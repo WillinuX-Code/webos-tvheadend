@@ -1,0 +1,25 @@
+@password=TODO
+
+# get epg events (50 per page) start page 0 - totalcount / 50
+GET http://userver.fritz.box:9981/api/epg/events/grid?start=10
+Authorization: Digest admin {{password}}
+
+###
+# get recording config (1 or more)
+# @name config
+GET http://userver.fritz.box:9981/api/dvr/config/grid
+Authorization: Digest admin {{password}}
+
+###
+GET http://userver.fritz.box:9981/api/dvr/entry/create_by_event?event_id=67909252&config_uuid=d5c1f4f2385f87cdf57fe059b0965532
+Authorization: Digest admin {{password}}    
+
+###
+# list upcoming 
+GET http://userver.fritz.box:9981/api/dvr/entry/grid_upcoming
+Authorization: Digest admin {{password}} 
+
+###
+# delete specific uuid (record reference)
+GET http://userver.fritz.box:9981/api/dvr/entry/cancel?uuid=94b1566ff72a68249c4b01e1e7d23897
+Authorization: Digest admin {{password}}    

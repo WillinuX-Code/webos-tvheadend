@@ -25,7 +25,7 @@ http://userver.fritz.box:9981/stream/channelid/1387974386?profile=pass
 ```
 
 #### API documentation
-https://oberguru.net/tvheadend/api.html
+https://github.com/dave-p/TVH-API-docs/wiki
 
 ##### API call epg
 http://userver.fritz.box:9981/api/epg/events/grid?start=0&limit=50
@@ -65,16 +65,16 @@ http://userver.fritz.box:9981/api/epg/events/grid?start=0&limit=50
 ```
 
 ##### API call recordings
-http://userver.fritz.box:9981/api/dvr/entry/create_by_event
+http://userver.fritz.box:9981/api/dvr/entry/create_by_event?event_id=123123&config_uuid=293482042837498dsdfsdf
 * create record event by epg id
-* param: event_id
-* param: config_uuid
+* param: event_id - epg event id: from epg/events/grid
+* param: config_uuid - recording configuration: can be taken from dvr/config/grid
 * param: comment <optional>
 
-http://userver.fritz.box:9981/api/dvr/entry/stop
+http://userver.fritz.box:9981/api/dvr/entry/stop?uuid=3282742384792837
 * Stop active recording gracefully
-* TODO params
+* uuid: uuid of the configured dvr entry 
 
-http://userver.fritz.box:9981/api/dvr/entry/cancel 
+http://userver.fritz.box:9981/api/dvr/entry/cancel?uuid=3282742384792837
 * Cancel scheduled or active recording
-* TODO params 
+* uuid: uuid of the configured dvr entry 

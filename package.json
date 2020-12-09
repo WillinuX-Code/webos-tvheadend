@@ -1,0 +1,45 @@
+{
+  "name": "webos-tvheadend",
+  "version": "0.1.0",
+  "private": true,
+  "homepage": "./",
+  "dependencies": {
+    "@procot/webostv": "^1.2.2",
+    "@testing-library/jest-dom": "^5.11.6",
+    "@testing-library/react": "^11.2.2",
+    "@testing-library/user-event": "^12.5.0",
+    "babel-polyfill": "^6.26.0",
+    "digest-fetch": "^1.1.5",
+    "node-fetch": "^2.6.1",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-scripts": "4.0.1",
+    "web-vitals": "^0.2.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "webos:emu": "npm run build && ares-package build service && ares-install -d emulator --remove com.willinux.tvh.app && ares-install com.willinux.tvh.app_1.0.0_all.ipk -d emulator && ares-launch com.willinux.tvh.app -d emulator",
+    "webos:tv": "npm run build && ares-package build service && ares-install -d tv --remove com.willinux.tvh.app && ares-install com.willinux.tvh.app_1.0.0_all.ipk -d tv && ares-launch com.willinux.tvh.app -d tv"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

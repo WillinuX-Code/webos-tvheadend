@@ -1,0 +1,10 @@
+{
+  "id": "com.willinux.tvh.app",
+  "version": "1.0.0",
+  "vendor": "My Company",
+  "type": "web",
+  "main": "index.html",
+  "title": "TV Headend App",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png"
+}

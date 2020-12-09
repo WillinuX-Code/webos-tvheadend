@@ -1,4 +1,22 @@
 # webos-tvheadend
+
+## Build
+Normal build without webos running
+* TVGuides.js:getNow() needs to return 1607462851000 as mock timestamp for now
+* TVHDataService:constructor() needs to use MockServiceAdapter instead of LunaServiceAdapter
+```shell
+npm run start
+```
+
+Deployment to emulator/webos
+```shell
+npm run webos:emu
+npm run webos:tv
+
+# for debugging attach to device
+ares-inspect -d emulator com.willinux.tvh.app --open
+ares-inspect -d tv com.willinux.tvh.app --open
+```
 ## Goal
 Create a tvheadend client for WebOS which 
 1) Allows playback of channels configured in tvheadend

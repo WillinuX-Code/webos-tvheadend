@@ -9,20 +9,16 @@ import epgMock from './epg.json';
 export default class MockServiceAdapter {
     call(method, params, onsuccess, onerror) {
         console.log('lsa:%s start', method);
-        switch(method) {
-            case 'setConfig': 
-                onsuccess({"returnValue": true});
-                break;
-            case 'getChannels':
-                onsuccess(channelMock);
-                break;
-            case 'getEpg':
-                onsuccess(epgMock);
-                break;
-            default:
-                onerror({"returnValue": false, "errorText": "Unknown method "+method});
+        let url = params.url;
+        if(url.includes('api/channel/grid')) {
+            onsuccess(channelMock);
         }
-        console.log('lsa:%s end', method); 
-        
+        else if(url.includes('api/epg/events/grid')) {
+            onsuccess(epgMock);
+        } 
+        else {
+            onerror({"returnValue": false, "errorText": "Unknown url "+url});
+        }
+        console.log('lsa:%s end', method);
     }
 }

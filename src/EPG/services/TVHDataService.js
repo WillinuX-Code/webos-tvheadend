@@ -4,38 +4,25 @@ import EPGChannel from "../models/EPGChannel";
 import EPGEvent from "../models/EPGEvent";
 
 export default class TVHDataService {
+    static API_INITIAL_CHANNELS = "api/channel/grid?dir=ASC&sort=number&start=";
+    static API_EPG = "api/epg/events/grid?dir=ASC&sort=start&limit=500&start=";
+
     constructor(callback) {
         this.serviceAdapter = new LunaServiceAdapter();
         //this.serviceAdapter = new MockServiceAdapter();
-        this.maxTotalEpgEntries = 7000;
+        this.maxTotalEpgEntries = 10000;
         this.baseUrl = 'http://userver.fritz.box:9981/';
         this.channels = [];
         this.channelMap = new Map();
         this.callback = callback;
     }
 
-    /**
-     * setup tvheadend config sync so other service calls 
-     * or send when setup is done
-     */
-    setupTVHData() {
-        this.serviceAdapter.call("setConfig", {
-            "baseUrl": this.baseUrl
-        },
-            succesful => {
-                console.log("setup complete: ", JSON.stringify(succesful));
-                this.retrieveTVHChannels(0);
-            },
-            err => { console.log("setup error: ", JSON.stringify(err)) }
-        );
-    }
-
     retrieveTVHChannels(start) {
         //var service = new LunaServiceAdapter();
         // after we set the base url we retrieve channels async
         let totalCount = 0;
-        this.serviceAdapter.call("getChannels", {
-                "start": start
+        this.serviceAdapter.call("proxy", {
+                "url": this.baseUrl + TVHDataService.API_INITIAL_CHANNELS + start
             },
             success => {
                 console.log("channels received: %d of %d", start + success.result.entries.length, success.result.total)
@@ -77,8 +64,8 @@ export default class TVHDataService {
     retrieveTVHEPG(start) {
         let totalCount = 0;
 
-        this.serviceAdapter.call("getEpg", {
-            "start": start
+        this.serviceAdapter.call("proxy", {
+            "url": this.baseUrl + TVHDataService.API_EPG + start
         },
             success => {
                 console.log("epg events received: %d of %d", start + success.result.entries.length, success.result.totalCount)

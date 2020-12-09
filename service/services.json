@@ -5,11 +5,7 @@
         "name": "com.willinux.tvh.app.proxy",
         "commands":[
             {
-               "name":"setConfig",
-               "public":true
-            },
-            {
-               "name":"getChannels",
+               "name":"proxy",
                "public":true
             }                                                            
          ]

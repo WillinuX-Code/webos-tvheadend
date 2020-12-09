@@ -700,7 +700,7 @@ export default class TVGuide extends Component {
     }
 
     componentDidMount() {
-        this.tvhDataService.setupTVHData();
+        this.tvhDataService.retrieveTVHChannels(0);
         //this.updateCanvas();
         this.recalculateAndRedraw(false);
         this.focusEPG();

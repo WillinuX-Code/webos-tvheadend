@@ -1,6 +1,5 @@
 var url = "";
-var PATH_INITIAL_CHANNELS = "api/channel/grid?dir=ASC&sort=number&start=";
-var PATH_EPG = "api/epg/events/grid?dir=ASC&sort=start&limit=500&start=";
+
 var http = require("http");
 var Service = require("webos-service");
 
@@ -14,40 +13,16 @@ service.activityManager.complete(keepAlive, function(activity) {
     console.log("completed activity"); 
 });*/
 
-service.register("setConfig", function (message) {
-    url = message.payload.baseUrl;
-    message.respond({
-        "returnValue": true,
-        "result": url
-    });
-});
-service.register("getChannels", function (message) {
-    var start = message.payload.start;
-    http.get(url + PATH_INITIAL_CHANNELS + start, function (resp) {
-        var data = '';
-        // A chunk of data has been recieved.
-        resp.on('data', (chunk) => {
-            data += chunk;
-        });
-        // The whole response has been received. Print out the result.
-        resp.on('end', function () {
-            message.respond({
-                "returnValue": true,
-                "result": JSON.parse(data)
-            });
-        });
+/**
+ * backend proxy for requests to tvheadend as they are
+ * not possible from browser due to cors restrictions
+ */
+service.register("proxy", function (message) {
+    var url = message.payload.url;
+    //var user = message.payload.user;
+    //var password = message.payload.password;
 
-    }).on("error", function (err) {
-        message.respond({
-            "returnValue": false,
-            "errorText": error.message,
-            "errorCode": 1
-        });
-    });
-});
-service.register("getEpg", function (message) {
-    var start = message.payload.start;
-    http.get(url + PATH_EPG + start, function (resp) {
+    http.get(url, function (resp) {
         var data = '';
         // A chunk of data has been recieved.
         resp.on('data', (chunk) => {

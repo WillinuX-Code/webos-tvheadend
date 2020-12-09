@@ -38,7 +38,7 @@ export default class EPGUtils {
         return days[ date.getDay() ];
     }
 
-    scaleBetween(unscaledNum, max, min = 0, minAllowed = 0, maxAllowed = 1280) {
+    scaleBetween(unscaledNum, max, min = 0, minAllowed = 0, maxAllowed = 3840) {
         return parseInt((maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed);
     }
 }

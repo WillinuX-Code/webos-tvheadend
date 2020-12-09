@@ -4,12 +4,19 @@
 Normal build without webos running
 * TVGuides.js:getNow() needs to return 1607462851000 as mock timestamp for now
 * TVHDataService:constructor() needs to use MockServiceAdapter instead of LunaServiceAdapter
-```shell
+```s
 npm run start
+```
+* Device Setup
+```s
+name      deviceinfo                    connection  profile
+--------  ----------------------------  ----------  -------
+emulator  developer@127.0.0.1:6622      ssh         tv
+tv        prisoner@192.168.178.22:9922  ssh         tv
 ```
 
 Deployment to emulator/webos
-```shell
+```s
 npm run webos:emu
 npm run webos:tv
 

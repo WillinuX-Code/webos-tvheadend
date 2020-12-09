@@ -48,11 +48,11 @@ export default class TVGuide extends Component {
         this.mMeasuringRect = new Rect();
 
         this.mEPGBackground = '#1e1e1e';
-        this.mVisibleChannelCount = 10;
+        this.mVisibleChannelCount = 9;
         this.mChannelLayoutMargin = 3;
         this.mChannelLayoutPadding = 8;
-        this.mChannelLayoutHeight = 70;
-        this.mChannelLayoutWidth = 70;
+        this.mChannelLayoutHeight = 90;
+        this.mChannelLayoutWidth = 140;
         this.mChannelLayoutBackground = '#323232';
 
         //this.mEventLayoutBackground = '#4f4f4f';
@@ -61,10 +61,10 @@ export default class TVGuide extends Component {
         this.mEventLayoutBackgroundCurrent = '#234054';
         this.mEventLayoutBackgroundFocus = 'rgba(65,182,230,1)';
         this.mEventLayoutTextColor = '#d6d6d6';
-        this.mEventLayoutTextSize = 20;
+        this.mEventLayoutTextSize = 28;
 
-        this.mTimeBarHeight = 30;
-        this.mTimeBarTextSize = 14;
+        this.mTimeBarHeight = 40;
+        this.mTimeBarTextSize = 18;
         this.mTimeBarLineWidth = 2;
         this.mTimeBarLineColor = '#c57120';
 
@@ -199,7 +199,7 @@ export default class TVGuide extends Component {
     }
 
     getWidth() {
-        return 1280;
+        return window.innerWidth;
     }
 
     getHeight() {
@@ -309,6 +309,7 @@ export default class TVGuide extends Component {
         //canvas.drawText(EPGUtil.getWeekdayName(mTimeLowerBoundary),
         //drawingRect.left + ((drawingRect.right - drawingRect.left) / 2),
         //drawingRect.top + (((drawingRect.bottom - drawingRect.top) / 2) + (mTimeBarTextSize / 2)), mPaint);
+        canvas.font = "bold "+this.mTimeBarTextSize+"px Arial";
         if (this.isRTL()) {
             //canvas.save();
             canvas.setTransform(1, 0, 0, 1, 0, 0);
@@ -445,7 +446,7 @@ export default class TVGuide extends Component {
         //mPaint.setColor(mEventLayoutTextColor);
         canvas.fillStyle = this.mEventLayoutTextColor;
         //mPaint.setTextSize(mEventLayoutTextSize);
-        canvas.font = "20px Arial";
+        canvas.font = this.mEventLayoutTextSize+"px Arial";
 
         // Move drawing.top so text will be centered (text is drawn bottom>up)
         //mPaint.getTextBounds(event.getTitle(), 0, event.getTitle().length(), mMeasuringRect);
@@ -463,9 +464,11 @@ export default class TVGuide extends Component {
             //canvas.setTransform(-1, -0, 0, 1, this.getWidth(), 0);
             //canvas.textAlign = "right";
         } else {
-            canvas.fillText(title, drawingRect.left, drawingRect.top -5 );
-            canvas.font = "14px Arial";
-            canvas.fillText(event.getSubTitle(), drawingRect.left, drawingRect.top +12 );
+            canvas.fillText(title, drawingRect.left, drawingRect.top -10 );
+            if(event.getSubTitle()) {
+                canvas.font = this.mEventLayoutTextSize - 6+"px Arial";
+                canvas.fillText(event.getSubTitle(), drawingRect.left, drawingRect.top +18 );
+            }
         }
 
     }
@@ -499,6 +502,22 @@ export default class TVGuide extends Component {
         }
     }
 
+    /*
+    drawChannelText(canvas, position, drawingRect) {
+        drawingRect.left = this.getScrollX();
+        drawingRect.top = this.getTopFrom(position);
+        drawingRect.right = drawingRect.left + this.mChannelLayoutWidth;
+        drawingRect.bottom = drawingRect.top + this.mChannelLayoutHeight;
+
+        drawingRect.top += (((drawingRect.bottom - drawingRect.top) / 2) + (10/2));
+
+        canvas.font = "bold "+this.mEventLayoutTextSize+"px Arial";
+        let channelName = this.epgData.getChannel(position).getName();
+        let channelNumber = this.epgData.getChannel(position).getId();
+        //canvas.fillText(channelNumber, drawingRect.left, drawingRect.top);
+        canvas.fillText(channelName, drawingRect.left + 20, drawingRect.top);
+    }*/
+
     drawChannelItem(canvas, position, drawingRect) {
         drawingRect.left = this.getScrollX();
         drawingRect.top = this.getTopFrom(position);
@@ -526,7 +545,7 @@ export default class TVGuide extends Component {
             let that = this;
             img.onload = function () {
                 that.mChannelImageCache.set(imageURL, img);
-                that.updateCanvas();
+                //that.updateCanvas();
                 //drawingRect = that.getDrawingRectForChannelImage(drawingRect, img);
                 //canvas.drawBitmap(image, null, drawingRect, null);
                 //canvas.drawImage(img, drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);

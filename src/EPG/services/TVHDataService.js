@@ -7,7 +7,7 @@ export default class TVHDataService {
     constructor(callback) {
         this.serviceAdapter = new LunaServiceAdapter();
         //this.serviceAdapter = new MockServiceAdapter();
-        this.maxTotalEpgEntries = 2000;
+        this.maxTotalEpgEntries = 7000;
         this.baseUrl = 'http://userver.fritz.box:9981/';
         this.channels = [];
         this.channelMap = new Map();
@@ -52,6 +52,7 @@ export default class TVHDataService {
                             this.baseUrl + tvhChannel.icon_public_url,
                             tvhChannel.name,
                             tvhChannel.number,
+                            tvhChannel.uuid
                         );
                         this.channelMap.set(tvhChannel.uuid, channel);
                         this.channels.push(channel);
@@ -87,20 +88,22 @@ export default class TVHDataService {
                         start++;
                         let channel = this.channelMap.get(tvhEvent.channelUuid);
                         if (channel) {
-                            channel.addEvent(new EPGEvent(tvhEvent.start * 1000, tvhEvent.stop * 1000, tvhEvent.title, tvhEvent.description));
+                            channel.addEvent(new EPGEvent(
+                                tvhEvent.start * 1000, tvhEvent.stop * 1000, tvhEvent.title, tvhEvent.description, tvhEvent.subtitle));
                             //this.events.push(new EPGEvent(tvhEvent.start, tvhEvent.stop, tvhEvent.title, tvhEvent.description));
                         }
 
                     });
                 }
+                // notify calling component
+                this.callback(this.channels);
                 // retrieve next increment
                 if (start < this.maxTotalEpgEntries && totalCount > start) {
                     this.retrieveTVHEPG(start);
                     return;
                 }
                 console.log("processed all epg events");
-                // notify calling component
-                this.callback(this.channels);
+                
             },
             error => {
                 console.log("Failed to retrieve epg data: ", JSON.stringify(error))

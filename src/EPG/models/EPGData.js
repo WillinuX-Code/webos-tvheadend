@@ -68,7 +68,7 @@ export default class EPGData {
     }
 
     update(channels) {
-        console.log("tvh data update: channels=%d", channels.length);
+        console.log("updated epg data");
         this.channels = channels;
     }
 }

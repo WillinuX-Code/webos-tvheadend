@@ -3,10 +3,11 @@
  */
 export default class EPGChannel {
 
-    constructor(icon, name, id) {
+    constructor(icon, name, id, uuid) {
         this.id = id;
         this.name = name;
         this.icon = icon;
+        this.uuid = uuid;
         this.events = [];
     }
 
@@ -16,6 +17,10 @@ export default class EPGChannel {
 
     getName() {
         return this.name;
+    }
+
+    getUUID() {
+        return this.uuid;
     }
 
     getImageURL() {

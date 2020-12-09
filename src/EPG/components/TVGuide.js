@@ -224,6 +224,7 @@ export default class TVGuide extends Component {
             this.drawTimeLine(canvas, drawingRect);
             //drawResetButton(canvas, drawingRect);
             this.drawFocusEvent(canvas, drawingRect);
+            // TODO draw details pane
         }
     }
 
@@ -462,7 +463,9 @@ export default class TVGuide extends Component {
             //canvas.setTransform(-1, -0, 0, 1, this.getWidth(), 0);
             //canvas.textAlign = "right";
         } else {
-            canvas.fillText(title, drawingRect.left, drawingRect.top);
+            canvas.fillText(title, drawingRect.left, drawingRect.top -5 );
+            canvas.font = "14px Arial";
+            canvas.fillText(event.getSubTitle(), drawingRect.left, drawingRect.top +12 );
         }
 
     }

@@ -3,11 +3,12 @@
  */
 export default class EPGEvent {
 
-    constructor(start, end, title, description) {
+    constructor(start, end, title, description, subTitle) {
         this.title = title;
         this.start = start;
         this.end = end;
         this.description = description;
+        this.subTitle = subTitle;
     }
 
     getTitle() {
@@ -29,5 +30,9 @@ export default class EPGEvent {
 
     getDescription() {
         return this.description;
+    }
+
+    getSubTitle() {
+        return this.subTitle;
     }
 }

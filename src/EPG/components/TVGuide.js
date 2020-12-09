@@ -63,8 +63,8 @@ export default class TVGuide extends Component {
         this.mEventLayoutTextColor = '#d6d6d6';
         this.mEventLayoutTextSize = 28;
 
-        this.mTimeBarHeight = 40;
-        this.mTimeBarTextSize = 18;
+        this.mTimeBarHeight = 60;
+        this.mTimeBarTextSize = 24;
         this.mTimeBarLineWidth = 2;
         this.mTimeBarLineColor = '#c57120';
 
@@ -252,6 +252,7 @@ export default class TVGuide extends Component {
         // Time stamps
         //mPaint.setColor(mEventLayoutTextColor);
         //mPaint.setTextSize(mTimeBarTextSize);
+        canvas.font = "bold "+this.mTimeBarTextSize+"px Arial";
         canvas.fillStyle = this.mEventLayoutTextColor;
         if (this.isRTL()) {
             //canvas.setTransform(1, 0, 0, 1, 0, 0);

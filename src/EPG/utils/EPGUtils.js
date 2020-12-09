@@ -8,7 +8,8 @@ export default class EPGUtils {
         var minutes = now.getMinutes();
         //return dateWithouthSecond.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         var minutes = now.getMinutes();
-        var ampm = "AM";
+
+        //var ampm = "AM";
         if (minutes < 15) {
             minutes = "00";
         } else if (minutes < 45){
@@ -17,23 +18,31 @@ export default class EPGUtils {
             minutes = "00";
             ++hour;
         }
+
+        /* TODO setting time format*/
+        if(hour > 23) {
+            hour = 0;
+        }/*
         if (hour > 23) {
             hour = 12;
-        } else if (hour > 12) {
+        } /*else if (hour > 12) {
             hour = hour - 12;
             ampm = "PM";
         } else if (hour == 12) {
             ampm = "PM";
         } else if (hour == 0) {
             hour = 12;
-        }
+        }*/
 
-        return(hour + ":" + minutes + " " + ampm);
+        //return(hour + ":" + minutes + " " + ampm);
+        return(hour + ":" + minutes);
         //return dateWithouthSecond.getHours() + ":" + dateWithouthSecond.getMinutes();
     }
 
     getWeekdayName(dateMillis) {
-        let days = ['Sun','Mon','Tues','Wed','Thus','Fri','Sat'];
+        //let days = ['Sun','Mon','Tues','Wed','Thus','Fri','Sat'];
+        // TODO setting languagee - depend on country germany or englisch
+        let days = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
         let date = new Date(dateMillis);
         return days[ date.getDay() ];
     }

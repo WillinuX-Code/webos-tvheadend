@@ -100,7 +100,7 @@ export default class TVGuide extends Component {
 
     getProgramPosition(channelPosition, time) {
         let events = this.epgData.getEvents(channelPosition);
-        if (events != null) {
+        if (events !== null) {
             for (let eventPos = 0; eventPos < events.length; eventPos++) {
                 let event = events[eventPos];
                 if (event.getStart() <= time && event.getEnd() >= time) {
@@ -161,6 +161,10 @@ export default class TVGuide extends Component {
         return now >= this.mTimeLowerBoundary && now < this.mTimeUpperBoundary;
     }
 
+    shouldDrawPastTimeOverlay(now) {
+        return now >= this.mTimeLowerBoundary;
+    }
+
     isEventVisible(start, end) {
         return (start >= this.mTimeLowerBoundary && start <= this.mTimeUpperBoundary) ||
             (end >= this.mTimeLowerBoundary && end <= this.mTimeUpperBoundary) ||
@@ -204,7 +208,7 @@ export default class TVGuide extends Component {
     }
 
     onDraw(canvas) {
-        if (this.epgData != null && this.epgData.hasData()) {
+        if (this.epgData !== null && this.epgData.hasData()) {
             this.mTimeLowerBoundary = this.getTimeFrom(this.getScrollX(false));
             this.mTimeUpperBoundary = this.getTimeFrom(this.getScrollX(false) + this.getWidth());
 
@@ -262,7 +266,6 @@ export default class TVGuide extends Component {
             let time = TVGuide.TIME_LABEL_SPACING_MILLIS *
                 (((this.mTimeLowerBoundary + (TVGuide.TIME_LABEL_SPACING_MILLIS * i)) +
                     (TVGuide.TIME_LABEL_SPACING_MILLIS / 2)) / TVGuide.TIME_LABEL_SPACING_MILLIS);
-
             if (this.isRTL()) {
                 canvas.fillText(this.epgUtils.getShortTime(time),
                     (this.getWidth() + this.mChannelLayoutMargin + this.mChannelLayoutMargin - this.mChannelLayoutHeight) - this.getXFrom(time),
@@ -351,6 +354,21 @@ export default class TVGuide extends Component {
 
     drawTimeLine(canvas, drawingRect) {
         let now = this.getNow();
+        
+        if(this.shouldDrawPastTimeOverlay(now)) {
+            // draw opaque overlay
+            drawingRect.left = this.getScrollX() + this.mChannelLayoutWidth + this.mChannelLayoutMargin;
+            drawingRect.top = this.getScrollY();
+            drawingRect.right = this.getXFrom(now);
+            drawingRect.bottom = drawingRect.top + this.getHeight();
+
+            canvas.fillStyle = this.mTimeBarLineColor;
+            let currentAlpha = canvas.globalAlpha;
+            canvas.globalAlpha = 0.2;
+            canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
+            canvas.globalAlpha = currentAlpha;
+        }
+
         if (this.shouldDrawTimeLine(now)) {
             drawingRect.left = this.getXFrom(now);
             drawingRect.top = this.getScrollY();
@@ -416,11 +434,11 @@ export default class TVGuide extends Component {
         // Background
         //mPaint.setColor(event.isCurrent() ? mEventLayoutBackgroundCurrent : mEventLayoutBackground);
         canvas.fillStyle = event.isCurrent() ? this.mEventLayoutBackgroundCurrent : this.mEventLayoutBackground;
-        if (channelPosition == this.getFocusedChannelPosition()) {
+        if (channelPosition === this.getFocusedChannelPosition()) {
             let focusedEventPosition = this.getFocusedEventPosition();
-            if (focusedEventPosition != -1) {
+            if (focusedEventPosition !== -1) {
                 let focusedEvent = this.epgData.getEvent(channelPosition, focusedEventPosition);
-                if (focusedEvent == event) {
+                if (focusedEvent === event) {
                     canvas.fillStyle = this.mEventLayoutBackgroundFocus;
                 }
 
@@ -631,7 +649,7 @@ export default class TVGuide extends Component {
     }
 
     recalculateAndRedraw(withAnimation) {
-        if (this.epgData != null && this.epgData.hasData()) {
+        if (this.epgData !== null && this.epgData.hasData()) {
             this.resetBoundaries();
 
             this.calculateMaxVerticalScroll();
@@ -660,7 +678,7 @@ export default class TVGuide extends Component {
             case 39:
                 //let programPosition = this.getProgramPosition(this.getFocusedChannelPosition(), this.getTimeFrom(this.getScrollX(false) ));
                 programPosition += 1
-                if (programPosition != -1 && programPosition < this.epgData.getEventCount(this.getFocusedChannelPosition())) {
+                if (programPosition !== -1 && programPosition < this.epgData.getEventCount(this.getFocusedChannelPosition())) {
                     this.focusedEvent = this.epgData.getEvent(this.getFocusedChannelPosition(), programPosition);
                     if (this.focusedEvent) {
                         this.focusedEventPosition = programPosition;
@@ -671,7 +689,7 @@ export default class TVGuide extends Component {
                 break;
             case 37:
                 programPosition -= 1;
-                if (programPosition != -1 && programPosition > -1) {
+                if (programPosition !== -1 && programPosition > -1) {
                     this.focusedEvent = this.epgData.getEvent(this.getFocusedChannelPosition(), programPosition);
                     if (this.focusedEvent) {
                         this.focusedEventPosition = programPosition;
@@ -688,7 +706,7 @@ export default class TVGuide extends Component {
                     this.focusedEventPosition = this.getProgramPosition(channelPosition, this.getTimeFrom(this.getScrollX(false) + this.getWidth() / 2));
 
                     if (channelPosition > (TVGuide.VISIBLE_CHANNEL_COUNT - TVGuide.VERTICAL_SCROLL_BOTTOM_PADDING_ITEM)) {
-                        if (channelPosition != (this.epgData.getChannelCount() - TVGuide.VERTICAL_SCROLL_BOTTOM_PADDING_ITEM)) {
+                        if (channelPosition !== (this.epgData.getChannelCount() - TVGuide.VERTICAL_SCROLL_BOTTOM_PADDING_ITEM)) {
                             this.scrollY = this.getScrollY(false) + dy;
                         }
                     }
@@ -705,7 +723,7 @@ export default class TVGuide extends Component {
                     this.focusedEventPosition = this.getProgramPosition(channelPosition, this.getTimeFrom(this.getScrollX(false) + this.getWidth() / 2));
                     if (channelPosition >= (TVGuide.VISIBLE_CHANNEL_COUNT - TVGuide.VERTICAL_SCROLL_BOTTOM_PADDING_ITEM)) {
 
-                        if (this.epgData.getChannelCount() - channelPosition != TVGuide.VERTICAL_SCROLL_BOTTOM_PADDING_ITEM) {
+                        if (this.epgData.getChannelCount() - channelPosition !== TVGuide.VERTICAL_SCROLL_BOTTOM_PADDING_ITEM) {
                             this.scrollY = this.getScrollY(false) + dy;
                         }
                     }
@@ -735,6 +753,8 @@ export default class TVGuide extends Component {
                     });
                 }
                 break;
+            default:
+                console.log("keyPressed:" ,keyCode);
         }
 
         if (this.ctx) {

@@ -7,7 +7,7 @@ export default class EPGUtils {
         var hour = now.getHours();
         var minutes = now.getMinutes();
         //return dateWithouthSecond.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        var minutes = now.getMinutes();
+        //var minutes = now.getMinutes();
 
         //var ampm = "AM";
         if (minutes < 15) {
@@ -28,9 +28,9 @@ export default class EPGUtils {
         } /*else if (hour > 12) {
             hour = hour - 12;
             ampm = "PM";
-        } else if (hour == 12) {
+        } else if (hour === 12) {
             ampm = "PM";
-        } else if (hour == 0) {
+        } else if (hour === 0) {
             hour = 12;
         }*/
 

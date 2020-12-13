@@ -73,7 +73,7 @@ export default class EPGData {
     }
 
     isEventSame(event1, event2) {
-        if (event1.getStart() == event2.getStart() && event1.getEnd() == event2.getEnd()) {
+        if (event1.getStart() === event2.getStart() && event1.getEnd() === event2.getEnd()) {
             return true;
         }
         return false;

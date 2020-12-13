@@ -12,10 +12,10 @@ import TVHDataService from '../services/TVHDataService';
 
 export default class TVGuide extends Component {
 
-    static DAYS_BACK_MILLIS = 2 * 60 * 60 * 1000;        // 2 hours
-    static DAYS_FORWARD_MILLIS = 1 * 24 * 60 * 60 * 1000;     // 1 days
-    static HOURS_IN_VIEWPORT_MILLIS = 2 * 60 * 60 * 1000;     // 2 hours
-    static TIME_LABEL_SPACING_MILLIS = 30 * 60 * 1000;        // 30 minutes
+    static DAYS_BACK_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
+    static DAYS_FORWARD_MILLIS = 1 * 24 * 60 * 60 * 1000; // 1 days
+    static HOURS_IN_VIEWPORT_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
+    static TIME_LABEL_SPACING_MILLIS = 30 * 60 * 1000; // 30 minutes
 
     static VISIBLE_CHANNEL_COUNT = 8; // No of channel to show at a time
     static VERTICAL_SCROLL_BOTTOM_PADDING_ITEM = 2;
@@ -29,11 +29,7 @@ export default class TVGuide extends Component {
         this.handleKeyPress = this.handleKeyPress.bind(this);
         this.epgData = new EPGData();
         this.epgUtils = new EPGUtils();
-        this.tvhDataService = new TVHDataService(channels => {
-            this.epgData.update(channels);
-            this.recalculateAndRedraw(false);
-            this.focusEPG();
-        });
+        this.tvhDataService = new TVHDataService();
         this.scrollX = 0;
         this.scrollY = 0;
         this.focusedChannelPosition = 0;
@@ -62,10 +58,11 @@ export default class TVGuide extends Component {
         this.mEventLayoutBackgroundFocus = 'rgba(65,182,230,1)';
         this.mEventLayoutTextColor = '#d6d6d6';
         this.mEventLayoutTextSize = 28;
+        this.mEventLayoutRecordingColor = '#da0000';
 
         this.mTimeBarHeight = 60;
         this.mTimeBarTextSize = 24;
-        this.mTimeBarLineWidth = 2;
+        this.mTimeBarLineWidth = 3;
         this.mTimeBarLineColor = '#c57120';
 
         this.mResetButtonSize = 40;
@@ -117,8 +114,8 @@ export default class TVGuide extends Component {
     getFirstVisibleChannelPosition() {
         let y = this.getScrollY(false);
 
-        let position = parseInt((y - this.mChannelLayoutMargin - this.mTimeBarHeight)
-            / (this.mChannelLayoutHeight + this.mChannelLayoutMargin));
+        let position = parseInt((y - this.mChannelLayoutMargin - this.mTimeBarHeight) /
+            (this.mChannelLayoutHeight + this.mChannelLayoutMargin));
 
         if (position < 0) {
             position = 0;
@@ -130,8 +127,8 @@ export default class TVGuide extends Component {
         let y = this.getScrollY(false);
         let totalChannelCount = this.epgData.getChannelCount();
         let screenHeight = this.getHeight();
-        let position = parseInt((y + screenHeight + this.mTimeBarHeight - this.mChannelLayoutMargin)
-            / (this.mChannelLayoutHeight + this.mChannelLayoutMargin));
+        let position = parseInt((y + screenHeight + this.mTimeBarHeight - this.mChannelLayoutMargin) /
+            (this.mChannelLayoutHeight + this.mChannelLayoutMargin));
 
         if (position > totalChannelCount - 1) {
             position = totalChannelCount - 1;
@@ -146,8 +143,8 @@ export default class TVGuide extends Component {
     }
 
     getTopFrom(position) {
-        let y = position * (this.mChannelLayoutHeight + this.mChannelLayoutMargin)
-            + this.mChannelLayoutMargin + this.mTimeBarHeight;
+        let y = position * (this.mChannelLayoutHeight + this.mChannelLayoutMargin) +
+            this.mChannelLayoutMargin + this.mTimeBarHeight;
         return y - this.getScrollY(false);
     }
 
@@ -165,9 +162,9 @@ export default class TVGuide extends Component {
     }
 
     isEventVisible(start, end) {
-        return (start >= this.mTimeLowerBoundary && start <= this.mTimeUpperBoundary)
-            || (end >= this.mTimeLowerBoundary && end <= this.mTimeUpperBoundary)
-            || (start <= this.mTimeLowerBoundary && end >= this.mTimeUpperBoundary);
+        return (start >= this.mTimeLowerBoundary && start <= this.mTimeUpperBoundary) ||
+            (end >= this.mTimeLowerBoundary && end <= this.mTimeUpperBoundary) ||
+            (start <= this.mTimeLowerBoundary && end >= this.mTimeUpperBoundary);
     }
 
     getFocusedChannelPosition() {
@@ -439,6 +436,11 @@ export default class TVGuide extends Component {
         }
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
 
+        if (this.epgData.isRecording(event)) {
+            canvas.fillStyle = this.mEventLayoutRecordingColor;
+            canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, 7);
+        }
+
         // Add left and right inner padding
         drawingRect.left += this.mChannelLayoutPadding;
         drawingRect.right -= this.mChannelLayoutPadding;
@@ -487,9 +489,9 @@ export default class TVGuide extends Component {
                 break;
             }
         }
-        if(result.length < text.length) {
-            if(result.length <= 3) {
-                return "...";
+        if (result.length < text.length) {
+            if (result.length <= 3) {
+                return "...".substring(0, result.length);
             }
             result = result.substring(0, result.length - 3) + "...";
         }
@@ -566,7 +568,7 @@ export default class TVGuide extends Component {
             let img = new Image();
             img.src = imageURL;
             let that = this;
-            img.onload = function () {
+            img.onload = function() {
                 that.mChannelImageCache.set(imageURL, img);
                 //that.updateCanvas();
                 //drawingRect = that.getDrawingRectForChannelImage(drawingRect, img);
@@ -652,7 +654,8 @@ export default class TVGuide extends Component {
         keyCode = this.isRTL() && (keyCode == 37) ? 39 : 37;*/
         let programPosition = this.getFocusedEventPosition();
         let channelPosition = this.getFocusedChannelPosition();
-        let dx = 0, dy = 0;
+        let dx = 0,
+            dy = 0;
         switch (keyCode) {
             case 39:
                 //let programPosition = this.getProgramPosition(this.getFocusedChannelPosition(), this.getTimeFrom(this.getScrollX(false) ));
@@ -710,6 +713,28 @@ export default class TVGuide extends Component {
                     this.focusedChannelPosition = channelPosition;
                 }
                 break;
+            case 403: // red button to trigger or cancel recording
+                // get current event
+                this.focusedEvent = this.epgData.getEvent(channelPosition, programPosition);
+                if(this.focusedEvent.isPastDated(this.getNow())) {
+                    // past dated do nothing
+                    return;
+                }
+                // check if event is already marked for recording
+                let recEvent = this.epgData.getRecording(this.focusedEvent);
+                if(recEvent) {   
+                    // cancel recording
+                    this.tvhDataService.cancelRec(recEvent, recordings => {
+                        this.epgData.updateRecordings(recordings);
+                        this.updateCanvas();
+                    });
+                } else { // creat new recording from event
+                    this.tvhDataService.createRec(this.focusedEvent, recordings => {
+                        this.epgData.updateRecordings(recordings);
+                        this.updateCanvas();
+                    });
+                }
+                break;
         }
 
         if (this.ctx) {
@@ -722,7 +747,14 @@ export default class TVGuide extends Component {
     }
 
     componentDidMount() {
-        this.tvhDataService.retrieveTVHChannels(0);
+        this.tvhDataService.retrieveTVHChannels(0, channels => {
+            this.epgData.updateChannels(channels);
+            this.recalculateAndRedraw(false);
+        });
+        this.tvhDataService.retrieveUpcomingRecordings(recordings => {
+            this.epgData.updateRecordings(recordings);
+            this.updateCanvas();
+        });
         //this.updateCanvas();
         this.recalculateAndRedraw(false);
         this.focusEPG();
@@ -770,7 +802,6 @@ export default class TVGuide extends Component {
                 </div>
             </div>
 
-        )
-            ;
+        );
     }
 }

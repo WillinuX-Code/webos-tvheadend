@@ -23,4 +23,23 @@ export default class LunaServiceAdapter {
             }
         });
     }
+
+    toast(message) {
+        console.log('lsa:toast start');
+        let lunareq = global.webOS.service.request('luna://com.webos.notification', {
+            method: "createToast",
+            parameters: {
+                message: message
+            },
+            onSuccess: function (res) {
+               console.log("succesfully created toast");
+            },
+            onFailure: function (res) {
+                console.log("failed to create toast");
+            },
+            onComplete: function() {
+                console.log("lsa:toast end");
+            }
+        });
+    }
 }

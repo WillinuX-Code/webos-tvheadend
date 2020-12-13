@@ -6,6 +6,7 @@ export default class EPGData {
     constructor() {
         this.channelMap = new Map();
         this.channels = [];
+        this.recordings = [];
 
         //new MockDataService().getChannels(this.channels);
         //if (this.data) {
@@ -40,6 +41,21 @@ export default class EPGData {
         return events[programPosition];
     }
 
+    isRecording(epgEvent) {
+        return this.getRecording(epgEvent) ? true : false;
+    }
+
+    getRecording(epgEvent) {
+        let result;
+        this.recordings.forEach(recEvent => {
+            if(epgEvent.isMatchingRecording(recEvent)) {
+                result = recEvent;
+                return;
+            }
+        });
+        return result;
+    }
+
     getEventPosition(channelPosition, event) {
         let events = this.channels[channelPosition].getEvents();
         for (let i = 0; i < events.length; i++) {
@@ -67,8 +83,13 @@ export default class EPGData {
         return this.getChannelCount() > 0;
     }
 
-    update(channels) {
+    updateChannels(channels) {
         console.log("updated epg data");
         this.channels = channels;
+    }
+
+    updateRecordings(recordings) {
+        console.log("updated recordings data");
+        this.recordings = recordings;
     }
 }

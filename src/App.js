@@ -17,9 +17,10 @@ export default class App extends Component {
       isEpgState: false,
       lastEPGUpdate: 0
     };
-    this.showEpgHandler = this.showEpgHandler.bind(this)
-    this.showTvHandler = this.showTvHandler.bind(this)
+    this.showEpgHandler = this.showEpgHandler.bind(this);
+    this.showTvHandler = this.showTvHandler.bind(this);
     this.handleKeyPress = this.handleKeyPress.bind(this);
+    
     this.epgData = new EPGData();
     this.epgUtils = new EPGUtils();
     this.imageCache = new Map();
@@ -144,6 +145,7 @@ export default class App extends Component {
   shouldComponentUpdate(nextProps) {
     return nextProps.lastEPGUpdate !== this.state.lastEPGUpdate;
   }
+
   componentDidMount() {
     this.tvhDataService.retrieveTVHChannels(0, channels => {
       this.epgData.updateChannels(channels);

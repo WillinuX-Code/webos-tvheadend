@@ -230,13 +230,15 @@ export default class TVGuide extends Component {
             drawingRect.top = this.getScrollY();
             drawingRect.right = drawingRect.left + this.getWidth();
             drawingRect.bottom = drawingRect.top + this.getHeight();
-
+            // draw background
+            canvas.fillStyle = '#000000';
+            canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
             this.drawChannelListItems(canvas, drawingRect);
             this.drawEvents(canvas, drawingRect);
             this.drawTimebar(canvas, drawingRect);
-            this.drawTimeLine(canvas, drawingRect);
             //drawResetButton(canvas, drawingRect);
             this.drawFocusEvent(canvas, drawingRect);
+            this.drawTimeLine(canvas, drawingRect);
             // draw details pane
             this.drawDetails(canvas, drawingRect);
         }
@@ -458,7 +460,7 @@ export default class TVGuide extends Component {
         let firstPos = this.getFirstVisibleChannelPosition();
         let lastPos = this.getLastVisibleChannelPosition();
 
-        console.log("Event: First: " + firstPos + " Last: " + lastPos);
+        //console.log("Event: First: " + firstPos + " Last: " + lastPos);
 
         for (let pos = firstPos; pos < lastPos; pos++) {
             // Set clip rectangle
@@ -864,8 +866,6 @@ export default class TVGuide extends Component {
         this.onDraw(this.ctx)
     }
 
-
-
     focusEPG() {
         ReactDOM.findDOMNode(this.refs.epg).focus();
     }
@@ -880,7 +880,7 @@ export default class TVGuide extends Component {
                         ref="canvas"
                         width={this.getWidth()}
                         height={this.getHeight()}
-                        style={{ border: '1px solid' }} />
+                        style={{ border: '0px solid' }} />
                 </div>
             </div>
 

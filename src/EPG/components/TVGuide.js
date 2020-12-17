@@ -44,9 +44,9 @@ export default class TVGuide extends Component {
 
         this.mEPGBackground = '#1e1e1e';
         this.mChannelLayoutMargin = 3;
-        this.mChannelLayoutPadding = 8;
+        this.mChannelLayoutPadding = 12;
         this.mChannelLayoutHeight = 80;
-        this.mChannelLayoutWidth = 140;
+        this.mChannelLayoutWidth = 160;
         this.mChannelLayoutBackground = '#323232';
 
         //this.mEventLayoutBackground = '#4f4f4f';
@@ -84,7 +84,7 @@ export default class TVGuide extends Component {
         this.mTimeUpperBoundary = this.getTimeFrom(this.getWidth());
     }
 
-    setChannelPosition(channelPosition) {
+    showAtChannelPosition(channelPosition) {
         //console.log("Channel pos: ", channelPosition);
         //this.focusedChannelPosition = channelPosition;
         this.refs.epg.style.display = 'block';
@@ -604,7 +604,7 @@ export default class TVGuide extends Component {
         let firstPos = this.getFirstVisibleChannelPosition();
         let lastPos = this.getLastVisibleChannelPosition();
 
-        console.log("Channel: First: " + firstPos + " Last: " + lastPos);
+        //console.log("Channel: First: " + firstPos + " Last: " + lastPos);
 
         for (let pos = firstPos; pos < lastPos; pos++) {
             this.drawChannelItem(canvas, pos, drawingRect);
@@ -644,11 +644,19 @@ export default class TVGuide extends Component {
                      drawingRect.left, drawingRect.top + this.mChannelLayoutHeight/2 + this.mEventLayoutTextSize/2 );
                 */
         // Loading channel image into target for
-        let imageURL = this.epgData.getChannel(position).getImageURL();
+        let channel = this.epgData.getChannel(position);
+        let imageURL = channel.getImageURL();
         let image = this.mChannelImageCache.get(imageURL);
         if (image !== undefined) {
             drawingRect = this.getDrawingRectForChannelImage(drawingRect, image);
             canvas.drawImage(image, drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
+        } else {
+            canvas.textAlign = 'center';
+            canvas.font = "bold 17px Arial";
+            canvas.fillStyle = this.mEventLayoutTextColor;
+            this.wrapText(channel.getName(), canvas, drawingRect.left + (drawingRect.width /2), drawingRect.top +  (drawingRect.bottom - drawingRect.top) / 2, drawingRect.width, 20);
+            //canvas.fillText(this.getShortenedText(canvas, channel.getName(), drawingRect), drawingRect.left + (drawingRect.width /2), drawingRect.top + 9+  (drawingRect.bottom - drawingRect.top) / 2);
+            canvas.textAlign = 'left';
         }
     }
 
@@ -815,10 +823,10 @@ export default class TVGuide extends Component {
                     });
                 }
                 break;
-            case 404: // green or back button hide epg/show tv
             case 461: // back button
-                // do not pass this key to the browser
+                // do not pass this key to the browser/webos
                 event.preventDefault();
+            case 404: // green or back button hide epg/show tv
             case 71: // keyboard 'g'  
                 this.refs.epg.style.display = 'none';
                 this.showTvHandler();

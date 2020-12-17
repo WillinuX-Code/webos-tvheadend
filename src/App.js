@@ -32,7 +32,7 @@ export default class App extends Component {
       isTVState: false
     }));
     if(channelPosition !== undefined) {
-      this.refs.epg.setChannelPosition(channelPosition);
+      this.refs.epg.showAtChannelPosition(channelPosition);
     }
   }
 
@@ -64,8 +64,7 @@ export default class App extends Component {
       img.src = imageURL;
       img.onload = () => {
         this.imageCache.set(imageURL, img);
-      }
-      // TODO on error set placeholder image
+      }     
     })
   }
 
@@ -141,6 +140,7 @@ export default class App extends Component {
     }
   };
 
+  // Test if commenting this will make it faster to load
   shouldComponentUpdate(nextProps) {
     return nextProps.lastEPGUpdate !== this.state.lastEPGUpdate;
   }

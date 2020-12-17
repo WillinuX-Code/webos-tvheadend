@@ -20,7 +20,7 @@ export default class App extends Component {
     this.showEpgHandler = this.showEpgHandler.bind(this);
     this.showTvHandler = this.showTvHandler.bind(this);
     this.handleKeyPress = this.handleKeyPress.bind(this);
-    
+
     this.epgData = new EPGData();
     this.epgUtils = new EPGUtils();
     this.imageCache = new Map();
@@ -32,7 +32,7 @@ export default class App extends Component {
       isEpgState: true,
       isTVState: false
     }));
-    if(channelPosition !== undefined) {
+    if (channelPosition !== undefined) {
       this.refs.epg.showAtChannelPosition(channelPosition);
     }
   }
@@ -49,7 +49,7 @@ export default class App extends Component {
       isTVState: true
     }));
     this.refs.tv.setFocus();
-    if(channelPosition !== undefined) {
+    if (channelPosition !== undefined) {
       this.refs.tv.changeChannelPosition(channelPosition);
     }
   }
@@ -65,10 +65,52 @@ export default class App extends Component {
       img.src = imageURL;
       img.onload = () => {
         this.imageCache.set(imageURL, img);
-      }     
+      }
     })
   }
 
+  /* SAMPLE CODE FOR background and visibility events
+  // Set the name of the "hidden" property and the change event for visibility
+var hidden, visibilityChange;
+if (typeof document.hidden !== "undefined") {   // To support the standard web browser engine
+    hidden = "hidden";
+    visibilityChange = "visibilitychange";
+} else if (typeof document.webkitHidden !== "undefined") {   // To support the webkit engine
+    hidden = "webkitHidden";
+    visibilityChange = "webkitvisibilitychange";
+}
+....
+ 
+function initAudioElement() {
+  // Handle page visibility change 
+  document.addEventListener(visibilityChange, handleVisibilityChange, false);
+}
+ 
+...
+// On app suspend, pause the audio element and stop all web audio api sounds
+function suspend() {
+  var audioElement = document.getElementById("audioElement");
+  audioElement.pause();
+  source.stopAll();
+}
+ 
+function resume() {
+  var audioElement = document.getElementById("audioElement");
+  audioElement.play();
+}
+ 
+// If the page is hidden, pause the audio
+// if the page is shown, play the audio
+function handleVisibilityChange() {
+  if (document[hidden]) {
+    console.log("app suspend");
+    suspend();
+  } else {
+    console.log("app resume");
+    resume();
+  }
+}
+*/
   handleKeyPress(event) {
     let keyCode = event.keyCode;
 
@@ -181,9 +223,9 @@ export default class App extends Component {
         <TV ref="tv" epgData={this.epgData}
           imageCache={this.imageCache}
           showEpgHandler={this.showEpgHandler} />
-        <TVGuide ref="epg" epgData={this.epgData}
+        {this.state.isEpgState && <TVGuide ref="epg" epgData={this.epgData}
           imageCache={this.imageCache}
-          showTvHandler={this.showTvHandler} />
+          showTvHandler={this.showTvHandler} /> }
       </div>
     );
   }

@@ -87,7 +87,7 @@ export default class TVGuide extends Component {
     showAtChannelPosition(channelPosition) {
         //console.log("Channel pos: ", channelPosition);
         //this.focusedChannelPosition = channelPosition;
-        this.refs.epg.style.display = 'block';
+        //this.refs.epg.style.display = 'block';
         this.recalculateAndRedraw(false);
         this.focusEPG();
         this.updateCanvas();
@@ -830,11 +830,11 @@ export default class TVGuide extends Component {
                 event.preventDefault();
             case 404: // green or back button hide epg/show tv
             case 71: // keyboard 'g'  
-                this.refs.epg.style.display = 'none';
+                //this.refs.epg.style.display = 'none';
                 this.showTvHandler();
                 break;
             case 13: // ok button -> switch to focused channel
-                this.refs.epg.style.display = 'none';
+                //this.refs.epg.style.display = 'none';
                 this.showTvHandler(channelPosition);
                 break;
             default:
@@ -874,7 +874,7 @@ export default class TVGuide extends Component {
         window.addEventListener("scroll", function (event) {
         }, false);
         return (
-            <div id="epg-wrapper" ref="epg" style={{ display: 'none' }} tabIndex='-1' onKeyDown={this.handleKeyPress} className={Styles.epg}>
+            <div id="epg-wrapper" ref="epg" tabIndex='-1' onKeyDown={this.handleKeyPress} className={Styles.epg}>
                 <div className="programguide-contents">
                     <canvas
                         ref="canvas"

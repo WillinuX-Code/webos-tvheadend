@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 
 import ReactDOM from "react-dom";
 import Styles from '../EPG/styles/app.css';
-import TVHDataService from '../EPG/services/TVHDataService';
 
 export default class TV extends Component {
 
@@ -18,8 +17,9 @@ export default class TV extends Component {
     }
 
     componentDidMount() {
+        this.initVideoElement();
         // in case we come back from epg
-        if (this.epgData.getChannelCount() > 1 && !document.getElementById('myVideo').hasChildNodes()) {
+        if (this.epgData.getChannelCount() > 0 && !this.getMediaElement().hasChildNodes()) {
             this.changeSource(this.epgData.getChannel(this.channelPosition).getStreamUrl());
         }
         this.setFocus();
@@ -30,7 +30,7 @@ export default class TV extends Component {
          * if video doesn't have a source yet - we set it
          * this normally happens when the epg is loaded
          */
-        if (this.epgData.getChannelCount() > 1 && !document.getElementById('myVideo').hasChildNodes()) {
+        if (this.epgData.getChannelCount() > 0 && !this.getMediaElement().hasChildNodes()) {
             this.changeSource(this.epgData.getChannel(this.channelPosition).getStreamUrl());
         }
 
@@ -51,7 +51,7 @@ export default class TV extends Component {
                     return
                 }
                 this.channelPosition -= 1;
-                this.changeSource(this.epgData.getChannel(this.channelPosition).getStreamUrl());
+                this.changeChannelPosition(this.channelPosition);
                 break;
             case 38:
                 // channel up
@@ -59,7 +59,7 @@ export default class TV extends Component {
                     return;
                 }
                 this.channelPosition += 1;
-                this.changeSource(this.epgData.getChannel(this.channelPosition).getStreamUrl());
+                this.changeChannelPosition(this.channelPosition);
                 break;
             case 404: // green button show epg
             case 71: // keyboard 'g'
@@ -94,6 +94,10 @@ export default class TV extends Component {
         }
     };
 
+    getMediaElement() {
+        return ReactDOM.findDOMNode(this.refs.media);
+    }
+
     changeChannelPosition(channelPosition) {
         if(this.channelPosition === channelPosition) {
             return;
@@ -102,8 +106,25 @@ export default class TV extends Component {
         this.changeSource(this.epgData.getChannel(channelPosition).getStreamUrl());
     }
 
+    initVideoElement() {
+        var videoElement = this.getMediaElement();
+        videoElement.addEventListener("loadedmetadata", event => {
+            console.log(JSON.stringify(event));
+            //console.log("Text Tracks: ", JSON.stringify(videoElement.textTracks));
+            //console.log("Audio Tracks: ", JSON.stringify(videoElement.sourceBuffer.audioTracks));
+        });
+        // videoElement.audioTracks.addEventListener("addtrack", event => {
+        //     //console.log(JSON.stringify(event));
+        //     console.log("add Track: ", JSON.stringify(event));
+        // });
+        
+    
+        // TODO audioTracklist
+        // TODO subtitleList
+    }
+
     changeSource(dataUrl) {
-        var videoElement = document.getElementById('myVideo');
+        var videoElement = this.getMediaElement();
 
         // Remove all source elements
         while (videoElement.firstChild) {
@@ -123,9 +144,6 @@ export default class TV extends Component {
         source.setAttribute('src', dataUrl);
         source.setAttribute('type', 'video/mp2t;mediaOption=' + mediaOption);
 
-        videoElement.addEventListener("loadeddata", function (event) {
-            console.log(JSON.stringify(event));
-        });
         videoElement.appendChild(source)
         videoElement.play();
     }
@@ -133,12 +151,8 @@ export default class TV extends Component {
     render() {
         return (
             <div id="tv-wrapper" ref="video" tabIndex='-1' onKeyDown={this.handleKeyPress} className={Styles.tv}>
-                <video id="myVideo" width="100%" height="100%" autoplay></video>
-                {
-                    // TODO programm info overlay
-                    // TODO channel list overlay
-                }
-            </div>
+                <video id="myVideo" ref="media" width="100%" height="100%" controls preload autoplay></video>
+            </div> 
         );
     }
 }

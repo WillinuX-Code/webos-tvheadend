@@ -59,7 +59,7 @@ export default class TVHDataService {
         });
     }
 
-    retrieveUpcomingRecordings(callback) {
+    async retrieveUpcomingRecordings(callback) {
         // now create rec by event
         this.serviceAdapter.call("proxy", {
             "url": this.baseUrl + TVHDataService.API_DVR_UPCOMING
@@ -152,7 +152,8 @@ export default class TVHDataService {
                             this.baseUrl + tvhChannel.icon_public_url,
                             tvhChannel.name,
                             tvhChannel.number,
-                            tvhChannel.uuid
+                            tvhChannel.uuid,
+                            this.baseUrl + "stream/channel/"+tvhChannel.uuid
                         );
                         this.channelMap.set(tvhChannel.uuid, channel);
                         this.channels.push(channel);
@@ -163,10 +164,9 @@ export default class TVHDataService {
                     this.retrieveTVHChannels(start, callback);
                     return;
                 } 
+
+                callback(this.channels);
                 console.log("processed all channels");
-                
-                this.retrieveTVHEPG(0, callback);
-                
             },
             error => {
                 console.log("Failed to retrieve channel data: ", JSON.stringify(error))
@@ -174,7 +174,7 @@ export default class TVHDataService {
         );
     }
 
-    retrieveTVHEPG(start, callback) {
+    async retrieveTVHEPG(start, callback) {
         let totalCount = 0;
 
         this.serviceAdapter.call("proxy", {

@@ -3,11 +3,12 @@
  */
 export default class EPGChannel {
 
-    constructor(icon, name, id, uuid) {
+    constructor(icon, name, id, uuid, streamUrl) {
         this.id = id;
         this.name = name;
         this.icon = icon;
         this.uuid = uuid;
+        this.streamUrl = streamUrl;
         this.events = [];
     }
 
@@ -33,5 +34,9 @@ export default class EPGChannel {
 
     addEvent(event) {
         this.events.push(event);
+    }
+
+    getStreamUrl() {
+        return this.streamUrl;
     }
 }

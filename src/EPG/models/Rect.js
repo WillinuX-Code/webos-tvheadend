@@ -49,4 +49,8 @@ export default class Rect {
     get height() {
         return this._bottom - this._top;
     }
+
+    clone() {
+        return new Rect(this._top, this._left, this._bottom, this._right);
+    }
 }

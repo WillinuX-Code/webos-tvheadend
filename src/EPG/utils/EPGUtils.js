@@ -40,14 +40,26 @@ export default class EPGUtils {
     }
 
     getWeekdayName(dateMillis) {
+        var userLang = navigator.language || navigator.userLanguage;
+        userLang = userLang.substring(0,2);
+        let dayMap = new Map();
+        dayMap.set('de', ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag']);
+        dayMap.set('en', ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']);
         //let days = ['Sun','Mon','Tues','Wed','Thus','Fri','Sat'];
         // TODO setting languagee - depend on country germany or englisch
-        let days = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+        let days = dayMap.get(userLang);
+        if(days === undefined) {
+            days = dayMap.get('en');
+        }
         let date = new Date(dateMillis);
         return days[ date.getDay() ];
     }
 
     scaleBetween(unscaledNum, max, min = 0, minAllowed = 0, maxAllowed = 3840) {
         return parseInt((maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed);
+    }
+
+    toTimeString(start, stop) {
+        return new Date(start).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + " - " + new Date(stop).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     }
 }

@@ -1,5 +1,3 @@
-var url = "";
-
 var http = require("http");
 var Service = require("webos-service");
 

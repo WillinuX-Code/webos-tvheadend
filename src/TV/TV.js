@@ -1,9 +1,6 @@
 
 import React, { Component } from 'react';
 
-import ReactDOM from "react-dom";
-import Styles from '../EPG/styles/app.css';
-
 export default class TV extends Component {
 
     constructor(props) {
@@ -17,12 +14,20 @@ export default class TV extends Component {
     }
 
     componentDidMount() {
+        // init video element
         this.initVideoElement();
         // in case we come back from epg
         if (this.epgData.getChannelCount() > 0 && !this.getMediaElement().hasChildNodes()) {
             this.changeSource(this.epgData.getChannel(this.channelPosition).getStreamUrl());
         }
         this.setFocus();
+    }
+    getWidth() {
+        return window.innerWidth;
+    }
+
+    getHeight() {
+        return window.innerHeight;
     }
 
     componentDidUpdate(prevProps) {
@@ -38,33 +43,38 @@ export default class TV extends Component {
     }
 
     setFocus() {
-        ReactDOM.findDOMNode(this.refs.video).focus();
+        this.refs.video.focus();
     }
 
     handleKeyPress(event) {
         let keyCode = event.keyCode;
-
+        let channelPosition = this.channelPosition;
         switch (keyCode) {
-            case 40:
+            case 34: // programm down
+            case 40: // arrow down
                 // channel down
-                if (this.channelPosition === 0) {
+                if (channelPosition === 0) {
                     return
                 }
-                this.channelPosition -= 1;
-                this.changeChannelPosition(this.channelPosition);
+                channelPosition -= 1;
+                this.changeChannelPosition(channelPosition);
                 break;
-            case 38:
+            case 33:    // programm up
+            case 38:    // arrow up
                 // channel up
-                if (this.channelPosition === this.epgData.getChannelCount() - 1) {
+                if (channelPosition === this.epgData.getChannelCount() - 1) {
                     return;
                 }
-                this.channelPosition += 1;
-                this.changeChannelPosition(this.channelPosition);
+                channelPosition += 1;
+                this.changeChannelPosition(channelPosition);
                 break;
+            case 1536: // guide button
+                event.preventDefault();
             case 404: // green button show epg
             case 71: // keyboard 'g'
-                this.showEpgHandler(this.channelPosition);
+                this.showEpgHandler(channelPosition);
                 break;
+            
             case 403: // red button trigger recording
                 // add current viewing channel to records
                 // red button to trigger or cancel recording
@@ -95,11 +105,11 @@ export default class TV extends Component {
     };
 
     getMediaElement() {
-        return ReactDOM.findDOMNode(this.refs.media);
+        return document.getElementById("myVideo");
     }
 
     changeChannelPosition(channelPosition) {
-        if(this.channelPosition === channelPosition) {
+        if(channelPosition === this.channelPosition) {
             return;
         }
         this.channelPosition = channelPosition;
@@ -108,11 +118,22 @@ export default class TV extends Component {
 
     initVideoElement() {
         var videoElement = this.getMediaElement();
-        videoElement.addEventListener("loadedmetadata", event => {
-            console.log(JSON.stringify(event));
-            //console.log("Text Tracks: ", JSON.stringify(videoElement.textTracks));
-            //console.log("Audio Tracks: ", JSON.stringify(videoElement.sourceBuffer.audioTracks));
-        });
+        // videoElement.addEventListener("loadedmetadata", event => {
+        //    // console.log(JSON.stringify(event));
+        //     console.log("Audio Tracks: ", videoElement.audioTracks);
+        //     console.log("audio track 1: ",videoElement.audioTracks.getTrackById(1));
+        //     //console.log("Audio Tracks: ", JSON.stringify(videoElement.sourceBuffer.audioTracks));
+        // });
+        // videoElement.addEventListener("loadeddata", event => {
+        //     console.log("Audio Tracks: ", videoElement.audioTracks);
+        //     console.log("audio track 1: ",videoElement.audioTracks.getTrackById(1));
+     
+        // });
+        // // Listen to the "change" event.
+        // videoElement.audioTracks.addEventListener('change', function() {
+
+        //     console.log("audio track: ", videoElement.audioTracks);
+        // });
         // videoElement.audioTracks.addEventListener("addtrack", event => {
         //     //console.log(JSON.stringify(event));
         //     console.log("add Track: ", JSON.stringify(event));
@@ -130,8 +151,8 @@ export default class TV extends Component {
         while (videoElement.firstChild) {
             videoElement.removeChild(videoElement.firstChild);
         }
-
-        // Initiating readyState of HTMLMediaElement
+        // Initiating readyState of HTMLMediaElement to free resources 
+        // after source elements have been removed
         videoElement.load();
 
         var options = {};
@@ -150,8 +171,8 @@ export default class TV extends Component {
 
     render() {
         return (
-            <div id="tv-wrapper" ref="video" tabIndex='-1' onKeyDown={this.handleKeyPress} className={Styles.tv}>
-                <video id="myVideo" ref="media" width="100%" height="100%" controls preload autoplay></video>
+            <div id="tv-wrapper" ref="video" tabIndex='-1' onKeyDown={this.handleKeyPress} >
+                <video id="myVideo" width={this.getWidth()} height={this.getHeight()} preload controls autoplay></video>
             </div> 
         );
     }

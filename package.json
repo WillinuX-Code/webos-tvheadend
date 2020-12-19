@@ -21,8 +21,10 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "webos:emu": "npm run build && ares-package build service && ares-install -d emulator --remove com.willinux.tvh.app && ares-install com.willinux.tvh.app_1.0.0_all.ipk -d emulator && ares-launch com.willinux.tvh.app -d emulator",
-    "webos:tv": "npm run build && ares-package build service && ares-install -d tv --remove com.willinux.tvh.app && ares-install com.willinux.tvh.app_1.0.0_all.ipk -d tv && ares-launch com.willinux.tvh.app -d tv"
+    "webos:emu": "npm run build && ares-package build service && ares-install com.willinux.tvh.app_1.0.0_all.ipk -d emulator && ares-launch com.willinux.tvh.app -d emulator",
+    "webos:emu-rm": "ares-install -d emulator --remove com.willinux.tvh.app",
+    "webos:tv": "npm run build && ares-package build service && ares-install com.willinux.tvh.app_1.0.0_all.ipk -d tv && ares-launch com.willinux.tvh.app -d tv",
+    "webos:tv-rm": "ares-install -d tv --remove com.willinux.tvh.app"
   },
   "eslintConfig": {
     "extends": [

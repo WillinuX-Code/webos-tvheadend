@@ -19,8 +19,7 @@ export default class App extends Component {
     };
     this.showEpgHandler = this.showEpgHandler.bind(this);
     this.showTvHandler = this.showTvHandler.bind(this);
-    this.handleKeyPress = this.handleKeyPress.bind(this);
-
+    
     this.epgData = new EPGData();
     this.epgUtils = new EPGUtils();
     this.imageCache = new Map();
@@ -111,77 +110,7 @@ function handleVisibilityChange() {
   }
 }
 */
-  handleKeyPress(event) {
-    let keyCode = event.keyCode;
-
-    switch (keyCode) {
-      case 40:
-        // channelPosition += 1;
-        // if (channelPosition < this.epgData.getChannelCount()) {
-
-        //   dy = this.mChannelLayoutHeight + this.mChannelLayoutMargin;
-        //   this.focusedEventPosition = this.getProgramPosition(channelPosition, this.getTimeFrom(this.getScrollX(false) + this.getWidth() / 2));
-
-        //   if (channelPosition > (TVGuide.VISIBLE_CHANNEL_COUNT - TVGuide.VERTICAL_SCROLL_BOTTOM_PADDING_ITEM)) {
-        //     if (channelPosition < (this.epgData.getChannelCount() - TVGuide.VERTICAL_SCROLL_BOTTOM_PADDING_ITEM)) {
-        //       this.scrollY = this.getScrollY(false) + dy;
-        //     }
-        //   }
-        //   console.log(channelPosition);
-        //   if (channelPosition < this.getLastVisibleChannelPosition()) {
-        //     this.focusedChannelPosition = channelPosition;
-        //   }
-        // }
-        break;
-      case 38:
-        // channelPosition -= 1;
-        // if (channelPosition >= 0) {
-
-        //   dy = (-1) * (this.mChannelLayoutHeight + this.mChannelLayoutMargin);
-        //   this.focusedEventPosition = this.getProgramPosition(channelPosition, this.getTimeFrom(this.getScrollX(false) + this.getWidth() / 2));
-        //   if (channelPosition >= (TVGuide.VISIBLE_CHANNEL_COUNT - TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM)) {
-
-        //     if (this.epgData.getChannelCount() - channelPosition !== TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM) {
-        //       this.scrollY = this.getScrollY(false) + dy;
-        //     }
-        //   }
-        //   console.log(channelPosition);
-        //   this.focusedChannelPosition = channelPosition;
-        // }
-        break;
-
-      case 406: // blue button show epg
-        // if epg is shown don't show epg
-        // if epg is not shown show epg
-        break;
-      case 403: // red button trigger recording
-        // add current viewing channel to records
-        // red button to trigger or cancel recording
-        // get current event
-        // this.focusedEvent = this.epgData.getEvent(channelPosition, programPosition);
-        // if (this.focusedEvent.isPastDated(this.getNow())) {
-        //   // past dated do nothing
-        //   return;
-        // }
-        // // check if event is already marked for recording
-        // let recEvent = this.epgData.getRecording(this.focusedEvent);
-        // if (recEvent) {
-        //   // cancel recording
-        //   this.tvhDataService.cancelRec(recEvent, recordings => {
-        //     this.epgData.updateRecordings(recordings);
-        //     this.updateCanvas();
-        //   });
-        // } else { // creat new recording from event
-        //   this.tvhDataService.createRec(this.focusedEvent, recordings => {
-        //     this.epgData.updateRecordings(recordings);
-        //     this.updateCanvas();
-        //   });
-        // }
-        break;
-      default:
-        console.log("App-keyPressed:", keyCode);
-    }
-  };
+  
 
   // Test if commenting this will make it faster to load
   shouldComponentUpdate(nextProps) {
@@ -214,7 +143,7 @@ function handleVisibilityChange() {
   }
 
   componentDidUpdate() {
-
+    
   }
 
   render() {

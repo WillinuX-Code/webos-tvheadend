@@ -153,7 +153,7 @@ export default class TVHDataService {
                             tvhChannel.name,
                             tvhChannel.number,
                             tvhChannel.uuid,
-                            this.baseUrl + "stream/channel/"+tvhChannel.uuid
+                            this.baseUrl + "stream/channel/"+tvhChannel.uuid+"?profile=pass"
                         );
                         this.channelMap.set(tvhChannel.uuid, channel);
                         this.channels.push(channel);

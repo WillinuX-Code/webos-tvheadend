@@ -1,5 +1,6 @@
 
 import React, { Component } from 'react';
+import Styles from '../EPG/styles/app.css';
 
 export default class TV extends Component {
 
@@ -118,27 +119,12 @@ export default class TV extends Component {
 
     initVideoElement() {
         var videoElement = this.getMediaElement();
-        // videoElement.addEventListener("loadedmetadata", event => {
-        //    // console.log(JSON.stringify(event));
-        //     console.log("Audio Tracks: ", videoElement.audioTracks);
-        //     console.log("audio track 1: ",videoElement.audioTracks.getTrackById(1));
-        //     //console.log("Audio Tracks: ", JSON.stringify(videoElement.sourceBuffer.audioTracks));
-        // });
-        // videoElement.addEventListener("loadeddata", event => {
-        //     console.log("Audio Tracks: ", videoElement.audioTracks);
-        //     console.log("audio track 1: ",videoElement.audioTracks.getTrackById(1));
-     
-        // });
-        // // Listen to the "change" event.
-        // videoElement.audioTracks.addEventListener('change', function() {
-
-        //     console.log("audio track: ", videoElement.audioTracks);
-        // });
-        // videoElement.audioTracks.addEventListener("addtrack", event => {
-        //     //console.log(JSON.stringify(event));
-        //     console.log("add Track: ", JSON.stringify(event));
-        // });
-        
+        videoElement.addEventListener("loadedmetadata", event => {
+            // console.log(JSON.stringify(event));
+             console.log("Audio Tracks: ", videoElement.audioTracks);
+             console.log("Video Tracks: ", videoElement.videoTracks);
+             console.log("Text Tracks: ", videoElement.textTracks);
+        });
     
         // TODO audioTracklist
         // TODO subtitleList
@@ -171,8 +157,8 @@ export default class TV extends Component {
 
     render() {
         return (
-            <div id="tv-wrapper" ref="video" tabIndex='-1' onKeyDown={this.handleKeyPress} >
-                <video id="myVideo" width={this.getWidth()} height={this.getHeight()} preload controls autoplay></video>
+            <div id="tv-wrapper" ref="video" tabIndex='-1' onKeyDown={this.handleKeyPress} className={Styles.tv} >
+                <video id="myVideo" width={this.getWidth()} height={this.getHeight()} preload autoplay></video>
             </div> 
         );
     }

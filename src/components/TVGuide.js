@@ -16,7 +16,7 @@ export default class TVGuide extends Component {
     static HOURS_IN_VIEWPORT_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
     static TIME_LABEL_SPACING_MILLIS = 30 * 60 * 1000; // 30 minutes
 
-    static VISIBLE_CHANNEL_COUNT = 8; // No of channel to show at a time
+    static VISIBLE_CHANNEL_COUNT = 10; // No of channel to show at a time
     static VERTICAL_SCROLL_BOTTOM_PADDING_ITEM = 4;
     static VERTICAL_SCROLL_TOP_PADDING_ITEM = 4;
 
@@ -44,9 +44,9 @@ export default class TVGuide extends Component {
 
         this.mEPGBackground = '#1e1e1e';
         this.mChannelLayoutMargin = 3;
-        this.mChannelLayoutPadding = 12;
-        this.mChannelLayoutHeight = 80;
-        this.mChannelLayoutWidth = 160;
+        this.mChannelLayoutPadding = 10;
+        this.mChannelLayoutHeight = 60;
+        this.mChannelLayoutWidth = 120;
         this.mChannelLayoutBackground = '#323232';
 
         //this.mEventLayoutBackground = '#4f4f4f';
@@ -554,7 +554,7 @@ export default class TVGuide extends Component {
         let title = event.getTitle();
         /*title = title.substring(0,
          mPaint.breakText(title, true, drawingRect.right - drawingRect.left, null));*/
-        canvas.fillText(this.getShortenedText(canvas, title, drawingRect), drawingRect.left, drawingRect.top - 10);
+        canvas.fillText(this.getShortenedText(canvas, title, drawingRect), drawingRect.left, drawingRect.top);
         // if (event.getSubTitle()) {
         //     canvas.font = this.mEventLayoutTextSize - 6 + "px Arial";
         //     canvas.fillText(this.getShortenedText(canvas, event.getSubTitle(), drawingRect), drawingRect.left, drawingRect.top + 18);
@@ -733,8 +733,6 @@ export default class TVGuide extends Component {
 
     handleKeyPress(event) {
         let keyCode = event.keyCode;
-        /*keyCode = this.isRTL() && (keyCode == 39) ? 37 : 39;
-        keyCode = this.isRTL() && (keyCode == 37) ? 39 : 37;*/
         let programPosition = this.getFocusedEventPosition();
         let channelPosition = this.getFocusedChannelPosition();
         let dx = 0,
@@ -770,19 +768,8 @@ export default class TVGuide extends Component {
                     return;
                 }
                 channelPosition += 1;
-                this.scrollToChannelPosition(channelPosition, false);
+                this.scrollToChannelPosition(channelPosition, true);
                 return;
-                // dy = this.mChannelLayoutHeight + this.mChannelLayoutMargin;
-                // this.focusedEventPosition = this.getProgramPosition(channelPosition, this.getTimeFrom(this.getScrollX(false) + this.getWidth() / 2));
-
-                // if (channelPosition > (TVGuide.VISIBLE_CHANNEL_COUNT - 1 - TVGuide.VERTICAL_SCROLL_BOTTOM_PADDING_ITEM)) {
-                //     if (channelPosition !== (this.epgData.getChannelCount() - TVGuide.VERTICAL_SCROLL_BOTTOM_PADDING_ITEM)) {
-                //         this.scrollY = this.getScrollY(false) + dy;
-                //     }
-                // }
-                // console.log(channelPosition);
-                // this.focusedChannelPosition = channelPosition;
-                break;
             case 38: // arrow up
                 // do not pass this key to the browser
                 event.preventDefault();
@@ -790,22 +777,8 @@ export default class TVGuide extends Component {
                     return
                 }
                 channelPosition -= 1;
-                this.scrollToChannelPosition(channelPosition, false);
+                this.scrollToChannelPosition(channelPosition, true);
                 return;
-                // //delta y > channel height
-                // dy = (-1) * (this.mChannelLayoutHeight + this.mChannelLayoutMargin);
-                // // new focused event position
-                // this.focusedEventPosition = this.getProgramPosition(channelPosition, this.getTimeFrom(this.getScrollX(false) + this.getWidth() / 2));
-                // // allow scroll
-                // if (channelPosition >= (TVGuide.VISIBLE_CHANNEL_COUNT - 1 - TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM)) {
-                //     // if 
-                //     if (this.epgData.getChannelCount() - 1 - channelPosition !== TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM) {
-                //         this.scrollY = this.getScrollY(false) + dy;
-                //     }
-                // }
-                // this.focusedChannelPosition = channelPosition;
-
-                break;
             case 403: // red button to trigger or cancel recording
                 // get current event
                 this.focusedEvent = this.epgData.getEvent(channelPosition, programPosition);
@@ -869,7 +842,7 @@ export default class TVGuide extends Component {
         }
 
         // scroll to channel position
-        let scrollTarget = -this.mChannelLayoutMargin + (this.mChannelLayoutMargin + this.mChannelLayoutHeight) * (channelPosition - TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM);  
+        let scrollTarget = (this.mChannelLayoutMargin + this.mChannelLayoutHeight) * (channelPosition - TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM);  
         if(!withAnimation) {
             this.scrollY = scrollTarget;
             this.updateCanvas();

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import Rect from '../EPG/models/Rect';
-import EPGUtils from '../EPG/utils/EPGUtils';
-import '../EPG/styles/app.css';
+import Rect from '../models/Rect';
+import EPGUtils from '../utils/EPGUtils';
+import '../styles/app.css';
 
 export default class ChannelList extends Component {
 

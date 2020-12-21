@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 
 import "babel-polyfill";
-import TVHDataService from './EPG/services/TVHDataService';
-import TVGuide from './EPG/components/TVGuide';
-import ChannelList from './TV/ChannelList';
-import EPGData from './EPG/models/EPGData';
-import EPGUtils from './EPG/utils/EPGUtils';
-import TV from './TV/TV';
+import TVHDataService from './services/TVHDataService';
+import TVGuide from './components/TVGuide';
+import ChannelList from './components/ChannelList';
+import EPGData from './models/EPGData';
+import EPGUtils from './utils/EPGUtils';
+import TV from './components/TV';
 import './App.css';
 export default class App extends Component {
 

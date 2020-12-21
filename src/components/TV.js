@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react';
-import Styles from '../EPG/styles/app.css';
+import Styles from '../styles/app.css';
 
 export default class TV extends Component {
 

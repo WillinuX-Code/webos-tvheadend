@@ -1,4 +1,4 @@
-import LunaServiceAdapter from "../../luna/LunaServiceAdapter";
+import LunaServiceAdapter from "../luna/LunaServiceAdapter";
 //import MockServiceAdapter from "../../mock/MockServiceAdapter";
 import EPGChannel from "../models/EPGChannel";
 import EPGEvent from "../models/EPGEvent";

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Rect from '../EPG/models/Rect';
 import EPGUtils from '../EPG/utils/EPGUtils';
-import Styles from '../EPG/styles/app.css';
+import '../EPG/styles/app.css';
 
 export default class ChannelList extends Component {
 
@@ -23,7 +23,7 @@ export default class ChannelList extends Component {
 
         this.mChannelLayoutTextSize = 32;
         this.mChannelLayoutTextColor = '#d6d6d6';
-        this.mChannelLayoutTitleTextColor = '#a6a6a6';
+        this.mChannelLayoutTitleTextColor = '#c6c6c6';
         this.mChannelLayoutMargin = 3;
         this.mChannelLayoutPadding = 7;
         this.mChannelLayoutHeight = 90;
@@ -116,12 +116,10 @@ export default class ChannelList extends Component {
         // Create gradient
         var grd = canvas.createLinearGradient(drawingRect.bottom, drawingRect.top, drawingRect.bottom, drawingRect.bottom);
         // Important bit here is to use rgba()
-        grd.addColorStop(0, "rgba(35, 64, 84, 0.2)");
-        grd.addColorStop(0.1, "rgba(35, 64, 84, 0.6)");
-        grd.addColorStop(0.4, "rgba(35, 64, 84, 1.0)");
-        grd.addColorStop(0.6, "rgba(35, 64, 84, 1.0)");
-        grd.addColorStop(0.9, "rgba(35, 64, 84, 0.6)");
-        grd.addColorStop(1, 'rgba(35, 64, 84, 0.2)');
+        grd.addColorStop(0, "rgba(35, 64, 84, 0.6)");
+        grd.addColorStop(0.1, "rgba(35, 64, 84, 0.9)");
+        grd.addColorStop(0.9, "rgba(35, 64, 84, 0.9)");
+        grd.addColorStop(1, 'rgba(35, 64, 84, 0.6)');
 
         // Fill with gradient
         canvas.fillStyle = grd;
@@ -388,11 +386,11 @@ export default class ChannelList extends Component {
 
     render() {
         return (
-            <div id="channellist-wrapper" ref="list" tabIndex='-1' onKeyDown={this.handleKeyPress} className={Styles.channelList}>
+            <div id="channellist-wrapper" ref="list" tabIndex='-1' onKeyDown={this.handleKeyPress} className="channelList">
                 <canvas ref="canvas"
                     width={this.getWidth()}
                     height={this.getHeight()}
-                     />
+                    style={{ border: 'none' }}/>
             </div>
         );
     }

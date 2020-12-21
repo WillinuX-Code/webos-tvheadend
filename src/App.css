@@ -1,7 +1,11 @@
 .App {
-  text-align: center;
+  /*text-align: center;*/
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0px;
 }
-
+/*
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -35,4 +39,4 @@
   to {
     transform: rotate(360deg);
   }
-}
+}*/

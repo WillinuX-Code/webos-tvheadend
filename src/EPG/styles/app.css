@@ -1,26 +1,31 @@
-
 body {
     background-color: #000000;
 }
 
 .epg {
-    position: absolute;
     width: 100%;
-    max-height: 100%;
-    top: 0px;
-    left: 0px;
-    right: initial;
-    opacity: 1;
-    z-index: 10;
+    height: 100%;            
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9;
 }
 
 .tv {
-    position: relative;
-    display: inline-block;
     width: 100%;
-    max-height: 100%;
-    top: 0px;
-    left: 0px;
-    right: initial;
-    opacity: 1;
+    height: 100%;            
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.channelList {
+    width: auto;
+    height: 100%;            
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 'none';
+    /*background-color: rgba(0,0,0,0.5);*/ 
+    z-index: 9;
 }

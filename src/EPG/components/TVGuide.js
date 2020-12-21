@@ -6,7 +6,7 @@ import React, { Component } from 'react';
 import Rect from '../models/Rect';
 import ReactDOM from "react-dom";
 import EPGUtils from '../utils/EPGUtils'
-import Styles from '../styles/app.css'
+import '../styles/app.css'
 import TVHDataService from '../services/TVHDataService';
 
 export default class TVGuide extends Component {
@@ -929,7 +929,7 @@ export default class TVGuide extends Component {
         window.addEventListener("scroll", function (event) {
         }, false);
         return (
-            <div id="epg-wrapper" ref="epg" tabIndex='-1' onKeyDown={this.handleKeyPress} className={Styles.epg}>
+            <div id="epg-wrapper" ref="epg" tabIndex='-1' onKeyDown={this.handleKeyPress} className="epg">
                 <div className="programguide-contents">
                     <canvas
                         ref="canvas"

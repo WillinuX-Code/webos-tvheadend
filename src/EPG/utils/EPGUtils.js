@@ -62,4 +62,9 @@ export default class EPGUtils {
     toTimeString(start, stop) {
         return new Date(start).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + " - " + new Date(stop).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     }
+
+    getNow() {
+        //return 1607462851000;
+        return Date.now();
+    }
 }

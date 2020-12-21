@@ -7,6 +7,7 @@ export default class TV extends Component {
     constructor(props) {
         super(props);
 
+        this.showChannelListHandler = props.showChannelListHandler;
         this.showEpgHandler = props.showEpgHandler;
         this.handleKeyPress = this.handleKeyPress.bind(this);
         this.epgData = props.epgData;
@@ -21,7 +22,7 @@ export default class TV extends Component {
         if (this.epgData.getChannelCount() > 0 && !this.getMediaElement().hasChildNodes()) {
             this.changeSource(this.epgData.getChannel(this.channelPosition).getStreamUrl());
         }
-        this.setFocus();
+        this.focus();
     }
     getWidth() {
         return window.innerWidth;
@@ -43,7 +44,7 @@ export default class TV extends Component {
         //this.setFocus();
     }
 
-    setFocus() {
+    focus() {
         this.refs.video.focus();
     }
 
@@ -52,7 +53,6 @@ export default class TV extends Component {
         let channelPosition = this.channelPosition;
         switch (keyCode) {
             case 34: // programm down
-            case 40: // arrow down
                 // channel down
                 if (channelPosition === 0) {
                     return
@@ -60,8 +60,10 @@ export default class TV extends Component {
                 channelPosition -= 1;
                 this.changeChannelPosition(channelPosition);
                 break;
-            case 33:    // programm up
-            case 38:    // arrow up
+            case 40: // arrow down
+                this.showChannelListHandler(channelPosition);
+                break;
+            case 33: // programm up
                 // channel up
                 if (channelPosition === this.epgData.getChannelCount() - 1) {
                     return;
@@ -69,8 +71,10 @@ export default class TV extends Component {
                 channelPosition += 1;
                 this.changeChannelPosition(channelPosition);
                 break;
-            case 1536: // guide button
-                event.preventDefault();
+            case 67: // 'c'
+            case 38: // arrow up
+                this.showChannelListHandler(channelPosition);
+                break;
             case 404: // green button show epg
             case 71: // keyboard 'g'
                 this.showEpgHandler(channelPosition);

@@ -1,3 +1,5 @@
+import EPGUtils from "../utils/EPGUtils";
+
 /**
  * Created by satadru on 3/30/17.
  */
@@ -11,6 +13,8 @@ export default class EPGEvent {
         this.description = description;
         this.subTitle = subTitle;
         this.channelUuid = channelUuid;
+
+        this.epgUtils = new EPGUtils();
     }
 
     getId() {
@@ -30,7 +34,7 @@ export default class EPGEvent {
     }
 
     isCurrent() {
-        let now = Date.now();
+        let now = this.epgUtils.getNow();
         return now >= this.start && now <= this.end;
     }
 

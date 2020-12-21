@@ -166,7 +166,7 @@ export default class TVHDataService {
                 } 
 
                 callback(this.channels);
-                console.log("processed all channels");
+                console.log("processed all channels %d", this.channels.length);
             },
             error => {
                 console.log("Failed to retrieve channel data: ", JSON.stringify(error))

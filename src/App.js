@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import "babel-polyfill";
 import TVHDataService from './EPG/services/TVHDataService';
 import TVGuide from './EPG/components/TVGuide';
+import ChannelList from './TV/ChannelList';
 import EPGData from './EPG/models/EPGData';
 import EPGUtils from './EPG/utils/EPGUtils';
 import TV from './TV/TV';
@@ -13,13 +14,15 @@ export default class App extends Component {
     super(props);
 
     this.state = {
-      isTVState: true,
       isEpgState: false,
+      isChannelListState: false,
+      channelPosition: 0,
       lastEPGUpdate: 0
     };
     this.showEpgHandler = this.showEpgHandler.bind(this);
     this.showTvHandler = this.showTvHandler.bind(this);
-    
+    this.showChannelListHandler = this.showChannelListHandler.bind(this);
+
     this.epgData = new EPGData();
     this.epgUtils = new EPGUtils();
     this.imageCache = new Map();
@@ -29,11 +32,15 @@ export default class App extends Component {
   showEpgHandler(channelPosition) {
     this.setState((state, props) => ({
       isEpgState: true,
-      isTVState: false
+      channelPosition: channelPosition
     }));
-    if (channelPosition !== undefined) {
-      this.refs.epg.showAtChannelPosition(channelPosition);
-    }
+  }
+
+  showChannelListHandler(channelPosition) {
+    this.setState((state, props) => ({
+      isChannelListState: true,
+      channelPosition: channelPosition
+    }));
   }
 
   /**
@@ -45,9 +52,10 @@ export default class App extends Component {
   showTvHandler(channelPosition) {
     this.setState((state, props) => ({
       isEpgState: false,
-      isTVState: true
+      isChannelListState: false,
+      channelPosition: channelPosition
     }));
-    this.refs.tv.setFocus();
+    this.refs.tv.focus();
     if (channelPosition !== undefined) {
       this.refs.tv.changeChannelPosition(channelPosition);
     }
@@ -151,10 +159,15 @@ function handleVisibilityChange() {
       <div className="App">
         <TV ref="tv" epgData={this.epgData}
           imageCache={this.imageCache}
-          showEpgHandler={this.showEpgHandler} />
+          showEpgHandler={this.showEpgHandler} showChannelListHandler={this.showChannelListHandler}/>
+        {this.state.isChannelListState && <ChannelList ref="list" epgData={this.epgData}
+          imageCache={this.imageCache}
+          showTvHandler={this.showTvHandler}
+          channelPosition={this.state.channelPosition}/>}
         {this.state.isEpgState && <TVGuide ref="epg" epgData={this.epgData}
           imageCache={this.imageCache}
-          showTvHandler={this.showTvHandler} /> }
+          showTvHandler={this.showTvHandler} 
+          channelPosition={this.state.channelPosition}/> }
       </div>
     );
   }

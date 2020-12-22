@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Rect from '../models/Rect';
 import EPGUtils from '../utils/EPGUtils';
 import '../styles/app.css';
+import CanvasUtils from '../utils/CanvasUtils';
 
 export default class ChannelList extends Component {
 
@@ -18,7 +19,7 @@ export default class ChannelList extends Component {
         this.channelPosition = props.channelPosition;
         this.scrollY = 0;
         this.epgUtils = new EPGUtils();
-
+        this.canvasUtils = new CanvasUtils();
         this.mMaxVerticalScroll = 0;
 
         this.mChannelLayoutTextSize = 32;
@@ -168,7 +169,7 @@ export default class ChannelList extends Component {
         drawingRect.left += 15;
         canvas.font = "bold " + this.mChannelLayoutTextSize + "px Arial";
         canvas.textAlign = 'left';
-        canvas.fillText(this.getShortenedText(canvas, channel.getName(), drawingRect),
+        canvas.fillText(this.canvasUtils.getShortenedText(canvas, channel.getName(), drawingRect),
             drawingRect.left, drawingRect.top + this.mChannelLayoutTextSize + this.mChannelLayoutPadding);
 
         // channel event
@@ -177,7 +178,7 @@ export default class ChannelList extends Component {
         canvas.textAlign = 'left';
         for (let event of channel.getEvents()) {
             if (event.isCurrent()) {
-                canvas.fillText(this.getShortenedText(canvas, event.getTitle(), drawingRect),
+                canvas.fillText(this.canvasUtils.getShortenedText(canvas, event.getTitle(), drawingRect),
                     drawingRect.left, drawingRect.top + (2 * this.mChannelLayoutTextSize) + this.mChannelLayoutPadding);
                 break;
             }
@@ -192,28 +193,6 @@ export default class ChannelList extends Component {
             drawingRect = this.getDrawingRectForChannelImage(drawingRect, image);
             canvas.drawImage(image, drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
         }
-    }
-
-    getShortenedText(canvas, text, drawingRect) {
-        let result = text;
-        let maxWidth = drawingRect.right - drawingRect.left;
-        for (var n = text.length; n >= 0; n--) {
-            result = result.substring(0, n);
-            var metrics = canvas.measureText(result);
-            var testWidth = metrics.width;
-            if (testWidth > maxWidth) {
-                continue;
-            } else {
-                break;
-            }
-        }
-        if (result.length < text.length) {
-            if (result.length <= 3) {
-                return "...".substring(0, result.length);
-            }
-            result = result.substring(0, result.length - 3) + "...";
-        }
-        return result;
     }
 
     getDrawingRectForChannelImage(drawingRect, image) {

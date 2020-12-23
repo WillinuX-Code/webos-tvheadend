@@ -1,18 +1,23 @@
-
 import React, { Component } from 'react';
-import Styles from '../styles/app.css';
+import ChannelInfo from './ChannelInfo';
+import '../styles/app.css';
 
 export default class TV extends Component {
 
     constructor(props) {
         super(props);
 
+        this.state = {
+            isInfoState: true,
+            channelPosition: 0
+        }
         this.showChannelListHandler = props.showChannelListHandler;
         this.showEpgHandler = props.showEpgHandler;
+        this.showChannelInfoHandler = props.showChannelInfoHandler;
         this.handleKeyPress = this.handleKeyPress.bind(this);
+        this.unmountInfo = this.unmountInfo.bind(this);
         this.epgData = props.epgData;
         this.imageCache = props.imageCache;
-        this.channelPosition = 0;
     }
 
     componentDidMount() {
@@ -20,7 +25,7 @@ export default class TV extends Component {
         this.initVideoElement();
         // in case we come back from epg
         if (this.epgData.getChannelCount() > 0 && !this.getMediaElement().hasChildNodes()) {
-            this.changeSource(this.epgData.getChannel(this.channelPosition).getStreamUrl());
+            this.changeSource(this.epgData.getChannel(this.state.channelPosition).getStreamUrl());
         }
         this.focus();
     }
@@ -38,10 +43,17 @@ export default class TV extends Component {
          * this normally happens when the epg is loaded
          */
         if (this.epgData.getChannelCount() > 0 && !this.getMediaElement().hasChildNodes()) {
-            this.changeSource(this.epgData.getChannel(this.channelPosition).getStreamUrl());
+            this.changeSource(this.epgData.getChannel(this.state.channelPosition).getStreamUrl());
         }
 
         //this.setFocus();
+    }
+
+    unmountInfo() {
+        this.focus();
+        this.setState((state, props) => ({
+            isInfoState: false
+        }));
     }
 
     focus() {
@@ -50,7 +62,7 @@ export default class TV extends Component {
 
     handleKeyPress(event) {
         let keyCode = event.keyCode;
-        let channelPosition = this.channelPosition;
+        let channelPosition = this.state.channelPosition;
         switch (keyCode) {
             case 34: // programm down
                 // channel down
@@ -79,7 +91,14 @@ export default class TV extends Component {
             case 71: // keyboard 'g'
                 this.showEpgHandler(channelPosition);
                 break;
-            
+            case 13: // ok button ->show/disable channel info
+                this.setState((state, props) => ({
+                    isInfoState: !props.isInfoState
+                }));
+                if (!this.state.isInfoState) {
+                    this.focus();
+                }
+                break;
             case 403: // red button trigger recording
                 // add current viewing channel to records
                 // red button to trigger or cancel recording
@@ -114,22 +133,24 @@ export default class TV extends Component {
     }
 
     changeChannelPosition(channelPosition) {
-        if(channelPosition === this.channelPosition) {
+        if (channelPosition === this.state.channelPosition) {
             return;
         }
-        this.channelPosition = channelPosition;
-        this.changeSource(this.epgData.getChannel(channelPosition).getStreamUrl());
+        this.setState((state, props) => ( {
+            channelPosition: channelPosition
+        }))
+        this.changeSource(this.epgData.getChannel(this.state.channelPosition).getStreamUrl());
     }
 
     initVideoElement() {
         var videoElement = this.getMediaElement();
         videoElement.addEventListener("loadedmetadata", event => {
             // console.log(JSON.stringify(event));
-             console.log("Audio Tracks: ", videoElement.audioTracks);
-             console.log("Video Tracks: ", videoElement.videoTracks);
-             console.log("Text Tracks: ", videoElement.textTracks);
+            console.log("Audio Tracks: ", videoElement.audioTracks);
+            console.log("Video Tracks: ", videoElement.videoTracks);
+            console.log("Text Tracks: ", videoElement.textTracks);
         });
-    
+
         // TODO audioTracklist
         // TODO subtitleList
     }
@@ -161,9 +182,15 @@ export default class TV extends Component {
 
     render() {
         return (
-            <div id="tv-wrapper" ref="video" tabIndex='-1' onKeyDown={this.handleKeyPress} className={Styles.tv} >
+            <div id="tv-wrapper" ref="video" tabIndex='-1' onKeyDown={this.handleKeyPress} className="tv" >
+                {this.state.isInfoState && <ChannelInfo ref="info" key={this.state.channelPosition} epgData={this.epgData}
+                    imageCache={this.imageCache}
+                    channelPosition={this.state.channelPosition}
+                    parentHandleKeyPress={this.handleKeyPress}
+                    unmountHandler={this.unmountInfo} />}
+
                 <video id="myVideo" width={this.getWidth()} height={this.getHeight()} preload autoplay></video>
-            </div> 
+            </div>
         );
     }
 }

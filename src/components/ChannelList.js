@@ -116,7 +116,8 @@ export default class ChannelList extends Component {
         drawingRect.bottom = drawingRect.top + this.getHeight();
         canvas.globalAlpha = 1.0;
         // put stroke color to transparent
-        canvas.strokeStyle = "transparent";
+        //canvas.strokeStyle = "transparent";
+        canvas.strokeStyle = "gradient";
         //mPaint.setColor(mChannelLayoutBackground);
         // canvas.fillStyle = this.mChannelLayoutBackground;
         // Create gradient

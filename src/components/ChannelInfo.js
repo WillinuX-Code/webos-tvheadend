@@ -23,6 +23,7 @@ export default class ChannelInfo extends Component {
         this.mChannelInfoHeight = 150;
         this.mChannelInfoTitleSize = 36;
         this.mChannelLayoutTextColor = '#d6d6d6';
+        this.mChannelInfoTimeBoxWidth = 200;
         //this.mChannelLayoutTitleTextColor = '#c6c6c6';
         this.mChannelLayoutMargin = 3;
         this.mChannelLayoutPadding = 7;
@@ -131,10 +132,12 @@ export default class ChannelInfo extends Component {
         };
         if(currentEvent !== undefined) {
             let left = drawingRect.left;
+            drawingRect.right -= this.mChannelInfoTimeBoxWidth;
             // draw current event
             canvas.fillText(this.canvasUtils.getShortenedText(canvas, currentEvent.getTitle(), drawingRect),
                         drawingRect.left, drawingRect.top);
             
+            drawingRect.right += this.mChannelInfoTimeBoxWidth;
             drawingRect.left = drawingRect.right - this.mChannelLayoutPadding;
             canvas.textAlign = 'right';
             canvas.fillText(this.epgUtils.toTimeString(currentEvent.getStart(), currentEvent.getEnd()),
@@ -145,14 +148,16 @@ export default class ChannelInfo extends Component {
             drawingRect.top += this.mChannelInfoTitleSize + this.mChannelLayoutPadding;  
             if(currentEvent.getSubTitle() !== undefined) {
                 drawingRect.left = left;
+                drawingRect.right -= this.mChannelInfoTimeBoxWidth;
                 canvas.fillText(this.canvasUtils.getShortenedText(canvas, currentEvent.getSubTitle(), drawingRect),
                     drawingRect.left, drawingRect.top);
 
             }       
             // draw time to go
+            drawingRect.right += this.mChannelInfoTimeBoxWidth;
             drawingRect.left = drawingRect.right - this.mChannelLayoutPadding;
             canvas.textAlign = 'right';
-            canvas.fillText(this.epgUtils.toDuration(currentEvent.getStart(), currentEvent.getEnd()),
+            canvas.fillText("-"+this.epgUtils.toDuration(this.epgUtils.getNow(), currentEvent.getEnd()),
                     drawingRect.left, drawingRect.top);
         }
 

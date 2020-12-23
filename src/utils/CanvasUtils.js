@@ -1,6 +1,6 @@
 export default class CanvasUtils {
  
-    static MEASURE_STRING = "One Measure String";
+    static MEASURE_STRING = "One interesting Measure String";
     
     /**
      * Faster shortened function with a complexity of 2

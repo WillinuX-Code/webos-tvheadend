@@ -3,6 +3,15 @@
  */
 export default class EPGChannel {
 
+    /**
+     * Create new instance
+     * 
+     * @param {URL} icon 
+     * @param {String} name 
+     * @param {Number} id 
+     * @param {String} uuid 
+     * @param {URL} streamUrl 
+     */
     constructor(icon, name, id, uuid, streamUrl) {
         this.id = id;
         this.name = name;

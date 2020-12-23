@@ -59,20 +59,25 @@ export default class ChannelList extends Component {
             return;
         }
 
-        // stop scrolling before padding position bottom
-        if (channelPosition >= this.epgData.getChannelCount() - 1 - ChannelList.VERTICAL_SCROLL_TOP_PADDING_ITEM) {
+        // stop scrolling before top padding position
+        let maxPosition = this.epgData.getChannelCount() - ChannelList.VERTICAL_SCROLL_TOP_PADDING_ITEM;
+        if (channelPosition >= maxPosition) {
+            // fix scroll to channel in case it is within bottom padding
+            if (this.scrollY === 0) {
+                this.scrollY = this.mChannelLayoutHeight * (maxPosition - ChannelList.VERTICAL_SCROLL_TOP_PADDING_ITEM);
+            }
             this.updateCanvas();
             return;
         }
 
         // scroll to channel position
-        let scrollTarget = this.mChannelLayoutHeight * (channelPosition - ChannelList.VERTICAL_SCROLL_TOP_PADDING_ITEM);  
-        if(!withAnimation) {
+        let scrollTarget = this.mChannelLayoutHeight * (channelPosition - ChannelList.VERTICAL_SCROLL_TOP_PADDING_ITEM);
+        if (!withAnimation) {
             this.scrollY = scrollTarget;
             this.updateCanvas();
             return;
         }
-        
+
         let scrollDistance = scrollTarget - this.scrollY;
         let scrollDelta = scrollDistance / (this.mChannelLayoutHeight / 5);
         cancelAnimationFrame(this.reapeater);
@@ -84,12 +89,12 @@ export default class ChannelList extends Component {
     }
 
     animateScroll(scrollDelta, scrollTarget) {
-        if(scrollDelta < 0 && this.scrollY <= scrollTarget) {
+        if (scrollDelta < 0 && this.scrollY <= scrollTarget) {
             //this.scrollY = scrollTarget;
             cancelAnimationFrame(this.reapeater);
             return;
         }
-        if(scrollDelta > 0 && this.scrollY >= scrollTarget) {
+        if (scrollDelta > 0 && this.scrollY >= scrollTarget) {
             //this.scrollY = scrollTarget;
             cancelAnimationFrame(this.reapeater);
             return;
@@ -97,7 +102,7 @@ export default class ChannelList extends Component {
         //console.log("scrolldelta=%d, scrolltarget=%d, scrollY=%d", scrollDelta, scrollTarget, this.scrollY);
         this.scrollY += scrollDelta;
         this.updateCanvas();
-        this.reapeater=requestAnimationFrame(() => {
+        this.reapeater = requestAnimationFrame(() => {
             this.animateScroll(scrollDelta, scrollTarget);
         });
     }
@@ -228,8 +233,8 @@ export default class ChannelList extends Component {
     getFirstVisibleChannelPosition() {
         let y = this.scrollY;
 
-        let position = parseInt((y ) /
-            (this.mChannelLayoutHeight ));
+        let position = parseInt((y) /
+            (this.mChannelLayoutHeight));
 
         if (position < 0) {
             position = 0;
@@ -241,11 +246,12 @@ export default class ChannelList extends Component {
     getLastVisibleChannelPosition() {
         let y = this.scrollY;
         let screenHeight = this.getHeight();
-        let position = parseInt((y + screenHeight ) /
-            (this.mChannelLayoutHeight ));
+        let position = parseInt((y + screenHeight) /
+            (this.mChannelLayoutHeight));
 
-        if (position < this.epgData.getChannelCount()) {
-            position += 1;
+        let channelCount = this.epgData.getChannelCount();
+        if (position > channelCount) {
+            position = channelCount;
         }
         //console.log("Last visible item: ", position);
         return position;
@@ -311,9 +317,11 @@ export default class ChannelList extends Component {
             case 404: // TODO yellow button + back button
             case 67: // keyboard 'c'
             case 461: // back button
+                cancelAnimationFrame(this.reapeater);
                 this.showTvHandler();
                 break;
             case 13: // ok button -> switch to focused channel
+                cancelAnimationFrame(this.reapeater);
                 this.showTvHandler(channelPosition);
                 break;
             case 403: // red button trigger recording
@@ -369,7 +377,7 @@ export default class ChannelList extends Component {
                 <canvas ref="canvas"
                     width={this.getWidth()}
                     height={this.getHeight()}
-                    style={{ border: 'none' }}/>
+                    style={{ border: 'none' }} />
             </div>
         );
     }

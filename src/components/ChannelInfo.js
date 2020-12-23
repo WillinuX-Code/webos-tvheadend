@@ -30,20 +30,21 @@ export default class ChannelInfo extends Component {
         this.mChannelLayoutBackgroundFocus = 'rgba(65,182,230,1)';
 
         this.reapeater = {};
+        this.timeoutReference = {};
     }
 
     handleKeyPress(event) {
         let keyCode = event.keyCode;
-        let channelPosition = this.channelPosition;
+
         switch (keyCode) {
-           
             case 461: // back button
             case 13: // ok button -> switch to focused channel
+                // do not pass this event to parent
+                event.stopPropagation();
                 this.unmountHandler();
                 break;
-            default:
-                this.parentHandleKeyPress(event);
         }
+        
     };
 
     drawChannelInfo(canvas) {
@@ -183,14 +184,19 @@ export default class ChannelInfo extends Component {
         this.updateCanvas();
         this.focus();
 
-        // TODO set interval to automatically unmount
-        //setInterval(this.unmountHandler(), 5000);
+        // set timeout to automatically unmount
+        this.timeoutReference = setTimeout(() => this.unmountHandler(), 5*1000);
+        
     }
 
     componentDidUpdate(prevProps) {
         this.updateCanvas();
         //this.setFocus();
         //setInterval(this.unmountHandler(), 5000);
+    }
+
+    componentWillUnmount() {
+        clearTimeout(this.timeoutReference);
     }
 
     focus() {
@@ -217,7 +223,7 @@ export default class ChannelInfo extends Component {
 
     render() {
         return (
-            <div id="channelinfo-wrapper" ref="info" tabIndex='-1' onKeyDown={this.handleKeyPresss} className="channelInfo">
+            <div id="channelinfo-wrapper" ref="info" tabIndex='-1' onKeyDown={this.handleKeyPress} className="channelInfo">
                 <canvas ref="canvas"
                     width={this.getWidth()}
                     height={this.getHeight()}

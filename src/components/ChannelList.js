@@ -80,6 +80,7 @@ export default class ChannelList extends Component {
 
         let scrollDistance = scrollTarget - this.scrollY;
         let scrollDelta = scrollDistance / (this.mChannelLayoutHeight / 5);
+        // stop existing animation if we have a new request
         cancelAnimationFrame(this.reapeater);
         this.reapeater = requestAnimationFrame(() => {
             this.animateScroll(scrollDelta, scrollTarget);
@@ -286,6 +287,11 @@ export default class ChannelList extends Component {
         //this.setFocus();
     }
 
+    componentWillUnmount() {
+        // stop animation when unmounting
+        cancelAnimationFrame(this.reapeater);
+    }
+
     focus() {
         this.refs.list.focus();
     }
@@ -318,11 +324,9 @@ export default class ChannelList extends Component {
             case 404: // TODO yellow button + back button
             case 67: // keyboard 'c'
             case 461: // back button
-                cancelAnimationFrame(this.reapeater);
                 this.showTvHandler();
                 break;
             case 13: // ok button -> switch to focused channel
-                cancelAnimationFrame(this.reapeater);
                 this.showTvHandler(channelPosition);
                 break;
             case 403: // red button trigger recording

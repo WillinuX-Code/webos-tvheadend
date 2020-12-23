@@ -15,7 +15,7 @@ export default class TV extends Component {
         this.showEpgHandler = props.showEpgHandler;
         this.showChannelInfoHandler = props.showChannelInfoHandler;
         this.handleKeyPress = this.handleKeyPress.bind(this);
-        this.unmountInfo = this.unmountInfo.bind(this);
+        this.unmountHandler = this.unmountHandler.bind(this);
         this.epgData = props.epgData;
         this.imageCache = props.imageCache;
     }
@@ -49,15 +49,17 @@ export default class TV extends Component {
         //this.setFocus();
     }
 
-    unmountInfo() {
-        this.focus();
+    unmountHandler() {
         this.setState((state, props) => ({
             isInfoState: false
         }));
+        this.focus();
     }
 
     focus() {
-        this.refs.video.focus();
+        if (this.refs.video) {
+            this.refs.video.focus();
+        }
     }
 
     handleKeyPress(event) {
@@ -136,7 +138,8 @@ export default class TV extends Component {
         if (channelPosition === this.state.channelPosition) {
             return;
         }
-        this.setState((state, props) => ( {
+        this.setState((state, props) => ({
+            isInfoState: true,
             channelPosition: channelPosition
         }))
         this.changeSource(this.epgData.getChannel(this.state.channelPosition).getStreamUrl());
@@ -186,8 +189,7 @@ export default class TV extends Component {
                 {this.state.isInfoState && <ChannelInfo ref="info" key={this.state.channelPosition} epgData={this.epgData}
                     imageCache={this.imageCache}
                     channelPosition={this.state.channelPosition}
-                    parentHandleKeyPress={this.handleKeyPress}
-                    unmountHandler={this.unmountInfo} />}
+                    unmountHandler={this.unmountHandler} />}
 
                 <video id="myVideo" width={this.getWidth()} height={this.getHeight()} preload autoplay></video>
             </div>

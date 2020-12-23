@@ -31,6 +31,7 @@ export default class ChannelInfo extends Component {
 
         this.reapeater = {};
         this.timeoutReference = {};
+        this.intervalReference = {};
     }
 
     handleKeyPress(event) {
@@ -129,17 +130,35 @@ export default class ChannelInfo extends Component {
             }
         };
         if(currentEvent !== undefined) {
+            let left = drawingRect.left;
             // draw current event
             canvas.fillText(this.canvasUtils.getShortenedText(canvas, currentEvent.getTitle(), drawingRect),
                         drawingRect.left, drawingRect.top);
+            
+            drawingRect.left = drawingRect.right - this.mChannelLayoutPadding;
+            canvas.textAlign = 'right';
+            canvas.fillText(this.epgUtils.toTimeString(currentEvent.getStart(), currentEvent.getEnd()),
+                    drawingRect.left, drawingRect.top);
+            canvas.textAlign = 'left';
+            // draw subtitle event
+            canvas.font = this.mChannelInfoTitleSize - 10 + "px Arial";
+            drawingRect.top += this.mChannelInfoTitleSize + this.mChannelLayoutPadding;  
             if(currentEvent.getSubTitle() !== undefined) {
-                // draw subtitle event
-                canvas.font = this.mChannelInfoTitleSize - 10 + "px Arial";
-                drawingRect.top += this.mChannelInfoTitleSize + this.mChannelLayoutPadding;  
+                drawingRect.left = left;
                 canvas.fillText(this.canvasUtils.getShortenedText(canvas, currentEvent.getSubTitle(), drawingRect),
                     drawingRect.left, drawingRect.top);
-            }
+
+            }       
+            // draw time to go
+            drawingRect.left = drawingRect.right - this.mChannelLayoutPadding;
+            canvas.textAlign = 'right';
+            canvas.fillText(this.epgUtils.toDuration(currentEvent.getStart(), currentEvent.getEnd()),
+                    drawingRect.left, drawingRect.top);
         }
+
+       
+
+
 
         // TODO from-until - current position
 
@@ -186,6 +205,7 @@ export default class ChannelInfo extends Component {
 
         // set timeout to automatically unmount
         this.timeoutReference = setTimeout(() => this.unmountHandler(), 5*1000);
+        this.intervalReference = setInterval(() => this.updateCanvas(), 500);
         
     }
 
@@ -197,6 +217,7 @@ export default class ChannelInfo extends Component {
 
     componentWillUnmount() {
         clearTimeout(this.timeoutReference);
+        clearInterval(this.intervalReference);
     }
 
     focus() {
@@ -211,6 +232,10 @@ export default class ChannelInfo extends Component {
         this.onDraw(this.ctx)
     }
 
+    /**
+     * 
+     * @param {CanvasRenderingContext2D} canvas 
+     */
     onDraw(canvas) {
         if (this.epgData !== null && this.epgData.hasData()) {
             this.drawChannelInfo(canvas);

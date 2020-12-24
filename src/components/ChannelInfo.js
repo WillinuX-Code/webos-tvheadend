@@ -151,12 +151,14 @@ export default class ChannelInfo extends Component {
                 canvas.fillText(this.canvasUtils.getShortenedText(canvas, currentEvent.getSubTitle(), drawingRect),
                     drawingRect.left, drawingRect.top);
 
+                drawingRect.right += this.mChannelInfoTimeBoxWidth;
+
             }       
-            // draw time to go
-            drawingRect.right += this.mChannelInfoTimeBoxWidth;
+            // draw current time in programm as well as overall durations
+            
             drawingRect.left = drawingRect.right - this.mChannelLayoutPadding;
             canvas.textAlign = 'right';
-            canvas.fillText("-"+this.epgUtils.toDuration(this.epgUtils.getNow(), currentEvent.getEnd()),
+            canvas.fillText(this.epgUtils.toDuration(currentEvent.getStart(), this.epgUtils.getNow())+" / "+this.epgUtils.toDuration(currentEvent.getStart(), currentEvent.getEnd()),
                     drawingRect.left, drawingRect.top);
         }
 

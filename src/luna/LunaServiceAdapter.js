@@ -18,8 +18,8 @@ export default class LunaServiceAdapter {
             onFailure: function (res) {
                 onerror(res);
             },
-            onComplete: function() {
-                console.log('lsa:%s end',method);
+            onComplete: function () {
+                console.log('lsa:%s end', method);
             }
         });
     }
@@ -32,14 +32,29 @@ export default class LunaServiceAdapter {
                 message: message
             },
             onSuccess: function (res) {
-               console.log("succesfully created toast");
+                console.log("succesfully created toast");
             },
             onFailure: function (res) {
                 console.log("failed to create toast");
             },
-            onComplete: function() {
+            onComplete: function () {
                 console.log("lsa:toast end");
             }
+        });
+    }
+
+    getLocaleInfo(onsuccess, onerror) {
+        let lunareq = global.webOS.service.request("luna://com.webos.settingsservice", {
+            method: "getSystemSettings",
+            parameters: {
+                "keys": ["localeInfo"]
+            },
+            onSuccess: function (res) {
+                onsuccess(res);
+            },
+            onFailure: function (res) {
+                onerror(res);
+            },
         });
     }
 }

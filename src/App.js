@@ -86,6 +86,10 @@ function handleVisibilityChange() {
   }
 
   componentDidMount() {
+    this.tvhDataService.getLocaleInfo(res => {
+      console.log(res);
+      this.epgData.updateLanguage(res.settings.localeInfo.locales.UI);
+    });
     this.tvhDataService.retrieveTVHChannels(0, channels => {
       this.epgData.updateChannels(channels);
       this.setState((state, props) => ({

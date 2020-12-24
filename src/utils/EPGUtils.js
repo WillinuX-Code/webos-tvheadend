@@ -2,6 +2,10 @@
  * Created by satadru on 3/31/17.
  */
 export default class EPGUtils {
+
+    constructor(locale) {
+        this.locale = locale;
+    }
     getShortTime(timeMillis) {
         var now = new Date(timeMillis);
         var hour = now.getHours();
@@ -60,11 +64,24 @@ export default class EPGUtils {
     }
 
     toTimeString(start, stop) {
-        return new Date(start).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + " - " + new Date(stop).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        let options = {
+            hour: '2-digit',
+            minute: '2-digit'
+        }
+        return new Intl.DateTimeFormat(this.locale, options).format(new Date(start)) + " - " + new Intl.DateTimeFormat(this.locale, options).format(new Date(stop));
     }
 
     toDuration(start, end) {
-        return new Date(end - start).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+        let date = new Date(end - start);
+        var result = "";
+        if(date.getUTCHours() > 0) {
+            result += date.getUTCHours();
+            result += ":"
+        }
+        result += date.getMinutes() < 10 ? "0" +date.getMinutes() : date.getMinutes();
+        result += ":";
+        result += date.getSeconds() < 10 ? "0" +date.getSeconds() : date.getSeconds()
+        return result;
     }
 
     /**

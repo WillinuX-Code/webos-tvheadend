@@ -7,7 +7,7 @@ export default class EPGData {
         this.channelMap = new Map();
         this.channels = [];
         this.recordings = [];
-
+        this.lang = "en-US";
         //new MockDataService().getChannels(this.channels);
         //if (this.data) {
             /*this.data.forEach((values, key) => {
@@ -91,5 +91,18 @@ export default class EPGData {
     updateRecordings(recordings) {
         console.log("updated recordings data");
         this.recordings = recordings;
+    }
+
+    updateLanguage(lang) {
+        console.log("updated language data");
+        this.lang = lang;
+    }
+
+    updateTimezone(timezone) {
+
+    }
+
+    getLocale() {
+        return this.lang;
     }
 }

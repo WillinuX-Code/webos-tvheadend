@@ -14,7 +14,7 @@ export default class ChannelInfo extends Component {
         this.epgData = props.epgData;
         this.imageCache = props.imageCache;
         this.channelPosition = props.channelPosition;
-        this.epgUtils = new EPGUtils();
+        this.epgUtils = new EPGUtils(this.epgData.getLocale());
         this.canvasUtils = new CanvasUtils();
 
         this.mChannelInfoHeight = 150;

@@ -29,7 +29,7 @@ export default class TVGuide extends Component {
         this.handleScroll = this.handleScroll.bind(this);
         this.handleKeyPress = this.handleKeyPress.bind(this);
         this.epgData = props.epgData;
-        this.epgUtils = new EPGUtils();
+        this.epgUtils = new EPGUtils(this.epgData.getLocale());
         this.canvasUtils = new CanvasUtils();
         this.tvhDataService = new TVHDataService();
         this.scrollX = 0;

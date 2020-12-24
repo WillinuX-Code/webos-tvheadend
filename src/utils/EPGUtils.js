@@ -64,8 +64,7 @@ export default class EPGUtils {
     }
 
     toDuration(start, end) {
-        return new Date(end - start).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-     
+        return new Date(end - start).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
     }
 
     /**

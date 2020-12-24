@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import ChannelInfo from './ChannelInfo';
+import TVGuide from './TVGuide';
+import ChannelList from './ChannelList';
 import '../styles/app.css';
 
 export default class TV extends Component {
@@ -9,13 +11,12 @@ export default class TV extends Component {
 
         this.state = {
             isInfoState: true,
+            isEpgState: false,
+            isChannelListState: false,
             channelPosition: 0
         }
-        this.showChannelListHandler = props.showChannelListHandler;
-        this.showEpgHandler = props.showEpgHandler;
-        this.showChannelInfoHandler = props.showChannelInfoHandler;
         this.handleKeyPress = this.handleKeyPress.bind(this);
-        this.unmountHandler = this.unmountHandler.bind(this);
+        this.stateUpdateHandler = this.stateUpdateHandler.bind(this);
         this.epgData = props.epgData;
         this.imageCache = props.imageCache;
     }
@@ -23,10 +24,11 @@ export default class TV extends Component {
     componentDidMount() {
         // init video element
         this.initVideoElement();
-        // in case we come back from epg
-        if (this.epgData.getChannelCount() > 0 && !this.getMediaElement().hasChildNodes()) {
-            this.changeSource(this.epgData.getChannel(this.state.channelPosition).getStreamUrl());
-        }
+        // activate video on mount
+        //if (this.epgData.getChannelCount() > 0 && !this.getMediaElement().hasChildNodes()) {
+        //this.changeSource(this.epgData.getChannel(this.state.channelPosition).getStreamUrl());
+        //}
+
         this.focus();
     }
     getWidth() {
@@ -37,23 +39,32 @@ export default class TV extends Component {
         return window.innerHeight;
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps, prevState, snapshot) {
         /*
          * if video doesn't have a source yet - we set it
          * this normally happens when the epg is loaded
          */
-        if (this.epgData.getChannelCount() > 0 && !this.getMediaElement().hasChildNodes()) {
+        // if (this.epgData.getChannelCount() > 0 && !this.getMediaElement().hasChildNodes()) {
+        //     this.changeSource(this.epgData.getChannel(this.state.channelPosition).getStreamUrl());
+        // }
+
+        // change channel in case we have channels retrieved and channel position changed or we don't have a channel active
+        if(this.epgData.getChannelCount() > 0 && 
+            (prevState.channelPosition !== this.state.channelPosition || !this.getMediaElement().hasChildNodes())) {
             this.changeSource(this.epgData.getChannel(this.state.channelPosition).getStreamUrl());
         }
 
+        // request focus if none of the other components are active
+        if(!this.state.isInfoState 
+            && !this.state.isEpgState 
+            && !this.state.isChannelListState) {
+            this.focus();
+        }
         //this.setFocus();
     }
 
-    unmountHandler() {
-        this.setState((state, props) => ({
-            isInfoState: false
-        }));
-        this.focus();
+    stateUpdateHandler(newState) {
+        this.setState((state, props) => (newState));
     }
 
     focus() {
@@ -75,7 +86,10 @@ export default class TV extends Component {
                 this.changeChannelPosition(channelPosition);
                 break;
             case 40: // arrow down
-                this.showChannelListHandler(channelPosition);
+                this.stateUpdateHandler({
+                    isChannelListState: true,
+                    channelPosition: channelPosition
+                });
                 break;
             case 33: // programm up
                 // channel up
@@ -87,19 +101,22 @@ export default class TV extends Component {
                 break;
             case 67: // 'c'
             case 38: // arrow up
-                this.showChannelListHandler(channelPosition);
+                this.stateUpdateHandler({
+                    isChannelListState: true,
+                    channelPosition: channelPosition
+                });
                 break;
             case 404: // green button show epg
             case 71: // keyboard 'g'
-                this.showEpgHandler(channelPosition);
+                this.stateUpdateHandler({
+                    isEpgState: true,
+                    channelPosition: channelPosition
+                });
                 break;
             case 13: // ok button ->show/disable channel info
-                this.setState((state, props) => ({
-                    isInfoState: !props.isInfoState
-                }));
-                if (!this.state.isInfoState) {
-                    this.focus();
-                }
+                this.stateUpdateHandler({
+                    isInfoState: !this.state.isInfoState
+                });
                 break;
             case 403: // red button trigger recording
                 // add current viewing channel to records
@@ -141,8 +158,7 @@ export default class TV extends Component {
         this.setState((state, props) => ({
             isInfoState: true,
             channelPosition: channelPosition
-        }))
-        this.changeSource(this.epgData.getChannel(this.state.channelPosition).getStreamUrl());
+        }));
     }
 
     initVideoElement() {
@@ -188,8 +204,18 @@ export default class TV extends Component {
             <div id="tv-wrapper" ref="video" tabIndex='-1' onKeyDown={this.handleKeyPress} className="tv" >
                 {this.state.isInfoState && <ChannelInfo ref="info" key={this.state.channelPosition} epgData={this.epgData}
                     imageCache={this.imageCache}
-                    channelPosition={this.state.channelPosition}
-                    unmountHandler={this.unmountHandler} />}
+                    stateUpdateHandler={this.stateUpdateHandler}
+                    channelPosition={this.state.channelPosition} />}
+
+                {this.state.isChannelListState && <ChannelList ref="list" key={this.state.isChannelListState} epgData={this.epgData}
+                    imageCache={this.imageCache}
+                    stateUpdateHandler={this.stateUpdateHandler} 
+                    channelPosition={this.state.channelPosition}/>}
+
+                {this.state.isEpgState && <TVGuide ref="epg" key={this.state.isEpgState} epgData={this.epgData}
+                    imageCache={this.imageCache}
+                    stateUpdateHandler={this.stateUpdateHandler} 
+                    channelPosition={this.state.channelPosition}/> }
 
                 <video id="myVideo" width={this.getWidth()} height={this.getHeight()} preload autoplay></video>
             </div>

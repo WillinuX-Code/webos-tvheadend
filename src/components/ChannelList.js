@@ -11,8 +11,7 @@ export default class ChannelList extends Component {
     constructor(props) {
         super(props);
 
-        this.showEpgHandler = props.showEpgHandler;
-        this.showTvHandler = props.showTvHandler;
+        this.stateUpdateHandler = props.stateUpdateHandler;
         this.handleKeyPress = this.handleKeyPress.bind(this);
         this.epgData = props.epgData;
         this.imageCache = props.imageCache;
@@ -24,7 +23,7 @@ export default class ChannelList extends Component {
 
         this.mChannelLayoutTextSize = 32;
         this.mChannelLayoutTextColor = '#d6d6d6';
-        this.mChannelLayoutTitleTextColor = '#c6c6c6';
+        this.mChannelLayoutTitleTextColor = '#969696';
         this.mChannelLayoutMargin = 3;
         this.mChannelLayoutPadding = 7;
         this.mChannelLayoutHeight = 90;
@@ -182,6 +181,9 @@ export default class ChannelList extends Component {
         // channel event
         canvas.font = "italic " + (this.mChannelLayoutTextSize - 5) + "px Arial";
         canvas.fillStyle = this.mChannelLayoutTitleTextColor;
+        if (position === this.channelPosition) {
+            canvas.fillStyle = this.mChannelLayoutTextColor;
+        }
         canvas.textAlign = 'left';
         for (let event of channel.getEvents()) {
             if (event.isCurrent()) {
@@ -252,6 +254,11 @@ export default class ChannelList extends Component {
             (this.mChannelLayoutHeight));
 
         let channelCount = this.epgData.getChannelCount();
+        // this will fade the bottom channel in while scrolling
+        if(position < channelCount) {
+            position += 1;
+        }
+        // this is the max channel available
         if (position > channelCount) {
             position = channelCount;
         }
@@ -299,11 +306,10 @@ export default class ChannelList extends Component {
     handleKeyPress(event) {
         let keyCode = event.keyCode;
         let channelPosition = this.channelPosition;
+        event.stopPropagation();
         switch (keyCode) {
             case 33:    // programm up
             case 38:    // arrow up
-
-                event.preventDefault();
                 // channel down
                 if (channelPosition === 0) {
                     return
@@ -313,7 +319,6 @@ export default class ChannelList extends Component {
                 break;
             case 34: // programm down
             case 40: // arrow down
-                event.preventDefault();
                 // channel up
                 if (channelPosition === this.epgData.getChannelCount() - 1) {
                     return;
@@ -324,10 +329,16 @@ export default class ChannelList extends Component {
             case 404: // TODO yellow button + back button
             case 67: // keyboard 'c'
             case 461: // back button
-                this.showTvHandler();
+                this.stateUpdateHandler({
+                    isChannelListState: false
+                });
                 break;
             case 13: // ok button -> switch to focused channel
-                this.showTvHandler(channelPosition);
+                this.stateUpdateHandler({
+                    isChannelListState: false,
+                    isInfoState: true,
+                    channelPosition: channelPosition
+                });
                 break;
             case 403: // red button trigger recording
                 // add current viewing channel to records
@@ -382,7 +393,7 @@ export default class ChannelList extends Component {
                 <canvas ref="canvas"
                     width={this.getWidth()}
                     height={this.getHeight()}
-                    style={{ border: 'none' }} />
+                    style={{ display: 'block' }} />
             </div>
         );
     }

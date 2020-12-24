@@ -10,10 +10,7 @@ export default class ChannelInfo extends Component {
         super(props);
 
         this.handleKeyPress = this.handleKeyPress.bind(this);
-        this.parentHandleKeyPress = props.parentHandleKeyPress;
-        this.unmountHandler = props.unmountHandler;
-        this.showTvHandler = props.showTvHandler;
-        this.showSettingsHandler = props.showSettingsHandler;
+        this.stateUpdateHandler = props.stateUpdateHandler;
         this.epgData = props.epgData;
         this.imageCache = props.imageCache;
         this.channelPosition = props.channelPosition;
@@ -43,7 +40,9 @@ export default class ChannelInfo extends Component {
             case 13: // ok button -> switch to focused channel
                 // do not pass this event to parent
                 event.stopPropagation();
-                this.unmountHandler();
+                this.stateUpdateHandler({
+                    isInfoState: false
+                });
                 break;
         }
         
@@ -71,7 +70,7 @@ export default class ChannelInfo extends Component {
 
         // Fill with gradient
         canvas.fillStyle = grd;
-        canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
+        canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.bottom);
 
         //console.log("Channel: First: " + firstPos + " Last: " + lastPos);
         drawingRect.left += this.mChannelLayoutMargin;
@@ -161,12 +160,6 @@ export default class ChannelInfo extends Component {
                     drawingRect.left, drawingRect.top);
         }
 
-       
-
-
-
-        // TODO from-until - current position
-
     }
 
     getDrawingRectForChannelImage(drawingRect, image) {
@@ -209,15 +202,15 @@ export default class ChannelInfo extends Component {
         this.focus();
 
         // set timeout to automatically unmount
-        this.timeoutReference = setTimeout(() => this.unmountHandler(), 5*1000);
+        this.timeoutReference = setTimeout(() => this.stateUpdateHandler({
+            isInfoState: false
+        }), 8*1000);
         this.intervalReference = setInterval(() => this.updateCanvas(), 500);
         
     }
 
     componentDidUpdate(prevProps) {
         this.updateCanvas();
-        //this.setFocus();
-        //setInterval(this.unmountHandler(), 5000);
     }
 
     componentWillUnmount() {
@@ -254,10 +247,7 @@ export default class ChannelInfo extends Component {
     render() {
         return (
             <div id="channelinfo-wrapper" ref="info" tabIndex='-1' onKeyDown={this.handleKeyPress} className="channelInfo">
-                <canvas ref="canvas"
-                    width={this.getWidth()}
-                    height={this.getHeight()}
-                    style={{ border: 'none' }}/>
+                <canvas ref="canvas" width={this.getWidth()} height={this.getHeight()} style={{ display: 'block' }}/>
             </div>
         );
     }

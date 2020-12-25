@@ -35,7 +35,7 @@ export default class TVGuide extends Component {
         this.scrollX = 0;
         this.scrollY = 0;
         this.currentCurser = 0;
-        this.focusedChannelPosition = props.channelPosition;
+        this.focusedChannelPosition = 0;//props.channelPosition;
         this.focusedEventPosition = -1;
         //this.state = {translate3d : `translate3d(${this.scrollX}px, 0px, 0px)`};
         //this.translate3d = `translate3d(${this.scrollX}px, 0px, 0px)`;

@@ -17,11 +17,10 @@ export default class CanvasUtils {
         var textLength = canvas.measureText(result).width;
         if (textLength > maxWidth) {
             var overLength = textLength - maxWidth;
-            //if(text.startsWith("Sebas")) {
+            // if(text.startsWith("Sebas")) {
             //     console.log("text: \"%s\" maxWidth: %d, textWidth: %d, deltaWidth: %d, widthPerCharacter: %d, textLength: %d, textOverLength: %d", text, maxWidth, textLength, overLength, widthPerCharacter, result.length, overLength/widthPerCharacter);
-            //}
-            // remove 1 + 2 buffer characters
-            result = result.substring(0, result.length - 3 - parseInt(overLength/widthPerCharacter));
+            // }
+            result = result.substring(0, result.length - 1 - parseInt(overLength/widthPerCharacter));
             if (result.length <= 3) {
                 return "...".substring(0, result.length);
             }

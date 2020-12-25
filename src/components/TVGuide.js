@@ -871,6 +871,7 @@ export default class TVGuide extends Component {
                 cancelAnimationFrame(this.reapeater);
                 this.stateUpdateHandler({
                     isEpgState: false,
+                    isInfoState: true,
                     channelPosition: channelPosition
                 });
                 break;

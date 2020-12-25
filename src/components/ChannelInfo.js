@@ -139,7 +139,7 @@ export default class ChannelInfo extends Component {
             drawingRect.right += this.mChannelInfoTimeBoxWidth;
             drawingRect.left = drawingRect.right - this.mChannelLayoutPadding;
             canvas.textAlign = 'right';
-            canvas.fillText(this.epgUtils.toTimeString(currentEvent.getStart(), currentEvent.getEnd()),
+            canvas.fillText(this.epgUtils.toTimeFrameString(currentEvent.getStart(), currentEvent.getEnd()),
                     drawingRect.left, drawingRect.top);
             canvas.textAlign = 'left';
             // draw subtitle event

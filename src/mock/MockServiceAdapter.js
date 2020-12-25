@@ -46,4 +46,17 @@ export default class MockServiceAdapter {
             returnValue: true
         });
     }
+
+    getLocaleInfo(onsuccess) {
+        onsuccess({
+            returnValue: true,
+            settings: {
+                localeInfo: {
+                    locales: [{
+                        UI: "de_DE"
+                    }]
+                }
+            }
+        });
+    }
 }

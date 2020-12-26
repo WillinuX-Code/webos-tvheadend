@@ -28,4 +28,41 @@ export default class CanvasUtils {
         } 
         return result;
     }
+
+    wrapText(text, canvas, x, y, maxWidth, lineHeight) {
+        var line = ""; 
+        var widthPerCharacter = canvas.measureText(CanvasUtils.MEASURE_STRING).width / CanvasUtils.MEASURE_STRING.length;
+        var maxCharactersPerLine = maxWidth / widthPerCharacter - 1;
+        var index = 0;
+        var newIndex = 0;
+        while(index < text.length -1) {
+            newIndex = index + maxCharactersPerLine > text.length ? text.length : index + maxCharactersPerLine;
+            line = text.substring(index, newIndex);
+            index = newIndex;
+            // cutoff leading space
+            if(line.startsWith(" ")) {
+                line = line.substring(1,line.length-1);
+            }
+            // if we reached the end print out the line 
+            if(index === text.length) {
+                canvas.fillText(line, x, y);
+                break;
+            }
+            // lucky we sliced at a space
+            if(line.endsWith(" ")) {
+                canvas.fillText(line, x, y);
+                y += lineHeight;
+                continue;
+            } 
+            // go back to find space first space
+            for(var i=line.length-1; i>=0; i--) {
+                if(line[i] === " ") {
+                    canvas.fillText(line.substring(0, i), x, y);
+                    y += lineHeight;
+                    break;
+                }
+                index -= 1;
+            }
+        }
+    }
 }

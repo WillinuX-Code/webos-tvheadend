@@ -179,7 +179,7 @@ export default class ChannelList extends Component {
             drawingRect.left, drawingRect.top + this.mChannelLayoutTextSize + this.mChannelLayoutPadding);
 
         // channel event
-        canvas.font = "italic " + (this.mChannelLayoutTextSize - 5) + "px Arial";
+        canvas.font = (this.mChannelLayoutTextSize - 5) + "px Arial";
         canvas.fillStyle = this.mChannelLayoutTitleTextColor;
         if (position === this.channelPosition) {
             canvas.fillStyle = this.mChannelLayoutTextColor;

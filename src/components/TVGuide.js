@@ -17,9 +17,9 @@ export default class TVGuide extends Component {
     static HOURS_IN_VIEWPORT_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
     static TIME_LABEL_SPACING_MILLIS = 30 * 60 * 1000; // 30 minutes
 
-    static VISIBLE_CHANNEL_COUNT = 10; // No of channel to show at a time
-    static VERTICAL_SCROLL_BOTTOM_PADDING_ITEM = 4;
-    static VERTICAL_SCROLL_TOP_PADDING_ITEM = 4;
+    static VISIBLE_CHANNEL_COUNT = 8; // No of channel to show at a time
+    static VERTICAL_SCROLL_BOTTOM_PADDING_ITEM = (TVGuide.VISIBLE_CHANNEL_COUNT / 2) -1;
+    static VERTICAL_SCROLL_TOP_PADDING_ITEM = (TVGuide.VISIBLE_CHANNEL_COUNT / 2) -1;
 
     constructor(props) {
         super(props);
@@ -48,7 +48,7 @@ export default class TVGuide extends Component {
         this.mEPGBackground = '#1e1e1e';
         this.mChannelLayoutMargin = 3;
         this.mChannelLayoutPadding = 10;
-        this.mChannelLayoutHeight = 60;
+        this.mChannelLayoutHeight = 75;
         this.mChannelLayoutWidth = 120;
         this.mChannelLayoutBackground = '#323232';
 
@@ -65,10 +65,11 @@ export default class TVGuide extends Component {
         this.mDetailsLayoutPadding = 8;
         this.mDetailsLayoutTextColor = '#d6d6d6';
         this.mDetailsLayoutTitleTextSize = 30;
+        this.mDetailsLayoutSubTitleTextColor = '#969696';
         this.mDetailsLayoutDescriptionTextSize = 28;
         this.mDetailsLayoutBackground = '#2d71ac';
 
-        this.mTimeBarHeight = 60;
+        this.mTimeBarHeight = 70;
         this.mTimeBarTextSize = 24;
         this.mTimeBarLineWidth = 3;
         this.mTimeBarLineColor = '#c57120';
@@ -78,7 +79,7 @@ export default class TVGuide extends Component {
 
         this.reapeater = {};
         //this.resetBoundaries();
-
+        this.backgroundImage = undefined;
     }
 
     resetBoundaries() {
@@ -86,15 +87,6 @@ export default class TVGuide extends Component {
         this.mTimeOffset = this.calculatedBaseLine();
         this.mTimeLowerBoundary = this.getTimeFrom(0);
         this.mTimeUpperBoundary = this.getTimeFrom(this.getWidth());
-    }
-
-    showAtChannelPosition(channelPosition) {
-        //console.log("Channel pos: ", channelPosition);
-        //this.focusedChannelPosition = channelPosition;
-        //this.refs.epg.style.display = 'block';
-        this.recalculateAndRedraw(false);
-        this.focusEPG();
-        this.updateCanvas();
     }
 
     calculateMaxHorizontalScroll() {
@@ -131,8 +123,8 @@ export default class TVGuide extends Component {
     getFirstVisibleChannelPosition() {
         let y = this.getScrollY(false);
 
-        let position = parseInt((y - this.mChannelLayoutMargin - this.mTimeBarHeight) /
-            (this.mChannelLayoutHeight + this.mChannelLayoutMargin));
+        let position = Math.round((y - this.mChannelLayoutMargin - this.mTimeBarHeight) /
+            (this.mChannelLayoutHeight + this.mChannelLayoutMargin)) + 1;
 
         if (position < 0) {
             position = 0;
@@ -234,8 +226,9 @@ export default class TVGuide extends Component {
             drawingRect.right = drawingRect.left + this.getWidth();
             drawingRect.bottom = drawingRect.top + this.getHeight();
             // draw background
-            canvas.fillStyle = '#000000';
-            canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
+            // canvas.fillStyle = '#000000';
+            // canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
+            this.drawBackground(canvas, drawingRect);
             this.drawChannelListItems(canvas, drawingRect);
             this.drawEvents(canvas, drawingRect);
             this.drawTimebar(canvas, drawingRect);
@@ -247,6 +240,84 @@ export default class TVGuide extends Component {
         }
     }
 
+    /**
+     * draw background and usee cache for future
+     * 
+     * @param {CanvasRenderingContext2D} canvas 
+     * @param {Rect} drawingRect 
+     */
+    drawBackground(canvas, drawingRect) {
+        drawingRect.left = this.getScrollX();
+        drawingRect.top = this.getScrollY();
+        drawingRect.right = drawingRect.left + this.getWidth();
+        drawingRect.bottom = drawingRect.top + this.getHeight();
+
+        // draw background from cache
+        if (this.backgroundImage) {
+            canvas.drawImage(this.backgroundImage, drawingRect.left, drawingRect.top, drawingRect.right,drawingRect.bottom);
+            return;
+        }
+
+        canvas.fillStyle = '#000000';
+        canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
+
+        // channel Background
+        this.mMeasuringRect.left = this.getScrollX();
+        this.mMeasuringRect.top = this.getScrollY();
+        this.mMeasuringRect.right = drawingRect.left + this.mChannelLayoutWidth;
+        this.mMeasuringRect.bottom = this.mMeasuringRect.top + this.getChannelListHeight();
+
+        //mPaint.setColor(mChannelLayoutBackground);
+        canvas.fillStyle = this.mChannelLayoutBackground;
+        canvas.fillRect(this.mMeasuringRect.left, this.mMeasuringRect.top, this.mMeasuringRect.width, this.mMeasuringRect.height);
+
+        // events Background
+        drawingRect.left = this.mChannelLayoutWidth + this.mChannelLayoutMargin;
+        drawingRect.top = this.mTimeBarHeight + this.mChannelLayoutMargin;
+        drawingRect.right = this.getWidth();
+        drawingRect.bottom = this.getChannelListHeight();
+        canvas.globalAlpha = 1.0;
+        // put stroke color to transparent
+        //canvas.strokeStyle = "transparent";
+        canvas.strokeStyle = "gradient";
+        //mPaint.setColor(mChannelLayoutBackground);
+        // canvas.fillStyle = this.mChannelLayoutBackground;
+        // Create gradient
+        var grd = canvas.createLinearGradient(drawingRect.left, drawingRect.left, drawingRect.right, drawingRect.left);
+        // Important bit here is to use rgba()
+        grd.addColorStop(0, "rgba(35, 64, 84, 0.4)");
+        grd.addColorStop(0.3, "rgba(35, 64, 84, 0.9)");
+        grd.addColorStop(0.7, "rgba(35, 64, 84, 0.9)");
+        grd.addColorStop(1, 'rgba(35, 64, 84, 0.4)');
+
+        // Fill with gradient
+        canvas.fillStyle = grd;
+        canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
+
+        // draw vertical line
+        canvas.beginPath();
+        canvas.lineWidth = "0.5";
+        canvas.strokeStyle = this.mEventLayoutTextColor;
+        canvas.moveTo(drawingRect.left, drawingRect.top);
+        canvas.lineTo(drawingRect.left, drawingRect.bottom);
+        canvas.stroke();
+
+
+        // timebar
+        drawingRect.left = this.getScrollX() + this.mChannelLayoutWidth + this.mChannelLayoutMargin;
+        drawingRect.top = this.getScrollY();
+        drawingRect.right = drawingRect.left + this.getWidth();
+        drawingRect.bottom = drawingRect.top + this.mTimeBarHeight;
+
+        // Background
+        canvas.fillStyle = this.mChannelLayoutBackground
+        canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
+
+        // cache image
+        var backgroundImage = new Image();
+        backgroundImage.src = this.refs.canvas.toDataURL();
+        this.backgroundImage = backgroundImage;
+    }
     drawDetails(canvas, drawingRect) {
         // Background
         drawingRect.left = this.getScrollX();
@@ -311,7 +382,7 @@ export default class TVGuide extends Component {
         // draw title, description etc
         canvas.font = this.mDetailsLayoutDescriptionTextSize + "px Arial";
         canvas.fillStyle = this.mDetailsLayoutTextColor;
-        this.wrapText(description, canvas, drect.left, drect.top, drect.width, this.mDetailsLayoutTitleTextSize + 5);
+        this.canvasUtils.wrapText(description, canvas, drect.left, drect.top, drect.width, this.mDetailsLayoutTitleTextSize + 5);
         //canvas.fillText(description, drect.left, drect.top);
     }
 
@@ -329,30 +400,9 @@ export default class TVGuide extends Component {
         drect.left = drect.left;
         drect.top += this.mDetailsLayoutTitleTextSize + 5;
         // draw title, description etc
-        canvas.font = "italic " + (this.mDetailsLayoutTitleTextSize - 4) + "px Arial";
-        canvas.fillStyle = this.mDetailsLayoutTextColor;
-        canvas.fillText(subtitle, drect.left, drect.top);
-    }
-
-    wrapText(text, canvas, x, y, maxWidth, lineHeight) {
-        var words = text.split(" ");
-        var line = "";
-
-        // TODO check if can be handled without for loop
-        for (var n = 0; n < words.length; n++) {
-            var testLine = line + words[n] + " ";
-            var metrics = canvas.measureText(testLine);
-            var testWidth = metrics.width;
-            if (testWidth > maxWidth && n > 0) {
-                canvas.fillText(line, x, y);
-                line = words[n] + " ";
-                y += lineHeight;
-            }
-            else {
-                line = testLine;
-            }
-        }
-        canvas.fillText(line, x, y);
+        canvas.font = (this.mDetailsLayoutTitleTextSize - 4) + "px Arial";
+        canvas.fillStyle = this.mDetailsLayoutSubTitleTextColor;
+        canvas.fillText(this.canvasUtils.getShortenedText(canvas, subtitle, drect), drect.left, drect.top);
     }
 
     drawTimebar(canvas, drawingRect) {
@@ -361,10 +411,6 @@ export default class TVGuide extends Component {
         drawingRect.top = this.getScrollY();
         drawingRect.right = drawingRect.left + this.getWidth();
         drawingRect.bottom = drawingRect.top + this.mTimeBarHeight;
-
-        // Background
-        canvas.fillStyle = this.mChannelLayoutBackground
-        canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
 
         // Time stamps
         //mPaint.setColor(mEventLayoutTextColor);
@@ -483,31 +529,6 @@ export default class TVGuide extends Component {
         drawingRect.top = this.mTimeBarHeight + this.mChannelLayoutMargin;
         drawingRect.right = this.getWidth();
         drawingRect.bottom = this.getChannelListHeight();
-        canvas.globalAlpha = 1.0;
-        // put stroke color to transparent
-        //canvas.strokeStyle = "transparent";
-        canvas.strokeStyle = "gradient";
-        //mPaint.setColor(mChannelLayoutBackground);
-        // canvas.fillStyle = this.mChannelLayoutBackground;
-        // Create gradient
-        var grd = canvas.createLinearGradient(drawingRect.left, drawingRect.left, drawingRect.right, drawingRect.left);
-        // Important bit here is to use rgba()
-        grd.addColorStop(0, "rgba(35, 64, 84, 0.4)");
-        grd.addColorStop(0.3, "rgba(35, 64, 84, 0.9)");
-        grd.addColorStop(0.7, "rgba(35, 64, 84, 0.9)");
-        grd.addColorStop(1, 'rgba(35, 64, 84, 0.4)');
-
-        // Fill with gradient
-        canvas.fillStyle = grd;
-        canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
-
-        // draw vertical line
-        canvas.beginPath();
-        canvas.lineWidth = "0.5";
-        canvas.strokeStyle = this.mEventLayoutTextColor;
-        canvas.moveTo(drawingRect.left, drawingRect.top);
-        canvas.lineTo(drawingRect.left, drawingRect.bottom);
-        canvas.stroke();
 
         let firstPos = this.getFirstVisibleChannelPosition();
         let lastPos = this.getLastVisibleChannelPosition();
@@ -546,44 +567,6 @@ export default class TVGuide extends Component {
                 }
             }
         }
-        // for (let pos = firstPos; pos < lastPos; pos++) {
-        //     // Set clip rectangle
-        //     this.mClipRect.left = this.getScrollX() + this.mChannelLayoutWidth + this.mChannelLayoutMargin;
-        //     this.mClipRect.top = this.getTopFrom(pos);
-        //     this.mClipRect.right = this.getScrollX() + this.getWidth();
-        //     this.mClipRect.bottom = this.mClipRect.top + this.mChannelLayoutHeight;
-
-        //     //canvas.save();
-        //     //canvas.rect(this.mClipRect.left, this.mClipRect.top, this.mClipRect.width, this.mClipRect.height);
-        //     //canvas.clip();
-
-        //     // Draw each event
-        //     let foundFirst = false;
-        //     let epgEvents = this.epgData.getEvents(pos);
-
-        //     // TODO improve performance - checek if for loop can be avoided
-        //     // hoever the list is ordered by time so its only a few events processed 
-        //     for (let event of epgEvents) {
-        //         if (this.isEventVisible(event.getStart(), event.getEnd())) {
-        //             this.drawEvent(canvas, pos, event, drawingRect);
-        //             if (foundFirst === false) {
-        //                 // draw filling rect from start of event screen
-        //                 if (event.getStart() > this.mTimeLowerBoundary) {
-        //                     let fillRect = drawingRect.clone();
-        //                     this.setEventDrawingRectangle(pos, this.mTimeLowerBoundary, event.getStart(), fillRect);
-        //                     canvas.fillStyle = this.mEventLayoutBackground;
-        //                     canvas.fillRect(fillRect.left - this.mChannelLayoutMargin, fillRect.top, fillRect.width + this.mChannelLayoutMargin, fillRect.height);
-        //                 }
-        //                 foundFirst = true;
-        //             }
-        //         } else if (foundFirst) {
-        //             // painted all visible events - now we break
-        //             break;
-        //         }
-        //     }
-
-        //     //canvas.restore();
-        // }
         canvas.globalAlpha = 1;
     }
 
@@ -670,10 +653,6 @@ export default class TVGuide extends Component {
         this.mMeasuringRect.right = drawingRect.left + this.mChannelLayoutWidth;
         this.mMeasuringRect.bottom = this.mMeasuringRect.top + this.getChannelListHeight();
 
-        //mPaint.setColor(mChannelLayoutBackground);
-        canvas.fillStyle = this.mChannelLayoutBackground;
-        canvas.fillRect(this.mMeasuringRect.left, this.mMeasuringRect.top, this.mMeasuringRect.width, this.mMeasuringRect.height);
-
         let firstPos = this.getFirstVisibleChannelPosition();
         let lastPos = this.getLastVisibleChannelPosition();
 
@@ -727,7 +706,7 @@ export default class TVGuide extends Component {
             canvas.textAlign = 'center';
             canvas.font = "bold 17px Arial";
             canvas.fillStyle = this.mEventLayoutTextColor;
-            this.wrapText(channel.getName(), canvas, drawingRect.left + (drawingRect.width / 2), drawingRect.top + (drawingRect.bottom - drawingRect.top) / 2, drawingRect.width, 20);
+            this.canvasUtils.wrapText(channel.getName(), canvas, drawingRect.left + (drawingRect.width / 2), drawingRect.top + (drawingRect.bottom - drawingRect.top) / 2, drawingRect.width, 20);
             //canvas.fillText(this.canvasUtils.getShortenedText(canvas, channel.getName(), drawingRect), drawingRect.left + (drawingRect.width /2), drawingRect.top + 9+  (drawingRect.bottom - drawingRect.top) / 2);
             canvas.textAlign = 'left';
         }
@@ -911,7 +890,7 @@ export default class TVGuide extends Component {
             programPosition = 0;
         }
         let eventCount = this.epgData.getEventCount(this.getFocusedChannelPosition())
-        if(programPosition >= eventCount - 1) {
+        if (programPosition >= eventCount - 1) {
             programPosition = eventCount - 1;
         }
         this.focusedEventPosition = programPosition;

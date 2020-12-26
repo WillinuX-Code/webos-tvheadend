@@ -508,7 +508,7 @@ export default class TVGuide extends Component {
 
         // draw current position
         drawingRect.left = this.getXFrom(this.timePosition);
-        drawingRect.top = this.getScrollY() + this.mTimeBarHeight;
+        drawingRect.top = this.getScrollY() + this.mTimeBarHeight - this.mTimeBarTextSize +2;
         drawingRect.right = drawingRect.left + this.mTimeBarLineWidth;
         drawingRect.bottom = drawingRect.top + this.getChannelListHeight();
 
@@ -517,8 +517,9 @@ export default class TVGuide extends Component {
         //canvas.drawRect(drawingRect, mPaint);
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
 
+        drawingRect.top += this.mTimeBarTextSize
         drawingRect.left = this.getXFrom(this.timePosition) + this.mChannelLayoutPadding;
-        drawingRect.top = this.getScrollY() + this.getChannelListHeight() - this.mTimeBarTextSize;
+        canvas.font = this.mTimeBarTextSize -2 +"px Arial"
         canvas.fillText(this.epgUtils.toTimeString(this.timePosition), drawingRect.left, drawingRect.top);
 
     }
@@ -538,13 +539,13 @@ export default class TVGuide extends Component {
         let transparentBottom = lastPos - 3;
         // canvas.globalAlpha = 0.0;
         for (let pos = firstPos; pos < lastPos; pos++) {
-            if (pos <= transparentTop) {
-                canvas.globalAlpha += 0.25;
-            } else if (pos >= transparentBottom) {
-                canvas.globalAlpha -= 0.25;
-            } else {
-                canvas.globalAlpha = 1;
-            }
+            // if (pos <= transparentTop) {
+            //     canvas.globalAlpha += 0.25;
+            // } else if (pos >= transparentBottom) {
+            //     canvas.globalAlpha -= 0.25;
+            // } else {
+            //     canvas.globalAlpha = 1;
+            // }
             // draw horizontal lines
             canvas.beginPath();
             canvas.lineWidth = "0.5";

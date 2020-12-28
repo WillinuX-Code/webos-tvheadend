@@ -65,7 +65,7 @@ export default class TVHSettings extends Component {
             setTimeout(this.props.handleUnmountSettings, 2000);
         },
             (error) => {
-                this.testResult = "Failed to retrieve server info";
+                this.testResult = "Failed to connect: "+error.errorText;
                 this.setState((state, props) => ({
                     isLoading: false
                 }))

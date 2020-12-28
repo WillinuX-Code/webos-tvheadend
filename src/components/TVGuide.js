@@ -9,6 +9,7 @@ import EPGUtils from '../utils/EPGUtils'
 import '../styles/app.css'
 import TVHDataService from '../services/TVHDataService';
 import CanvasUtils from '../utils/CanvasUtils';
+import TVHSettings from './TVHSettings';
 
 export default class TVGuide extends Component {
 
@@ -31,15 +32,15 @@ export default class TVGuide extends Component {
         this.epgData = props.epgData;
         this.epgUtils = new EPGUtils(this.epgData.getLocale());
         this.canvasUtils = new CanvasUtils();
-        this.tvhDataService = new TVHDataService();
+        // read settings from storage
+        let tvhSettings = JSON.parse(localStorage.getItem(TVHSettings.STORAGE_TVH_SETTING_KEY));
+        this.tvhDataService = new TVHDataService(tvhSettings);
         this.scrollX = 0;
         this.scrollY = 0;
         this.timePosition = this.epgUtils.getNow();
         this.focusedChannelPosition = props.channelPosition;
         this.focusedEventPosition = -1;
-        //this.state = {translate3d : `translate3d(${this.scrollX}px, 0px, 0px)`};
-        //this.translate3d = `translate3d(${this.scrollX}px, 0px, 0px)`;
-
+        
         this.mChannelImageCache = props.imageCache;
         this.mClipRect = new Rect();
         this.mDrawingRect = new Rect();
@@ -787,36 +788,19 @@ export default class TVGuide extends Component {
         let dx = 0,
             dy = 0;
         // do not pass this event to parents
-        event.stopPropagation();
         switch (keyCode) {
             case 39: // right arrow
-                //let programPosition = this.getProgramPosition(this.getFocusedChannelPosition(), this.getTimeFrom(this.getScrollX(false) ));
+                event.stopPropagation();
                 programPosition += 1
-                // if (programPosition !== -1 && programPosition < this.epgData.getEventCount(this.getFocusedChannelPosition())) {
-                //     this.focusedEvent = this.epgData.getEvent(this.getFocusedChannelPosition(), programPosition);
-                //     if (this.focusedEvent) {
-                //         this.focusedEventPosition = programPosition;
-                //         //dx = parseInt((this.focusedEvent.getEnd() - this.focusedEvent.getStart()) / this.mMillisPerPixel);
-                //         dx = parseInt((this.focusedEvent.getEnd() - this.focusedEvent.getStart()) / this.mMillisPerPixel);
-                //     }
-                // }
-                // this.scrollX = this.getScrollX(false) + dx;
                 this.scrollToProgramPosition(programPosition);
                 break;
             case 37: // left arrow
+                event.stopPropagation();
                 programPosition -= 1;
-                // if (programPosition !== -1 && programPosition > -1) {
-                //     this.focusedEvent = this.epgData.getEvent(this.getFocusedChannelPosition(), programPosition);
-                //     if (this.focusedEvent) {
-                //         this.focusedEventPosition = programPosition;
-                //         dx = (-1) * parseInt((this.focusedEvent.getEnd() - this.focusedEvent.getStart()) / this.mMillisPerPixel);
-                //     }
-                // }
-                // this.scrollX = this.getScrollX(false) + dx;
-                //this.scrollToTimePosition(-1 * 60 * 1000);
                 this.scrollToProgramPosition(programPosition);
                 break;
             case 40: // arrow down
+                event.stopPropagation();
                 if (channelPosition === this.epgData.getChannelCount() - 1) {
                     return;
                 }
@@ -824,13 +808,16 @@ export default class TVGuide extends Component {
                 this.scrollToChannelPosition(channelPosition, false);
                 return;
             case 38: // arrow up
+                event.stopPropagation();
                 if (channelPosition === 0) {
                     return
                 }
                 channelPosition -= 1;
                 this.scrollToChannelPosition(channelPosition, false);
                 return;
-            case 403: // red button to trigger or cancel recording
+            case 403: 
+                event.stopPropagation();
+                // red button to trigger or cancel recording
                 // get current event
                 this.focusedEvent = this.epgData.getEvent(channelPosition, programPosition);
                 if (this.focusedEvent.isPastDated(this.epgUtils.getNow())) {
@@ -852,20 +839,22 @@ export default class TVGuide extends Component {
                     });
                 }
                 break;
-            case 461: // back button
+            case 461: 
+                event.stopPropagation();
+                // back button
                 // do not pass this key to the browser/webos
                 cancelAnimationFrame(this.reapeater);
                 event.preventDefault();
-            case 404: // green or back button hide epg/show tv
-            case 71: // keyboard 'g'  
-                //this.refs.epg.style.display = 'none';
+            case 406: // blue or back button hide epg/show tv
+            case 66: // keyboard 'b' 
+                event.stopPropagation();
                 cancelAnimationFrame(this.reapeater);
                 this.stateUpdateHandler({
                     isEpgState: false
                 });
                 break;
             case 13: // ok button -> switch to focused channel
-                //this.refs.epg.style.display = 'none';
+                event.stopPropagation();
                 cancelAnimationFrame(this.reapeater);
                 this.stateUpdateHandler({
                     isEpgState: false,

@@ -17,28 +17,51 @@ service.activityManager.complete(keepAlive, function(activity) {
  */
 service.register("proxy", function (message) {
     var url = message.payload.url;
+    
     //var user = message.payload.user;
     //var password = message.payload.password;
 
-    http.get(url, function (resp) {
+    // var options = {
+    //     timeout: 2000
+    // }
+    var req = http.get(url, function (resp) {
         var data = '';
-        // A chunk of data has been recieved.
-        resp.on('data', (chunk) => {
-            data += chunk;
-        });
-        // The whole response has been received. Print out the result.
-        resp.on('end', function () {
+        // handle http status
+        if(resp.statusCode != 200) {
             message.respond({
-                "returnValue": true,
-                "result": JSON.parse(data)
+                "returnValue": false,
+                "errorText": "Server answered with StatusCode "+resp.statusCode,
+                "errorCode": 1
             });
-        });
+        } else {
+            // A chunk of data has been recieved.
+            resp.on('data', (chunk) => {
+                data += chunk;
+            });
+            // The whole response has been received. Print out the result.
+            resp.on('end', function () {
+                message.respond({
+                    "returnValue": true,
+                    "result": JSON.parse(data)
+                });
+            });
+        }
 
-    }).on("error", function (err) {
+    });
+    req.on("error", function (err) {
         message.respond({
             "returnValue": false,
-            "errorText": error.message,
+            "errorText": err.message,
             "errorCode": 1
         });
+    });
+    req.on("socket", function (socket) {
+        socket.setTimeout(2000);  
+        socket.on('timeout', function() {
+            req.abort();
+        });
+    });
+    req.setTimeout(2000, function() {                                                                                                                                                                                                                                              
+        req.abort();                                                                                                                                               
     });
 });

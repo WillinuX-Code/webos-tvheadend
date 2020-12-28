@@ -39,6 +39,14 @@ export default class TV extends Component {
         return window.innerHeight;
     }
 
+    componentWillUnmount() {
+        var videoElement = this.getMediaElement();
+        // Remove all source elements
+        while (videoElement.firstChild) {
+            videoElement.removeChild(videoElement.firstChild);
+        }
+    }
+
     componentDidUpdate(prevProps, prevState, snapshot) {
         /*
          * if video doesn't have a source yet - we set it
@@ -78,6 +86,7 @@ export default class TV extends Component {
         let channelPosition = this.state.channelPosition;
         switch (keyCode) {
             case 34: // programm down
+                event.stopPropagation();
                 // channel down
                 if (channelPosition === 0) {
                     return
@@ -86,12 +95,14 @@ export default class TV extends Component {
                 this.changeChannelPosition(channelPosition);
                 break;
             case 40: // arrow down
+                event.stopPropagation();
                 this.stateUpdateHandler({
                     isChannelListState: true,
                     channelPosition: channelPosition
                 });
                 break;
             case 33: // programm up
+                event.stopPropagation();
                 // channel up
                 if (channelPosition === this.epgData.getChannelCount() - 1) {
                     return;
@@ -101,28 +112,37 @@ export default class TV extends Component {
                 break;
             case 67: // 'c'
             case 38: // arrow up
+                event.stopPropagation();
                 this.stateUpdateHandler({
                     isChannelListState: true,
                     channelPosition: channelPosition
                 });
                 break;
-            case 404: // green button show epg
-            case 71: // keyboard 'g'
+            case 406: // blue button show epg
+            case 66: // keyboard 'b'
+                event.stopPropagation();
                 this.stateUpdateHandler({
                     isEpgState: true,
                     channelPosition: channelPosition
                 });
                 break;
             case 13: // ok button ->show/disable channel info
+                event.stopPropagation();
                 this.stateUpdateHandler({
                     isInfoState: !this.state.isInfoState
                 });
                 break;
+            case 405: // yellow button 
+            case 89: //'y'
+                event.stopPropagation();
+                // TODO show channel settings panel
+                break;
             case 403: // red button trigger recording
+                event.stopPropagation();
                 // add current viewing channel to records
                 // red button to trigger or cancel recording
                 // get current event
-                // this.focusedEvent = this.epgData.getEvent(channelPosition, programPosition);
+                //this.focusedEvent = this.epgData.getEvent(channelPosition, programPosition);
                 // if (this.focusedEvent.isPastDated(this.getNow())) {
                 //   // past dated do nothing
                 //   return;

@@ -33,6 +33,26 @@ export default class MockServiceAdapter {
                 }
             });
         } 
+        else if(url.includes('/api/serverinfo')) {
+            onsuccess({
+                returnValue: true,
+                result: {
+                    "sw_version": "4.3-1919~g52b255940",
+                    "api_version": 19,
+                    "name": "Tvheadend",
+                    "capabilities": [
+                      "caclient",
+                      "tvadapters",
+                      "satip_client",
+                      "satip_server",
+                      "timeshift",
+                      "trace",
+                      "libav",
+                      "caclient_advanced"
+                    ]
+                  }
+            });
+        }
         else {
             onerror({"returnValue": false, "errorText": "Unknown url "+url});
         }

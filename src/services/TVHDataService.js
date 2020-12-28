@@ -4,6 +4,7 @@ import EPGChannel from "../models/EPGChannel";
 import EPGEvent from "../models/EPGEvent";
 
 export default class TVHDataService {
+    static API_SERVER_INFO = "api/serverinfo";
     static API_INITIAL_CHANNELS = "api/channel/grid?dir=ASC&sort=number&start=";
     static API_EPG = "api/epg/events/grid?dir=ASC&sort=start&limit=500&start=";
     static API_DVR_CONFIG = "api/dvr/config/grid";
@@ -11,11 +12,16 @@ export default class TVHDataService {
     static API_DVR_CANCEL = "api/dvr/entry/cancel?uuid=";
     static API_DVR_UPCOMING = "api/dvr/entry/grid_upcoming?duplicates=0";
 
-    constructor() {
+    constructor(settings) {
         this.serviceAdapter = new LunaServiceAdapter();
         //this.serviceAdapter = new MockServiceAdapter();
         this.maxTotalEpgEntries = 10000;
-        this.baseUrl = 'http://userver.fritz.box:9981/';
+        this.url = settings.tvhUrl;
+        // append trailing slash if it doesn't exist
+        if(!this.url.endsWith("/")) {
+           this.url += "/";
+        }
+        this.profile = settings.streamProfile;
         this.channels = [];
         this.channelMap = new Map();
         this.dvrUuid = "";
@@ -40,10 +46,30 @@ export default class TVHDataService {
             });
     }
 
+    /**
+     * retrieve tvh server info
+     * 
+     * @param {Function} callback 
+     */
+    retrieveServerInfo(successCallback, errorCallback) {
+        // now create rec by event
+        this.serviceAdapter.call("proxy", {
+            "url": this.url + TVHDataService.API_SERVER_INFO
+        },
+            success => {
+                console.log("retrieved server info: %s", success.result.sw_version)
+                successCallback(success.result);
+            },
+            error => {
+                console.log("Failed to retrieve server info: ", JSON.stringify(error))
+                errorCallback(error);
+            });
+    }
+
     createRec(event, callback) {
         // now create rec by event
         this.serviceAdapter.call("proxy", {
-            "url": this.baseUrl + TVHDataService.API_DVR_CREATE_BY_EVENT + "event_id=" + event.getId() + "&config_uuid=" + this.dvrUuid + "&comment=webos-tvheadend"
+            "url": this.url + TVHDataService.API_DVR_CREATE_BY_EVENT + "event_id=" + event.getId() + "&config_uuid=" + this.dvrUuid + "&comment=webos-tvheadend"
         },
             success => {
                 console.log("created record: %s", success.result.total)
@@ -60,7 +86,7 @@ export default class TVHDataService {
     cancelRec(event, callback) {
         // now create rec by event
         this.serviceAdapter.call("proxy", {
-            "url": this.baseUrl + TVHDataService.API_DVR_CANCEL + event.getId()
+            "url": this.url + TVHDataService.API_DVR_CANCEL + event.getId()
         },
             success => {
                 console.log("created record: %s", success.result.total)
@@ -77,7 +103,7 @@ export default class TVHDataService {
     async retrieveUpcomingRecordings(callback) {
         // now create rec by event
         this.serviceAdapter.call("proxy", {
-            "url": this.baseUrl + TVHDataService.API_DVR_UPCOMING
+            "url": this.url + TVHDataService.API_DVR_UPCOMING
         },
             success => {
                 console.log("retrieved upcoming records: %s", success.result.total)
@@ -120,7 +146,7 @@ export default class TVHDataService {
     retrieveDVRConfig(callback) {
         // retrieve the default dvr config
         this.serviceAdapter.call("proxy", {
-            "url": this.baseUrl + TVHDataService.API_DVR_CONFIG
+            "url": this.url + TVHDataService.API_DVR_CONFIG
         },
             success => {
                 console.log("dvr configs received: %d", success.result.total)
@@ -150,7 +176,7 @@ export default class TVHDataService {
         // after we set the base url we retrieve channels async
         let totalCount = 0;
         this.serviceAdapter.call("proxy", {
-            "url": this.baseUrl + TVHDataService.API_INITIAL_CHANNELS + start
+            "url": this.url + TVHDataService.API_INITIAL_CHANNELS + start
         },
             success => {
                 console.log("channels received: %d of %d", start + success.result.entries.length, success.result.total)
@@ -164,11 +190,11 @@ export default class TVHDataService {
                         }
                         let channel = new EPGChannel(
                             // complete icon url
-                            this.baseUrl + tvhChannel.icon_public_url,
+                            this.url + tvhChannel.icon_public_url,
                             tvhChannel.name,
                             tvhChannel.number,
                             tvhChannel.uuid,
-                            this.baseUrl + "stream/channel/" + tvhChannel.uuid + "?profile=pass"
+                            this.url + "stream/channel/" + tvhChannel.uuid + "?profile="+this.streamProfile
                         );
                         this.channelMap.set(tvhChannel.uuid, channel);
                         this.channels.push(channel);
@@ -193,7 +219,7 @@ export default class TVHDataService {
         let totalCount = 0;
 
         this.serviceAdapter.call("proxy", {
-            "url": this.baseUrl + TVHDataService.API_EPG + start
+            "url": this.url + TVHDataService.API_EPG + start
         },
             success => {
                 console.log("epg events received: %d of %d", start + success.result.entries.length, success.result.totalCount)

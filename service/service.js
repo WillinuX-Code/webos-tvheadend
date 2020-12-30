@@ -27,7 +27,7 @@ service.register("proxy", function (message) {
     var req = http.get(url, function (resp) {
         var data = '';
         // handle http status
-        if(resp.statusCode != 200) {
+        if(resp.statusCode < 200 || resp.statusCode > 299) {
             message.respond({
                 "returnValue": false,
                 "errorText": "Server answered with StatusCode "+resp.statusCode,
@@ -47,15 +47,13 @@ service.register("proxy", function (message) {
             });
         }
 
-    });
-    req.on("error", function (err) {
+    }).on("error", function (err) {
         message.respond({
             "returnValue": false,
             "errorText": err.message,
             "errorCode": 1
         });
-    });
-    req.on("socket", function (socket) {
+    }).on("socket", function (socket) {
         socket.setTimeout(2000);  
         socket.on('timeout', function() {
             req.abort();

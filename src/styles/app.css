@@ -35,3 +35,67 @@ body {
     left: 0;
     z-index: 9;
 }
+
+.tvhSettings {
+    border-radius: 15px;
+    /*background-color: #f2f2f2;*/
+    margin: 100px;
+    width: 100% - 100px;
+    height: 400px;
+    font-size: 30px;
+    text-align: center;
+}
+.tvhSettings h1 {
+    color: #d6d6d6;
+}
+
+.tvhSettings input[type="text"], input[type="url"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    resize: vertical;
+    font-size: 30px;
+    /*min-width: 80px;*/
+    height: 40px;
+    text-align: center;
+}
+
+.tvhSettings input[type="submit"] {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    resize: vertical;
+    font-size: 30px;
+    min-width: 80px;
+    height: 50px;
+    text-align: center;
+}
+
+.tvhSettings .col-25 {
+    float: left;
+    width: 20%;
+    margin-top: 6px;
+}
+  
+.tvhSettings .col-75 {
+    float: left;
+    width: 60%;
+    margin-top: 6px;
+}
+
+.tvhSettings label {
+    font-weight: bold;
+    text-align: left;
+    color: #d6d6d6;
+    padding: 12px 12px 12px 0;
+    display: inline-block;
+}
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}

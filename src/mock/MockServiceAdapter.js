@@ -1,6 +1,7 @@
 import channelMock from './channels.json';
 import epgMock from './epg.json';
 import recordingMock from './recordings.json';
+import channelTagsMock from './channelTags.json';
 /**
  * Depending on local development or emulator usage
  * the service bridge is differen
@@ -20,6 +21,9 @@ export default class MockServiceAdapter {
         else if(url.includes('api/dvr/entry/grid_upcoming')) {
             onsuccess(recordingMock);
         } 
+        else if (url.includes('api/channeltag/list')) {
+            onsuccess(channelTagsMock);
+        }
         else if(url.includes('api/dvr/config/grid')) {
             onsuccess({
                 returnValue: true,

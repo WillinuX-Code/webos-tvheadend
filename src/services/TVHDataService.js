@@ -5,6 +5,7 @@ import EPGEvent from "../models/EPGEvent";
 
 export default class TVHDataService {
     static API_SERVER_INFO = "api/serverinfo";
+    static API_CHANNEL_TAGS = "api/channeltag/list";
     static API_INITIAL_CHANNELS = "api/channel/grid?dir=ASC&sort=number&start=";
     static API_EPG = "api/epg/events/grid?dir=ASC&sort=start&limit=500&start=";
     static API_DVR_CONFIG = "api/dvr/config/grid";
@@ -25,8 +26,12 @@ export default class TVHDataService {
         this.channels = [];
         this.channelMap = new Map();
         this.dvrUuid = "";
-
+        this.tvChannelUUID = "";
         // TODO store information
+        // retrieve channel tags
+        this.retrieveChannelTags(tvChannelUUID => {
+            this.tvChannelUUID = tvChannelUUID;
+        });
         // retrieve the default dvr config
         this.retrieveDVRConfig(dvrUuid => {
             this.dvrUuid = dvrUuid;
@@ -143,6 +148,31 @@ export default class TVHDataService {
         )
     }
 
+    retrieveChannelTags(callback) {
+        // retrieve the default dvr config
+        this.serviceAdapter.call("proxy", {
+            "url": this.url + TVHDataService.API_CHANNEL_TAGS
+        },
+            success => {
+                console.log("channel tags received: %d", success.result.total)
+                // get default config -> name = ""
+                if (success.result.entries.length > 0) {
+                    let tvChannelsUUid = "";
+                    success.result.entries.forEach((entry) => {
+                        if (entry.val === "TV channels") {
+                            tvChannelsUUid = entry.key;
+                            return;
+                        }
+                    });
+                    callback(tvChannelsUUid);
+                }
+            },
+            error => {
+                console.log("Failed to retrieve channel tags: ", JSON.stringify(error))
+            }
+        );
+    }
+
     retrieveDVRConfig(callback) {
         // retrieve the default dvr config
         this.serviceAdapter.call("proxy", {
@@ -184,8 +214,8 @@ export default class TVHDataService {
                     totalCount = success.result.total;
                     success.result.entries.forEach((tvhChannel) => {
                         start++;
-                        // TODO workaround - ignore radio for now
-                        if (tvhChannel.number <= 0) {
+                        // check if channel contains is a tvchannel
+                        if (!tvhChannel.tags.includes(this.tvChannelUUID)) {
                             return;
                         }
                         let channel = new EPGChannel(
@@ -194,7 +224,8 @@ export default class TVHDataService {
                             tvhChannel.name,
                             tvhChannel.number,
                             tvhChannel.uuid,
-                            this.url + "stream/channel/" + tvhChannel.uuid + "?profile="+this.streamProfile
+                            //this.url + "stream/channel/" + tvhChannel.uuid + "?profile="+this.streamProfile
+                            this.url + "stream/channel/" + tvhChannel.uuid + "?profile=pass"
                         );
                         this.channelMap.set(tvhChannel.uuid, channel);
                         this.channels.push(channel);

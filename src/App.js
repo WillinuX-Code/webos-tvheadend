@@ -25,7 +25,7 @@ export default class App extends Component {
 
   async reloadData() {
     // load locale
-    await this.loadLocale();
+    this.loadLocale();
     // retrieve channel infos etc
     let channels = await this.tvhDataService.retrieveTVHChannels(0);
     this.epgData.updateChannels(channels); 

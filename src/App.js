@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import "babel-polyfill";
 import TVHDataService from './services/TVHDataService';
 import EPGData from './models/EPGData';
-import EPGUtils from './utils/EPGUtils';
 import TV from './components/TV';
 import './App.css';
 import TVHSettings from './components/TVHSettings';
@@ -14,34 +13,34 @@ export default class App extends Component {
     super(props);
 
     this.state = {
-      isSettingsState: true
+      isSettingsState: true,
+      lastEpgUpdate: 0
     };
 
     this.handleKeyPress = this.handleKeyPress.bind(this);
     this.handleUnmountSettings = this.handleUnmountSettings.bind(this);
     this.epgData = new EPGData();
-    this.epgUtils = new EPGUtils();
     this.imageCache = new Map();
   }
 
-  reloadData() {
-    this.tvhDataService.getLocaleInfo(res => {
-      console.log(res);
-      this.epgData.updateLanguage(res.settings.localeInfo.locales.UI);
-    });
-    this.tvhDataService.retrieveTVHChannels(0, channels => {
+  async reloadData() {
+    // load locale
+    await this.loadLocale();
+    // retrieve channel infos etc
+    let channels = await this.tvhDataService.retrieveTVHChannels(0);
+    this.epgData.updateChannels(channels); 
+    // preload images
+    this.preloadImages();
+    // force update to load/preload video already
+    this.forceUpdate();
+    // reetrievee epg and update channels
+    this.tvhDataService.retrieveTVHEPG(0, channels => {
       this.epgData.updateChannels(channels);
-      // preload image cache
-      this.preloadImages();
-      // reetrievee epg and update channels
-      this.tvhDataService.retrieveTVHEPG(0, channels => {
-        this.epgData.updateChannels(channels);
-      });
-      //this.recalculateAndRedraw(false);
     });
     this.tvhDataService.retrieveUpcomingRecordings(recordings => {
       this.epgData.updateRecordings(recordings);
     });
+     
   }
 
   handleUnmountSettings() {
@@ -56,14 +55,30 @@ export default class App extends Component {
       this.setState((state, props) => ({
         isSettingsState: true
       }));
-      return;
     }
   }
+
+  async loadLocale() {
+    try {
+      // retrieve local info
+      let localInfoResult = await this.tvhDataService.getLocaleInfo();
+      let locale = localInfoResult.settings.localeInfo.locales.UI;
+      // udpate epg
+      this.epgData.updateLanguage(locale);
+      console.log("Retrieved locale info:",locale);
+    } catch (error) {
+      console.log("Failed to retrieve locale info: ", error);
+    };
+  }
+
   /**
    * preload all images and set placeholders
    * if images cannot be loaded
    */
-  async preloadImages() {
+  preloadImages() {
+    if(!this.epgData.channels) {
+      return
+    }
     this.epgData.channels.forEach(channel => {
       let imageURL = channel.getImageURL();
       let img = new Image();

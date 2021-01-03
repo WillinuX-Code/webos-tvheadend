@@ -7,20 +7,24 @@ import '@procot/webostv/webOSTV';
  * - local + webos emulator => luna service bus
  */
 export default class LunaServiceAdapter {
-    call(method, params, onsuccess, onerror) {
-        console.log('lsa:%s start', method);
-        let lunareq = global.webOS.service.request('luna://com.willinux.tvh.app.proxy', {
-            method: method,
-            parameters: params,
-            onSuccess: function (res) {
-                onsuccess(res);
-            },
-            onFailure: function (res) {
-                onerror(res);
-            },
-            onComplete: function () {
-                console.log('lsa:%s end', method);
-            }
+    /**
+     * returns promise
+     * 
+     * @param {String} method 
+     * @param {Object} params 
+     */
+    call(method, params) {
+        return new Promise(function(resolve, reject) {
+            console.log('lsa:%s start', method);
+            let lunareq = global.webOS.service.request('luna://com.willinux.tvh.app.proxy', {
+                method: method,
+                parameters: params,
+                onSuccess: (res) => resolve(res),
+                onFailure: (res) => reject(res),
+                onComplete: function () {
+                    console.log('lsa:%s end', method);
+                }
+            });
         });
     }
 
@@ -43,18 +47,16 @@ export default class LunaServiceAdapter {
         });
     }
 
-    getLocaleInfo(onsuccess, onerror) {
-        let lunareq = global.webOS.service.request("luna://com.webos.settingsservice", {
-            method: "getSystemSettings",
-            parameters: {
-                "keys": ["localeInfo"]
-            },
-            onSuccess: function (res) {
-                onsuccess(res);
-            },
-            onFailure: function (res) {
-                onerror(res);
-            },
+    getLocaleInfo() {
+        return new Promise(function(resolve, reject) {
+            let lunareq = global.webOS.service.request("luna://com.webos.settingsservice", {
+                method: "getSystemSettings",
+                parameters: {
+                    "keys": ["localeInfo"]
+                },
+                onSuccess: (res) => resolve(res),
+                onFailure: (res) => reject(res)
+            });
         });
     }
 }

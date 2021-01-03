@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
-import { Input, SIZE } from "baseui/input";
 import { Button, KIND } from "baseui/button";
+import { Input, SIZE } from "baseui/input";
+import React, { Component } from 'react';
 import TVHDataService from '../services/TVHDataService';
 //import '../styles/app.css';
 
@@ -14,6 +14,8 @@ export default class TVHSettings extends Component {
         this.state = {
             tvhUrl: "http://",
             streamProfile: "pass",
+            tvChannelTagUuid: "",
+            dvrConfigUuid: "",
             isValid: false,
             isLoading: false
             // TODO user password
@@ -44,32 +46,43 @@ export default class TVHSettings extends Component {
         }));
     }
 
-    handleConnectionTest(event) {
+    async handleConnectionTest(event) {
         event.preventDefault();
         this.setState((state, props) => ({
             isLoading: true
         }));
         //test url verify if it works
-        new TVHDataService(this.state).retrieveServerInfo((result) => {
-            this.testResult = "Connected to version: " + result.sw_version;
+        let service = new TVHDataService(this.state);
+        try {
+            // retrieve server info
+            let serverInfoResult = await service.retrieveServerInfo();
+            this.testResult = "Connected to version: " + serverInfoResult.result.sw_version;
+            // retrieve channel tags
+            let tvChannelTagUuid = await service.retrieveTvChannelTag();
+            // retrieve the default dvr config
+            let dvrConfigUuid = await service.retrieveDVRConfig();
+            // state update
             this.setState((state, props) => ({
+                tvChannelTagUuid: tvChannelTagUuid,
+                dvrConfigUuid: dvrConfigUuid,
                 isLoading: false
             }))
             // put to storage
             localStorage.setItem(TVHSettings.STORAGE_TVH_SETTING_KEY, JSON.stringify({
                 tvhUrl: this.state.tvhUrl,
                 streamProfile: this.state.streamProfile,
+                tvChannelTagUuid: this.state.tvChannelTagUuid,
+                dvrConfigUuid: this.state.dvrConfigUuid,
                 isValid: true
             }));
             // unmount
             setTimeout(this.props.handleUnmountSettings, 2000);
-        },
-            (error) => {
-                this.testResult = "Failed to connect: "+error.errorText;
-                this.setState((state, props) => ({
-                    isLoading: false
-                }))
-            });
+        } catch(error) {
+            this.testResult = "Failed to connect: " + (error.errorText ? error.errorText: error);
+            this.setState((state, props) => ({
+                isLoading: false
+            }));
+        }
     }
 
     componentDidMount() {
@@ -83,6 +96,7 @@ export default class TVHSettings extends Component {
     }
 
     componentDidUpdate(prevProps) {
+
     }
 
     componentWillUnmount() {

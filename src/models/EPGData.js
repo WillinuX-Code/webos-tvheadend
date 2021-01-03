@@ -98,10 +98,6 @@ export default class EPGData {
         this.lang = lang;
     }
 
-    updateTimezone(timezone) {
-
-    }
-
     getLocale() {
         return this.lang;
     }

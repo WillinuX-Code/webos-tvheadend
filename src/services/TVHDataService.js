@@ -19,109 +19,80 @@ export default class TVHDataService {
         this.maxTotalEpgEntries = 10000;
         this.url = settings.tvhUrl;
         // append trailing slash if it doesn't exist
-        if(!this.url.endsWith("/")) {
-           this.url += "/";
+        if (!this.url.endsWith("/")) {
+            this.url += "/";
         }
         this.profile = settings.streamProfile;
+        this.dvrUuid = settings.dvrConfigUuid;
+        this.tvChannelUuid = settings.tvChannelTagUuid;
         this.channels = [];
         this.channelMap = new Map();
-        this.dvrUuid = "";
-        this.tvChannelUUID = "";
-        // TODO store information
-        // retrieve channel tags
-        this.retrieveChannelTags(tvChannelUUID => {
-            this.tvChannelUUID = tvChannelUUID;
-        });
-        // retrieve the default dvr config
-        this.retrieveDVRConfig(dvrUuid => {
-            this.dvrUuid = dvrUuid;
-        });
     }
 
     /**
      * retrieve local information from tv
      */
-    async getLocaleInfo(callback) {
-        this.serviceAdapter.getLocaleInfo(
-            // on success
-            callback,
-            // on error
-            (res) => {
-                console.log(res);
-            });
+    async getLocaleInfo() {
+        let localeInfo = await this.serviceAdapter.getLocaleInfo();
+        // console.log("getLocaleInfo:", localeInfo);
+        return localeInfo;
     }
 
     /**
      * retrieve tvh server info
-     * 
-     * @param {Function} callback 
      */
-    retrieveServerInfo(successCallback, errorCallback) {
+    async retrieveServerInfo() {
         // now create rec by event
-        this.serviceAdapter.call("proxy", {
+        return this.serviceAdapter.call("proxy", {
             "url": this.url + TVHDataService.API_SERVER_INFO
-        },
-            success => {
-                console.log("retrieved server info: %s", success.result.sw_version)
-                successCallback(success.result);
-            },
-            error => {
-                console.log("Failed to retrieve server info: ", JSON.stringify(error))
-                errorCallback(error);
-            });
+        });
     }
 
     createRec(event, callback) {
         // now create rec by event
         this.serviceAdapter.call("proxy", {
             "url": this.url + TVHDataService.API_DVR_CREATE_BY_EVENT + "event_id=" + event.getId() + "&config_uuid=" + this.dvrUuid + "&comment=webos-tvheadend"
-        },
-            success => {
-                console.log("created record: %s", success.result.total)
-                // toast information
-                this.serviceAdapter.toast("Added DVR entry: " + event.getTitle())
-                // update upcoming recordings
-                this.retrieveUpcomingRecordings(callback);
-            },
-            error => {
-                console.log("Failed to create entry by eventid: ", JSON.stringify(error))
-            });
+        }).then(success => {
+            console.log("created record: %s", success.result.total)
+            // toast information
+            this.serviceAdapter.toast("Added DVR entry: " + event.getTitle())
+            // update upcoming recordings
+            this.retrieveUpcomingRecordings(callback);
+        }).catch(error => {
+            console.log("Failed to create entry by eventid: ", JSON.stringify(error))
+        });
     }
 
     cancelRec(event, callback) {
         // now create rec by event
         this.serviceAdapter.call("proxy", {
             "url": this.url + TVHDataService.API_DVR_CANCEL + event.getId()
-        },
-            success => {
-                console.log("created record: %s", success.result.total)
-                // toast information
-                this.serviceAdapter.toast("Cancelled DVR entry: " + event.getTitle())
-                // update upcoming recordings
-                this.retrieveUpcomingRecordings(callback);
-            },
-            error => {
-                console.log("Failed to cancel entry: ", JSON.stringify(error))
-            });
+        }).then(success => {
+            console.log("created record: %s", success.result.total)
+            // toast information
+            this.serviceAdapter.toast("Cancelled DVR entry: " + event.getTitle())
+            // update upcoming recordings
+            this.retrieveUpcomingRecordings(callback);
+        }).catch(error => {
+            console.log("Failed to cancel entry: ", JSON.stringify(error))
+        });
     }
 
-    async retrieveUpcomingRecordings(callback) {
+    retrieveUpcomingRecordings(callback) {
         // now create rec by event
         this.serviceAdapter.call("proxy", {
             "url": this.url + TVHDataService.API_DVR_UPCOMING
-        },
-            success => {
-                console.log("retrieved upcoming records: %s", success.result.total)
-                let recordings = [];
-                // update upcoming recordings
-                success.result.entries.forEach(tvhEvent => {
-                    recordings.push(this.toEpgEventRec(tvhEvent));
-                });
-                callback(recordings);
-            },
-            error => {
-                console.log("Failed to retrieve recordings: ", JSON.stringify(error))
+        }).then(success => {
+            console.log("retrieved upcoming records: %s", success.result.total)
+            let recordings = [];
+            // update upcoming recordings
+            success.result.entries.forEach(tvhEvent => {
+                recordings.push(this.toEpgEventRec(tvhEvent));
             });
+            callback(recordings);
+        }).catch(error => {
+            console.log("Failed to retrieve recordings: ", JSON.stringify(error))
+        });
     }
 
     toEpgEvent(tvhEvent) {
@@ -148,135 +119,111 @@ export default class TVHDataService {
         )
     }
 
-    retrieveChannelTags(callback) {
+    /**
+     * return the channel tag reference for "TV Channels"
+     */
+    async retrieveTvChannelTag() {
         // retrieve the default dvr config
-        this.serviceAdapter.call("proxy", {
+        let responsePromise = await this.serviceAdapter.call("proxy", {
             "url": this.url + TVHDataService.API_CHANNEL_TAGS
-        },
-            success => {
-                console.log("channel tags received: %d", success.result.total)
-                // get default config -> name = ""
-                if (success.result.entries.length > 0) {
-                    let tvChannelsUUid = "";
-                    success.result.entries.forEach((entry) => {
-                        if (entry.val === "TV channels") {
-                            tvChannelsUUid = entry.key;
-                            return;
-                        }
-                    });
-                    callback(tvChannelsUUid);
-                }
-            },
-            error => {
-                console.log("Failed to retrieve channel tags: ", JSON.stringify(error))
+        });
+        // return tv channels tag
+        for (var i = 0; i < responsePromise.result.entries.length; i++) {
+            if (responsePromise.result.entries[i].val === "TV channels") {
+                console.log("TV Channel Tag:", responsePromise.result.entries[i].key);
+                return responsePromise.result.entries[i].key;
             }
-        );
+        };
     }
 
-    retrieveDVRConfig(callback) {
+    async retrieveDVRConfig() {
         // retrieve the default dvr config
         this.serviceAdapter.call("proxy", {
             "url": this.url + TVHDataService.API_DVR_CONFIG
-        },
-            success => {
-                console.log("dvr configs received: %d", success.result.total)
-                // get default config -> name = ""
-                if (success.result.entries.length > 0) {
-                    let dvrConfigUuid = "";
-                    success.result.entries.forEach((entry) => {
-                        if (entry.name === "") {
-                            dvrConfigUuid = entry.uuid;
-                            return;
-                        }
-                    });
-                    // if no default config we use the first entry
-                    if (dvrConfigUuid === "") {
-                        dvrConfigUuid = success.result.entries[0].uuid;
-                    }
-                    callback(dvrConfigUuid);
+        }).then((success) => {
+            console.log("dvr configs received: %d", success.result.total)
+            // get default config -> name = ""
+            for (var i = 0; i < success.result.entries.length; i++) {
+                if (success.result.entries[i].name === "") {
+                    return success.result.entries[i].uuid;
                 }
-            },
-            error => {
-                console.log("Failed to retrieve dvr config: ", JSON.stringify(error))
             }
-        );
+            // if no default config we use the first entry
+            return success.result.entries[0].uuid;
+        }).catch(error => {
+            console.log("Failed to retrieve dvr config: ", JSON.stringify(error))
+        });
     }
 
-    retrieveTVHChannels(start, callback) {
+    async retrieveTVHChannels(start) {
         // after we set the base url we retrieve channels async
         let totalCount = 0;
-        this.serviceAdapter.call("proxy", {
-            "url": this.url + TVHDataService.API_INITIAL_CHANNELS + start
-        },
-            success => {
-                console.log("channels received: %d of %d", start + success.result.entries.length, success.result.total)
-                if (success.result.entries.length > 0) {
-                    totalCount = success.result.total;
-                    success.result.entries.forEach((tvhChannel) => {
-                        start++;
-                        // check if channel contains is a tvchannel
-                        if (!tvhChannel.tags.includes(this.tvChannelUUID)) {
-                            return;
-                        }
-                        let channel = new EPGChannel(
-                            // complete icon url
-                            this.url + tvhChannel.icon_public_url,
-                            tvhChannel.name,
-                            tvhChannel.number,
-                            tvhChannel.uuid,
-                            //this.url + "stream/channel/" + tvhChannel.uuid + "?profile="+this.streamProfile
-                            this.url + "stream/channel/" + tvhChannel.uuid + "?profile=pass"
-                        );
-                        this.channelMap.set(tvhChannel.uuid, channel);
-                        this.channels.push(channel);
-                    });
-                }
-                // retrieve next increment
-                if (totalCount > start) {
-                    this.retrieveTVHChannels(start, callback);
-                    return;
-                }
-
-                callback(this.channels);
-                console.log("processed all channels %d", this.channels.length);
-            },
-            error => {
-                console.log("Failed to retrieve channel data: ", JSON.stringify(error))
+        try {
+            let success = await this.serviceAdapter.call("proxy", {
+                "url": this.url + TVHDataService.API_INITIAL_CHANNELS + start
+            });
+            console.log("channels received: %d of %d", start + success.result.entries.length, success.result.total)
+            if (success.result.entries.length > 0) {
+                totalCount = success.result.total;
+                success.result.entries.forEach((tvhChannel) => {
+                    start++;
+                    // check if channel contains is a tvchannel
+                    if (!tvhChannel.tags.includes(this.tvChannelUuid)) {
+                        return;
+                    }
+                    let channel = new EPGChannel(
+                        // complete icon url
+                        this.url + tvhChannel.icon_public_url,
+                        tvhChannel.name,
+                        tvhChannel.number,
+                        tvhChannel.uuid,
+                        //this.url + "stream/channel/" + tvhChannel.uuid + "?profile="+this.streamProfile
+                        this.url + "stream/channel/" + tvhChannel.uuid + "?profile=pass"
+                    );
+                    this.channelMap.set(tvhChannel.uuid, channel);
+                    this.channels.push(channel);
+                });
             }
-        );
+            // retrieve next increment
+            if (totalCount > start) {
+                this.retrieveTVHChannels(start);
+                return this.channels;
+            }
+            console.log("processed all channels %d", this.channels.length);
+            return this.channels;
+        } catch (error) {
+            console.log("Failed to retrieve channel data: ", JSON.stringify(error))
+        };
     }
 
-    async retrieveTVHEPG(start, callback) {
+    retrieveTVHEPG(start, callback) {
         let totalCount = 0;
 
         this.serviceAdapter.call("proxy", {
             "url": this.url + TVHDataService.API_EPG + start
-        },
-            success => {
-                console.log("epg events received: %d of %d", start + success.result.entries.length, success.result.totalCount)
-                if (success.result.entries.length > 0) {
-                    totalCount = success.result.totalCount;
-                    success.result.entries.forEach((tvhEvent) => {
-                        start++;
-                        let channel = this.channelMap.get(tvhEvent.channelUuid);
-                        if (channel) {
-                            channel.addEvent(this.toEpgEvent(tvhEvent));
-                        }
-                    });
-                }
-                // notify calling component
-                callback(this.channels);
-                // retrieve next increment
-                if (start < this.maxTotalEpgEntries && totalCount > start) {
-                    this.retrieveTVHEPG(start, callback);
-                    return;
-                }
-                console.log("processed all epg events");
-
-            },
-            error => {
-                console.log("Failed to retrieve epg data: ", JSON.stringify(error))
+        }).then(success => {
+            console.log("epg events received: %d of %d", start + success.result.entries.length, success.result.totalCount)
+            if (success.result.entries.length > 0) {
+                totalCount = success.result.totalCount;
+                success.result.entries.forEach((tvhEvent) => {
+                    start++;
+                    let channel = this.channelMap.get(tvhEvent.channelUuid);
+                    if (channel) {
+                        channel.addEvent(this.toEpgEvent(tvhEvent));
+                    }
+                });
             }
-        );
+            // notify calling component
+            callback(this.channels);
+            // retrieve next increment
+            if (start < this.maxTotalEpgEntries && totalCount > start) {
+                this.retrieveTVHEPG(start, callback);
+                return;
+            }
+            console.log("processed all epg events");
+
+        }).catch(error => {
+            console.log("Failed to retrieve epg data: ", JSON.stringify(error))
+        });
     }
 }

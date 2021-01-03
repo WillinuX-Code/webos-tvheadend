@@ -17,7 +17,7 @@ export default class ChannelList extends Component {
         this.imageCache = props.imageCache;
         this.channelPosition = props.channelPosition;
         this.scrollY = 0;
-        this.epgUtils = new EPGUtils();
+        this.epgUtils = new EPGUtils(this.epgData.getLocale());
         this.canvasUtils = new CanvasUtils();
         this.mMaxVerticalScroll = 0;
 

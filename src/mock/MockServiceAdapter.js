@@ -9,23 +9,24 @@ import channelTagsMock from './channelTags.json';
  * - local + webos emulator => luna service bus
  */
 export default class MockServiceAdapter {
-    call(method, params, onsuccess, onerror) {
+
+    async call(method, params) {
         console.log('lsa:%s start', method);
         let url = params.url;
-        if(url.includes('api/channel/grid')) {
-            onsuccess(channelMock);
+        if (url.includes('api/channel/grid')) {
+            return channelMock;
         }
-        else if(url.includes('api/epg/events/grid')) {
-            onsuccess(epgMock);
-        } 
-        else if(url.includes('api/dvr/entry/grid_upcoming')) {
-            onsuccess(recordingMock);
-        } 
+        else if (url.includes('api/epg/events/grid')) {
+            return epgMock;
+        }
+        else if (url.includes('api/dvr/entry/grid_upcoming')) {
+            return recordingMock;
+        }
         else if (url.includes('api/channeltag/list')) {
-            onsuccess(channelTagsMock);
+            return channelTagsMock;
         }
-        else if(url.includes('api/dvr/config/grid')) {
-            onsuccess({
+        else if (url.includes('api/dvr/config/grid')) {
+            return {
                 returnValue: true,
                 result: {
                     total: 1,
@@ -35,52 +36,52 @@ export default class MockServiceAdapter {
                         }
                     ]
                 }
-            });
-        } 
-        else if(url.includes('/api/serverinfo')) {
-            onsuccess({
+            };
+        }
+        else if (url.includes('/api/serverinfo')) {
+            return {
                 returnValue: true,
                 result: {
                     "sw_version": "4.3-1919~g52b255940",
                     "api_version": 19,
                     "name": "Tvheadend",
                     "capabilities": [
-                      "caclient",
-                      "tvadapters",
-                      "satip_client",
-                      "satip_server",
-                      "timeshift",
-                      "trace",
-                      "libav",
-                      "caclient_advanced"
+                        "caclient",
+                        "tvadapters",
+                        "satip_client",
+                        "satip_server",
+                        "timeshift",
+                        "trace",
+                        "libav",
+                        "caclient_advanced"
                     ]
-                  }
-            });
+                }
+            };
         }
         else {
-            onerror({"returnValue": false, "errorText": "Unknown url "+url});
+            return { "returnValue": false, "errorText": "Unknown url " + url };
         }
         console.log('lsa:%s end', method);
     }
 
     toast(message, onsuccess, onerror) {
         console.log('lsa:toast start');
-       
+
         onsuccess({
             returnValue: true
         });
     }
 
-    getLocaleInfo(onsuccess) {
-        onsuccess({
+    async getLocaleInfo() {
+        return {
             returnValue: true,
             settings: {
                 localeInfo: {
-                    locales: [{
-                        UI: "de_DE"
-                    }]
+                    locales: {
+                        UI: "de-DE"
+                    }
                 }
             }
-        });
+        }
     }
 }

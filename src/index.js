@@ -1,29 +1,41 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
-import {Client as Styletron} from 'styletron-engine-atomic';
-import {Provider as StyletronProvider} from 'styletron-react';
-import {LightTheme, BaseProvider, styled} from 'baseui';
+import AppContent from './App';
+import kind from "@enact/core/kind";
+import MoonstoneDecorator from "@enact/moonstone/MoonstoneDecorator";
+
+// import {Client as Styletron} from 'styletron-engine-atomic';
+// import {Provider as StyletronProvider} from 'styletron-react';
+// import {LightTheme, BaseProvider, styled} from 'baseui';
 //import reportWebVitals from './reportWebVitals';
 
-const engine = new Styletron();
-const Centered = styled('div', {
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  height: '100%',
+// const engine = new Styletron();
+// const Centered = styled('div', {
+//   display: 'flex',
+//   justifyContent: 'center',
+//   alignItems: 'center',
+//   height: '100%',
+// });
+
+const AppBase = kind({
+  name: "App",
+  /*styles: {
+    className: "app",
+    css: "./App.css"
+  },*/
+  render: props => {
+    return (
+      <AppContent />
+    );
+  }
 });
+
+const App = MoonstoneDecorator(AppBase);
 
 ReactDOM.render(
   <React.StrictMode>
-      <StyletronProvider value={engine}>
-      <BaseProvider theme={LightTheme}>
-        <Centered>
-          <App />
-        </Centered>
-      </BaseProvider>
-    </StyletronProvider> 
+    <App />
   </React.StrictMode>,
   document.getElementById('root')
 );

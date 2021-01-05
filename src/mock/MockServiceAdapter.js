@@ -29,10 +29,17 @@ export default class MockServiceAdapter {
             return {
                 returnValue: true,
                 result: {
-                    total: 1,
+                    total: 2,
                     entries: [
                         {
-                            uuid: "somefakeUuid"
+                            uuid: "somefakeUuid",
+                            enabled: true,
+                            name: ""
+                        },
+                        {
+                            uuid: "anotherDisabledOne",
+                            enabled: false,
+                            name: "aName",
                         }
                     ]
                 }
@@ -58,6 +65,28 @@ export default class MockServiceAdapter {
                 }
             };
         }
+        else if (url.includes('/api/profile/list')) {
+            return {
+                returnValue: true,
+                result: {
+                    "entries": [
+                        {
+                            "key": "37e63ea3fcda682086adaab175dde991",
+                            "val": "pass"
+                        },
+                        {
+                            "val": "matroska",
+                            "key": "03663b00383b34a6ce2a621733388bf5"
+                        },
+                        {
+                            "val": "webtv-h264-aac-mpegts",
+                            "key": "b90da9e0bc0633515b261714a966910d"
+                        }
+                    ]
+                }
+            }
+        }
+
         else {
             return { "returnValue": false, "errorText": "Unknown url " + url };
         }

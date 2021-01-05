@@ -5,6 +5,7 @@ import EPGEvent from "../models/EPGEvent";
 
 export default class TVHDataService {
     static API_SERVER_INFO = "api/serverinfo";
+    static API_PROFILE_LIST = "api/profile/list";
     static API_CHANNEL_TAGS = "api/channeltag/list";
     static API_INITIAL_CHANNELS = "api/channel/grid?dir=ASC&sort=number&start=";
     static API_EPG = "api/epg/events/grid?dir=ASC&sort=start&limit=500&start=";
@@ -22,7 +23,7 @@ export default class TVHDataService {
         if (!this.url.endsWith("/")) {
             this.url += "/";
         }
-        this.profile = settings.streamProfile;
+        this.profile = settings.selectedProfile;
         this.dvrUuid = settings.dvrConfigUuid;
         this.tvChannelUuid = settings.tvChannelTagUuid;
         this.channels = [];
@@ -45,6 +46,15 @@ export default class TVHDataService {
         // now create rec by event
         return this.serviceAdapter.call("proxy", {
             "url": this.url + TVHDataService.API_SERVER_INFO
+        });
+    }
+
+    /**
+     * retrieve the stream profile list
+     */
+    async retrieveProfileList() {
+        return this.serviceAdapter.call("proxy", {
+            "url": this.url + TVHDataService.API_PROFILE_LIST
         });
     }
 
@@ -142,7 +152,13 @@ export default class TVHDataService {
             "url": this.url + TVHDataService.API_DVR_CONFIG
         }).then((success) => {
             console.log("dvr configs received: %d", success.result.total)
-            // get default config -> name = ""
+            // try first enabled
+            for (var i = 0; i < success.result.entries.length; i++) {
+                if (success.result.entries[i].enabled) {
+                    return success.result.entries[i].uuid;
+                }
+            }
+            // try default config -> name = ""
             for (var i = 0; i < success.result.entries.length; i++) {
                 if (success.result.entries[i].name === "") {
                     return success.result.entries[i].uuid;
@@ -177,8 +193,7 @@ export default class TVHDataService {
                         tvhChannel.name,
                         tvhChannel.number,
                         tvhChannel.uuid,
-                        //this.url + "stream/channel/" + tvhChannel.uuid + "?profile="+this.streamProfile
-                        this.url + "stream/channel/" + tvhChannel.uuid + "?profile=pass"
+                        this.url + "stream/channel/" + tvhChannel.uuid + (this.profile ? "?profile="+this.profile : "")
                     );
                     this.channelMap.set(tvhChannel.uuid, channel);
                     this.channels.push(channel);
@@ -186,7 +201,7 @@ export default class TVHDataService {
             }
             // retrieve next increment
             if (totalCount > start) {
-                this.retrieveTVHChannels(start);
+                await this.retrieveTVHChannels(start);
                 return this.channels;
             }
             console.log("processed all channels %d", this.channels.length);

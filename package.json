@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "./",
   "dependencies": {
+    "@enact/moonstone": "^3.3.1",
     "@procot/webostv": "^1.2.2",
     "babel-polyfill": "^6.26.0",
     "baseui": "^9.106.3",

@@ -123,10 +123,10 @@ export default class ChannelList extends Component {
         // Create gradient
         var grd = canvas.createLinearGradient(drawingRect.bottom, drawingRect.top, drawingRect.bottom, drawingRect.bottom);
         // Important bit here is to use rgba()
-        grd.addColorStop(0, "rgba(35, 64, 84, 0.6)");
-        grd.addColorStop(0.1, "rgba(35, 64, 84, 0.9)");
-        grd.addColorStop(0.9, "rgba(35, 64, 84, 0.9)");
-        grd.addColorStop(1, 'rgba(35, 64, 84, 0.6)');
+        grd.addColorStop(0, "rgba(11, 39, 58, 0.7)");
+        grd.addColorStop(0.2, "rgba(35, 64, 84, 0.9)");
+        grd.addColorStop(0.8, "rgba(35, 64, 84, 0.9)");
+        grd.addColorStop(1, 'rgba(11, 39, 58, 0.7)');
 
         // Fill with gradient
         canvas.fillStyle = grd;
@@ -138,15 +138,15 @@ export default class ChannelList extends Component {
         //console.log("Channel: First: " + firstPos + " Last: " + lastPos);
         let transparentTop = firstPos + 3;
         let transparentBottom = lastPos - 3;
-        canvas.globalAlpha = 0.0;
+        canvas.globalAlpha = 1.0;
         for (let pos = firstPos; pos < lastPos; pos++) {
-            if (pos <= transparentTop) {
-                canvas.globalAlpha += 0.25;
-            } else if (pos >= transparentBottom) {
-                canvas.globalAlpha -= 0.25;
-            } else {
-                canvas.globalAlpha = 1;
-            }
+            // if (pos <= transparentTop) {
+            //     canvas.globalAlpha += 0.25;
+            // } else if (pos >= transparentBottom) {
+            //     canvas.globalAlpha -= 0.25;
+            // } else {
+            //     canvas.globalAlpha = 1;
+            // }
             this.drawChannelItem(canvas, pos, drawingRect);
         }
     }

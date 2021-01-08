@@ -3,6 +3,7 @@ import ChannelInfo from './ChannelInfo';
 import TVGuide from './TVGuide';
 import ChannelList from './ChannelList';
 import ChannelSettings from './ChannelSettings';
+import EPGUtils from '../utils/EPGUtils';
 import '../styles/app.css';
 
 export default class TV extends Component {
@@ -28,7 +29,9 @@ export default class TV extends Component {
         this.handleKeyPress = this.handleKeyPress.bind(this);
         this.stateUpdateHandler = this.stateUpdateHandler.bind(this);
 
+        this.tvhService = props.tvhService;
         this.epgData = props.epgData;
+        this.epgUtils = new EPGUtils();
         this.imageCache = props.imageCache;
     }
 
@@ -159,30 +162,36 @@ export default class TV extends Component {
                     isChannelSettingsState: !this.state.isChannelSettingsState
                 });
                 break;
-            case 403: // red button trigger recording
+            case 403: // red button to trigger or cancel recording
                 event.stopPropagation();
                 // add current viewing channel to records
-                // red button to trigger or cancel recording
                 // get current event
-                //this.focusedEvent = this.epgData.getEvent(channelPosition, programPosition);
-                // if (this.focusedEvent.isPastDated(this.getNow())) {
-                //   // past dated do nothing
-                //   return;
-                // }
-                // // check if event is already marked for recording
-                // let recEvent = this.epgData.getRecording(this.focusedEvent);
-                // if (recEvent) {
-                //   // cancel recording
-                //   this.tvhDataService.cancelRec(recEvent, recordings => {
-                //     this.epgData.updateRecordings(recordings);
-                //     this.updateCanvas();
-                //   });
-                // } else { // creat new recording from event
-                //   this.tvhDataService.createRec(this.focusedEvent, recordings => {
-                //     this.epgData.updateRecordings(recordings);
-                //     this.updateCanvas();
-                //   });
-                // }
+                let channel = this.getCurrentChannel()
+                let epgEvent = {};
+                for (let e of channel.getEvents()) {
+                    if (e.isCurrent()) {
+                        epgEvent = e;
+                        break;
+                    }
+                };
+                if (epgEvent.isPastDated(this.epgUtils.getNow())) {
+                    // past dated do nothing
+                    return;
+                }
+                // check if event is already marked for recording
+                let recEvent = this.epgData.getRecording(epgEvent);
+                if (recEvent) {
+                    // cancel recording
+                    this.tvhService.cancelRec(recEvent, recordings => {
+                        this.epgData.updateRecordings(recordings);
+                        this.updateCanvas();
+                    });
+                } else { // creat new recording from event
+                    this.tvhService.createRec(epgEvent, recordings => {
+                        this.epgData.updateRecordings(recordings);
+                        this.updateCanvas();
+                    });
+                }
                 break;
             default:
                 console.log("TV-keyPressed:", keyCode);
@@ -196,7 +205,7 @@ export default class TV extends Component {
     changeChannelPosition(channelPosition) {
         if (channelPosition === this.state.channelPosition) {
             return;
-        }
+        } 
         this.setState((state, props) => ({
             isInfoState: true,
             channelPosition: channelPosition
@@ -214,7 +223,7 @@ export default class TV extends Component {
             let indexStr = localStorage.getItem(this.getCurrentChannel().getName());
             if (indexStr !== undefined) {
                 let index = parseInt(indexStr);
-                console.log("restore index %d for channel %s",index,this.getCurrentChannel().getName());
+                console.log("restore index %d for channel %s", index, this.getCurrentChannel().getName());
                 if (index < videoElement.audioTracks.length) {
                     for (let i = 0; i < videoElement.audioTracks.length; i++) {
                         if (videoElement.audioTracks[i].enabled === true && i === index) {
@@ -229,7 +238,7 @@ export default class TV extends Component {
                     }
                 }
             }
-            
+
             this.stateUpdateHandler({
                 audioTracks: videoElement.audioTracks,
                 textTracks: videoElement.textTracks

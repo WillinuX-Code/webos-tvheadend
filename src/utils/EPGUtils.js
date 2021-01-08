@@ -4,7 +4,7 @@
 export default class EPGUtils {
 
     constructor(locale) {
-        this.locale = locale;
+        this.locale = locale || "en-US";
     }
 
     getWeekdayName(dateMillis) {

@@ -179,7 +179,7 @@ function handleVisibilityChange() {
           <TVHSettings handleUnmountSettings={this.handleUnmountSettings} />}
 
         {!this.state.isSettingsState &&
-          <TV ref="tv" epgData={this.epgData} imageCache={this.imageCache} />}
+          <TV ref="tv" tvhService={this.tvhDataService} epgData={this.epgData} imageCache={this.imageCache} />}
       </div>
     );
   }

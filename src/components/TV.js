@@ -18,7 +18,7 @@ export default class TV extends Component {
             isInfoState: true,
             isEpgState: false,
             isChannelListState: false,
-            channelPosition: localStorage.getItem(TV.STORAGE_KEY_LAST_CHANNEL) || 0,
+            channelPosition: 0,
             // audioTracks: [
             //     {enabled:true,id:1,language:"de"},
             //     {enabled:true,id:2,language:"mis"},
@@ -38,13 +38,14 @@ export default class TV extends Component {
     }
 
     componentDidMount() {
+        // read last channel position from storage
+        let lastChannelPosition = localStorage.getItem(TV.STORAGE_KEY_LAST_CHANNEL);
+        //console.log("Last Channel position:", lastChannelPosition);
+        if(lastChannelPosition) {
+            this.changeChannelPosition(parseInt(lastChannelPosition));
+        }
         // init video element
         this.initVideoElement();
-        // activate video on mount
-        //if (this.epgData.getChannelCount() > 0 && !this.getMediaElement().hasChildNodes()) {
-        //this.changeSource(this.epgData.getChannel(this.state.channelPosition).getStreamUrl());
-        //}
-
         this.focus();
     }
     getWidth() {
@@ -215,7 +216,7 @@ export default class TV extends Component {
             channelPosition: channelPosition
         }));
         // store last used channel
-        localStorage.setItem(TV.STORAGE_KEY_LAST_CHANNEL, channelPosition);
+        localStorage.setItem(TV.STORAGE_KEY_LAST_CHANNEL, channelPosition.toString());
     }
 
     initVideoElement() {

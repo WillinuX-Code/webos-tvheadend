@@ -18,8 +18,9 @@ export default class ChannelInfo extends Component {
         this.canvasUtils = new CanvasUtils();
 
         this.mChannelInfoHeight = 150;
-        this.mChannelInfoTitleSize = 36;
+        this.mChannelInfoTitleSize = 42;
         this.mChannelLayoutTextColor = '#d6d6d6';
+        this.mChannelLayoutTitleTextColor = '#969696';
         this.mChannelInfoTimeBoxWidth = 200;
         //this.mChannelLayoutTitleTextColor = '#c6c6c6';
         this.mChannelLayoutMargin = 3;
@@ -45,7 +46,7 @@ export default class ChannelInfo extends Component {
                 });
                 break;
         }
-        
+
     };
 
     drawChannelInfo(canvas) {
@@ -61,15 +62,16 @@ export default class ChannelInfo extends Component {
         //mPaint.setColor(mChannelLayoutBackground);
         // canvas.fillStyle = this.mChannelLayoutBackground;
         // Create gradient
-        var grd = canvas.createLinearGradient(drawingRect.top, drawingRect.top, drawingRect.top, drawingRect.bottom);
+        var grd = canvas.createLinearGradient(drawingRect.left, drawingRect.left, drawingRect.right, drawingRect.left);
         // Important bit here is to use rgba()
-        grd.addColorStop(0, "rgba(35, 64, 84, 0.0)");
-        grd.addColorStop(0.5, "rgba(35, 64, 84, 0.5)");
-        grd.addColorStop(0.9, "rgba(35, 64, 84, 1.0)");
-        //grd.addColorStop(1, 'rgba(35, 64, 84, 1.0)');
+        grd.addColorStop(0, "rgba(11, 39, 58, 0.7)");
+        grd.addColorStop(0.4, "rgba(35, 64, 84, 0.9)");
+        grd.addColorStop(0.6, "rgba(35, 64, 84, 0.9)");
+        grd.addColorStop(1, 'rgba(11, 39, 58, 0.7)');
 
         // Fill with gradient
         canvas.fillStyle = grd;
+        //canvas.fillStyle = "rgba(40, 40, 40, 0.7)";
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.bottom);
 
         //console.log("Channel: First: " + firstPos + " Last: " + lastPos);
@@ -80,7 +82,7 @@ export default class ChannelInfo extends Component {
 
 
         let channel = this.epgData.getChannel(this.channelPosition);
-        
+
         // channel number
         //canvas.strokeStyle = ;
         // drawingRect.top = 70;
@@ -111,7 +113,7 @@ export default class ChannelInfo extends Component {
             drawingRect = this.getDrawingRectForChannelImage(drawingRect, image);
             canvas.drawImage(image, drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
         }
-        
+
         // channel event
         drawingRect.left += drawingRect.right + 20;
         drawingRect.right = this.getWidth();
@@ -125,42 +127,43 @@ export default class ChannelInfo extends Component {
                 currentEvent = event;
                 continue;
             }
-            if(currentEvent !== undefined) {
+            if (currentEvent !== undefined) {
                 nextEvent = event;
                 break;
             }
         };
-        if(currentEvent !== undefined) {
+        if (currentEvent !== undefined) {
             let left = drawingRect.left;
             drawingRect.right -= this.mChannelInfoTimeBoxWidth;
             // draw current event
             canvas.fillText(this.canvasUtils.getShortenedText(canvas, currentEvent.getTitle(), drawingRect),
-                        drawingRect.left, drawingRect.top);
-            
+                drawingRect.left, drawingRect.top);
+
             drawingRect.right += this.mChannelInfoTimeBoxWidth;
             drawingRect.left = drawingRect.right - this.mChannelLayoutPadding - 20;
             canvas.textAlign = 'right';
             canvas.fillText(this.epgUtils.toTimeFrameString(currentEvent.getStart(), currentEvent.getEnd()),
-                    drawingRect.left, drawingRect.top);
+                drawingRect.left, drawingRect.top);
             canvas.textAlign = 'left';
             // draw subtitle event
-            canvas.font = this.mChannelInfoTitleSize - 10 + "px Arial";
-            drawingRect.top += this.mChannelInfoTitleSize + this.mChannelLayoutPadding;  
-            if(currentEvent.getSubTitle() !== undefined) {
+            canvas.font = "bold "+(this.mChannelInfoTitleSize - 8) + "px Arial";
+            drawingRect.top += this.mChannelInfoTitleSize + this.mChannelLayoutPadding;
+            if (currentEvent.getSubTitle() !== undefined) {
                 drawingRect.left = left;
                 drawingRect.right -= this.mChannelInfoTimeBoxWidth;
+                canvas.fillStyle = this.mChannelLayoutTitleTextColor;
                 canvas.fillText(this.canvasUtils.getShortenedText(canvas, currentEvent.getSubTitle(), drawingRect),
                     drawingRect.left, drawingRect.top);
 
                 drawingRect.right += this.mChannelInfoTimeBoxWidth;
 
-            }       
+            }
             // draw current time in programm as well as overall durations
-            
+
             drawingRect.left = drawingRect.right - this.mChannelLayoutPadding - 20;
             canvas.textAlign = 'right';
-            canvas.fillText(this.epgUtils.toDuration(currentEvent.getStart(), this.epgUtils.getNow())+" / "+this.epgUtils.toDuration(currentEvent.getStart(), currentEvent.getEnd()),
-                    drawingRect.left, drawingRect.top);
+            canvas.fillText(this.epgUtils.toDuration(currentEvent.getStart(), this.epgUtils.getNow()) + " / " + this.epgUtils.toDuration(currentEvent.getStart(), currentEvent.getEnd()),
+                drawingRect.left, drawingRect.top);
         }
 
     }
@@ -207,9 +210,9 @@ export default class ChannelInfo extends Component {
         // set timeout to automatically unmount
         this.timeoutReference = setTimeout(() => this.stateUpdateHandler({
             isInfoState: false
-        }), 8*1000);
+        }), 8 * 1000);
         this.intervalReference = setInterval(() => this.updateCanvas(), 500);
-        
+
     }
 
     componentDidUpdate(prevProps) {
@@ -250,7 +253,7 @@ export default class ChannelInfo extends Component {
     render() {
         return (
             <div id="channelinfo-wrapper" ref="info" tabIndex='-1' onKeyDown={this.handleKeyPress} className="channelInfo">
-                <canvas ref="canvas" width={this.getWidth()} height={this.getHeight()} style={{ display: 'block' }}/>
+                <canvas ref="canvas" width={this.getWidth()} height={this.getHeight()} style={{ display: 'block' }} />
             </div>
         );
     }

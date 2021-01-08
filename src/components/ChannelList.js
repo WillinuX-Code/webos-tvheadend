@@ -164,7 +164,7 @@ export default class ChannelList extends Component {
 
         let channel = this.epgData.getChannel(position);
         // channel number
-        drawingRect.left += 50;
+        drawingRect.left += 70;
         canvas.font = "bold " + (this.mChannelLayoutTextSize + 6) + "px Arial";
         canvas.fillStyle = this.mChannelLayoutTextColor;
         canvas.textAlign = 'right';
@@ -172,7 +172,7 @@ export default class ChannelList extends Component {
             drawingRect.left, drawingRect.top + this.mChannelLayoutHeight / 2 + this.mChannelLayoutTextSize / 2);
 
         // channel name
-        drawingRect.left += 15;
+        drawingRect.left += 20;
         canvas.font = "bold " + this.mChannelLayoutTextSize + "px Arial";
         canvas.textAlign = 'left';
         canvas.fillText(this.canvasUtils.getShortenedText(canvas, channel.getName(), drawingRect),
@@ -194,7 +194,7 @@ export default class ChannelList extends Component {
         };
 
         // channel logo
-        drawingRect.left = drawingRect.right - this.mChannelLayoutHeight * 1.5;
+        drawingRect.left = drawingRect.right - this.mChannelLayoutHeight * 1.3;
         let imageURL = channel.getImageURL();
         let image = this.imageCache.get(imageURL);
         if (image !== undefined) {
@@ -255,7 +255,7 @@ export default class ChannelList extends Component {
 
         let channelCount = this.epgData.getChannelCount();
         // this will fade the bottom channel in while scrolling
-        if(position < channelCount) {
+        if (position < channelCount) {
             position += 1;
         }
         // this is the max channel available
@@ -316,7 +316,7 @@ export default class ChannelList extends Component {
                 if (channelPosition < 0) {
                     channelPosition = this.epgData.getChannelCount() - 1;
                 }
-                
+
                 this.scrollToChannelPosition(channelPosition, true);
                 break;
             case 34: // programm down

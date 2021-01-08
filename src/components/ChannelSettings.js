@@ -15,27 +15,18 @@ export default class ChannelSettings extends Component {
 
         this.textTracks = props.textTracks;
         this.audioTracks = props.audioTracks;
-        // contains a mapping between display and audiotrack index
-        this.audioIndexMap = new Map();
         this.textTracksDisplay = [];
         this.audioTracksDisplay = [];
         this.timeoutId = {};
 
         let selectedAudioTrack = -1;
         for (var i = 0; i < this.audioTracks.length; i++) {
-            let audioTrack = this.audioTracks[i];
-            // filter mis and mul
-            if(audioTrack.language === "mul" || audioTrack.language === "mis") {
-                continue;
+            if (this.audioTracks[i].enabled === true) {
+                selectedAudioTrack = i;
             }
-            this.audioTracksDisplay.push(audioTrack.language);
-            let displayIndex = this.audioTracksDisplay.length - 1;
-            // map display index to audiotrack index
-            this.audioIndexMap.set(displayIndex, i);
-            if (audioTrack.enabled === true) {
-                selectedAudioTrack = displayIndex;
-            }
+            this.audioTracksDisplay.push(this.audioTracks[i].language);
         }
+
         let selectedTextTrack = -1;
         for (i = 0; i < this.textTracks.length; i++) {
             if (this.textTracks[i].enabled === true) {
@@ -71,12 +62,11 @@ export default class ChannelSettings extends Component {
         this.updateAutomaticUnmount();
         // disable previous track
         this.audioTracks[this.state.selectedAudioTrack].enabled = false;
-        let audioIndex = this.audioIndexMap.get(object.value);
-        // enable new track
-        this.audioTracks[audioIndex].enabled = true;
+         // enable new track
+        this.audioTracks[object.value].enabled = true;
         // enable current selected audio
         this.setState((state, props) => ({
-            selectedAudioTrack: audioIndex
+            selectedAudioTrack: object.value
         }));
         // save selected audio track index for channel
         localStorage.setItem(this.state.channelName, object.value);

@@ -191,7 +191,7 @@ export default class TVHDataService {
                         // complete icon url
                         this.url + tvhChannel.icon_public_url,
                         tvhChannel.name,
-                        tvhChannel.number,
+                        this.channels.length + 1,   // use our own numbers tvhChannel.number,
                         tvhChannel.uuid,
                         this.url + "stream/channel/" + tvhChannel.uuid + (this.profile ? "?profile="+this.profile : "")
                     );

@@ -8,6 +8,8 @@ import '../styles/app.css';
 
 export default class TV extends Component {
 
+    static STORAGE_KEY_LAST_CHANNEL = "lastChannel";
+
     constructor(props) {
         super(props);
 
@@ -16,7 +18,7 @@ export default class TV extends Component {
             isInfoState: true,
             isEpgState: false,
             isChannelListState: false,
-            channelPosition: 0,
+            channelPosition: localStorage.getItem(TV.STORAGE_KEY_LAST_CHANNEL) || 0,
             // audioTracks: [
             //     {enabled:true,id:1,language:"de"},
             //     {enabled:true,id:2,language:"mis"},
@@ -117,6 +119,7 @@ export default class TV extends Component {
                 event.stopPropagation();
                 this.stateUpdateHandler({
                     isChannelListState: true,
+                    isInfoState: false,
                     channelPosition: channelPosition
                 });
                 break;
@@ -134,6 +137,7 @@ export default class TV extends Component {
                 event.stopPropagation();
                 this.stateUpdateHandler({
                     isChannelListState: true,
+                    isInfoState: false,
                     channelPosition: channelPosition
                 });
                 break;
@@ -210,6 +214,8 @@ export default class TV extends Component {
             isInfoState: true,
             channelPosition: channelPosition
         }));
+        // store last used channel
+        localStorage.setItem(TV.STORAGE_KEY_LAST_CHANNEL, channelPosition);
     }
 
     initVideoElement() {

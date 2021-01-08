@@ -19,8 +19,8 @@ export default class TVGuide extends Component {
     static TIME_LABEL_SPACING_MILLIS = 30 * 60 * 1000; // 30 minutes
 
     static VISIBLE_CHANNEL_COUNT = 8; // No of channel to show at a time
-    static VERTICAL_SCROLL_BOTTOM_PADDING_ITEM = (TVGuide.VISIBLE_CHANNEL_COUNT / 2) -1;
-    static VERTICAL_SCROLL_TOP_PADDING_ITEM = (TVGuide.VISIBLE_CHANNEL_COUNT / 2) -1;
+    static VERTICAL_SCROLL_BOTTOM_PADDING_ITEM = (TVGuide.VISIBLE_CHANNEL_COUNT / 2) - 1;
+    static VERTICAL_SCROLL_TOP_PADDING_ITEM = (TVGuide.VISIBLE_CHANNEL_COUNT / 2) - 1;
 
     constructor(props) {
         super(props);
@@ -40,7 +40,7 @@ export default class TVGuide extends Component {
         this.timePosition = this.epgUtils.getNow();
         this.focusedChannelPosition = props.channelPosition;
         this.focusedEventPosition = -1;
-        
+
         this.mChannelImageCache = props.imageCache;
         this.mClipRect = new Rect();
         this.mDrawingRect = new Rect();
@@ -255,7 +255,7 @@ export default class TVGuide extends Component {
 
         // draw background from cache
         if (this.backgroundImage) {
-            canvas.drawImage(this.backgroundImage, drawingRect.left, drawingRect.top, drawingRect.right,drawingRect.bottom);
+            canvas.drawImage(this.backgroundImage, drawingRect.left, drawingRect.top, drawingRect.right, drawingRect.bottom);
             return;
         }
 
@@ -509,7 +509,7 @@ export default class TVGuide extends Component {
 
         // draw current position
         drawingRect.left = this.getXFrom(this.timePosition);
-        drawingRect.top = this.getScrollY() + this.mTimeBarHeight - this.mTimeBarTextSize +2;
+        drawingRect.top = this.getScrollY() + this.mTimeBarHeight - this.mTimeBarTextSize + 2;
         drawingRect.right = drawingRect.left + this.mTimeBarLineWidth;
         drawingRect.bottom = drawingRect.top + this.getChannelListHeight();
 
@@ -520,7 +520,7 @@ export default class TVGuide extends Component {
 
         drawingRect.top += this.mTimeBarTextSize
         drawingRect.left = this.getXFrom(this.timePosition) + this.mChannelLayoutPadding;
-        canvas.font = this.mTimeBarTextSize -2 +"px Arial"
+        canvas.font = this.mTimeBarTextSize - 2 + "px Arial"
         canvas.fillText(this.epgUtils.toTimeString(this.timePosition), drawingRect.left, drawingRect.top);
 
     }
@@ -801,21 +801,21 @@ export default class TVGuide extends Component {
                 break;
             case 40: // arrow down
                 event.stopPropagation();
-                if (channelPosition === this.epgData.getChannelCount() - 1) {
-                    return;
-                }
                 channelPosition += 1;
+                if (channelPosition > this.epgData.getChannelCount() - 1) {
+                    channelPosition = 0;
+                }
                 this.scrollToChannelPosition(channelPosition, false);
                 return;
             case 38: // arrow up
                 event.stopPropagation();
-                if (channelPosition === 0) {
-                    return
-                }
                 channelPosition -= 1;
+                if (channelPosition < 0) {
+                    channelPosition = this.epgData.getChannelCount() - 1;
+                }
                 this.scrollToChannelPosition(channelPosition, false);
                 return;
-            case 403: 
+            case 403:
                 event.stopPropagation();
                 // red button to trigger or cancel recording
                 // get current event
@@ -839,7 +839,7 @@ export default class TVGuide extends Component {
                     });
                 }
                 break;
-            case 461: 
+            case 461:
                 event.stopPropagation();
                 // back button
                 // do not pass this key to the browser/webos
@@ -920,7 +920,12 @@ export default class TVGuide extends Component {
         }
 
         // stop scrolling before padding position bottom
-        if (channelPosition >= this.epgData.getChannelCount() - 1 - TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM) {
+        let maxPosition = this.epgData.getChannelCount() - 1 - TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM;
+        if (channelPosition >= maxPosition) {
+            // fix scroll to channel in case it is within bottom padding
+            if (this.scrollY === 0) {
+                this.scrollY = (this.mChannelLayoutMargin * TVGuide.VISIBLE_CHANNEL_COUNT - 1) + this.mChannelLayoutHeight * (maxPosition - TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM);
+            }
             this.updateCanvas();
             return;
         }

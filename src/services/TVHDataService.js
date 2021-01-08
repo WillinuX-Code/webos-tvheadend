@@ -159,7 +159,7 @@ export default class TVHDataService {
                 }
             }
             // try default config -> name = ""
-            for (var i = 0; i < success.result.entries.length; i++) {
+            for (i = 0; i < success.result.entries.length; i++) {
                 if (success.result.entries[i].name === "") {
                     return success.result.entries[i].uuid;
                 }

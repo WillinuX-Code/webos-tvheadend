@@ -4,7 +4,6 @@ import Button from '@enact/moonstone/Button';
 import Spinner from '@enact/moonstone/Spinner';
 import Input from '@enact/moonstone/Input';
 import { Header, Panel } from "@enact/moonstone/Panels";
-import BodyText from '@enact/moonstone/BodyText';
 import Icon from '@enact/moonstone/Icon';
 import Picker from '@enact/moonstone/Picker';
 import Heading from '@enact/moonstone/Heading';
@@ -210,7 +209,7 @@ export default class TVHSettings extends Component {
                     {this.state.isLoading && <Spinner></Spinner>}
                     <br /> <br />
                     <Heading spacing="auto">Connection Status</Heading>
-                    {this.testResult.length == 0 && <Icon>question</Icon>}
+                    {this.testResult.length === 0 && <Icon>question</Icon>}
                     {this.testResult.length > 0 &&
                         <>
                             {this.state.isValid && <Icon>check</Icon>}

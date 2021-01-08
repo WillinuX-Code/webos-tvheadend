@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import ChannelInfo from './ChannelInfo';
 import TVGuide from './TVGuide';
 import ChannelList from './ChannelList';
+import ChannelSettings from './ChannelSettings';
 import '../styles/app.css';
 
 export default class TV extends Component {
@@ -10,13 +11,23 @@ export default class TV extends Component {
         super(props);
 
         this.state = {
+            isChannelSettingsState: false,
             isInfoState: true,
             isEpgState: false,
             isChannelListState: false,
-            channelPosition: 0
+            channelPosition: 0,
+            // audioTracks: [
+            //     {enabled:true,id:1,language:"de"},
+            //     {enabled:true,id:2,language:"mis"},
+            //     {enabled:true,id:3,language:"mul"},
+            //     {enabled:false,id:4,language:"en"},
+            // ],
+            audioTracks: [],
+            textTracks: [],
         }
         this.handleKeyPress = this.handleKeyPress.bind(this);
         this.stateUpdateHandler = this.stateUpdateHandler.bind(this);
+
         this.epgData = props.epgData;
         this.imageCache = props.imageCache;
     }
@@ -39,6 +50,10 @@ export default class TV extends Component {
         return window.innerHeight;
     }
 
+    getCurrentChannel() {
+        return this.epgData.getChannel(this.state.channelPosition);
+    }
+
     componentWillUnmount() {
         var videoElement = this.getMediaElement();
         // Remove all source elements
@@ -57,15 +72,16 @@ export default class TV extends Component {
         // }
 
         // change channel in case we have channels retrieved and channel position changed or we don't have a channel active
-        if(this.epgData.getChannelCount() > 0 && 
+        if (this.epgData.getChannelCount() > 0 &&
             (prevState.channelPosition !== this.state.channelPosition || !this.getMediaElement().hasChildNodes())) {
-            this.changeSource(this.epgData.getChannel(this.state.channelPosition).getStreamUrl());
+            this.changeSource(this.getCurrentChannel().getStreamUrl());
         }
 
         // request focus if none of the other components are active
-        if(!this.state.isInfoState 
-            && !this.state.isEpgState 
-            && !this.state.isChannelListState) {
+        if (!this.state.isInfoState
+            && !this.state.isEpgState
+            && !this.state.isChannelListState
+            && !this.state.isChannelSettingsState) {
             this.focus();
         }
         //this.setFocus();
@@ -128,6 +144,10 @@ export default class TV extends Component {
                 break;
             case 13: // ok button ->show/disable channel info
                 event.stopPropagation();
+                // in channel settings state we dont process the ok - the channel settings component handles it
+                if (this.state.isChannelSettingsState) {
+                    break;
+                }
                 this.stateUpdateHandler({
                     isInfoState: !this.state.isInfoState
                 });
@@ -135,7 +155,9 @@ export default class TV extends Component {
             case 405: // yellow button 
             case 89: //'y'
                 event.stopPropagation();
-                // TODO show channel settings panel
+                this.stateUpdateHandler({
+                    isChannelSettingsState: !this.state.isChannelSettingsState
+                });
                 break;
             case 403: // red button trigger recording
                 event.stopPropagation();
@@ -188,10 +210,31 @@ export default class TV extends Component {
             console.log("Audio Tracks: ", videoElement.audioTracks);
             console.log("Video Tracks: ", videoElement.videoTracks);
             console.log("Text Tracks: ", videoElement.textTracks);
+            // restore selected audio channel from storage
+            let indexStr = localStorage.getItem(this.getCurrentChannel().getName());
+            if (indexStr !== undefined) {
+                let index = parseInt(indexStr);
+                console.log("restore index %d for channel %s",index,this.getCurrentChannel().getName());
+                if (index < videoElement.audioTracks.length) {
+                    for (let i = 0; i < videoElement.audioTracks.length; i++) {
+                        if (videoElement.audioTracks[i].enabled === true && i === index) {
+                            break;
+                        }
+                        if (index === i) {
+                            console.log("enabeling audio index %d", index);
+                            videoElement.audioTracks[i].enabled = true;
+                        } else {
+                            videoElement.audioTracks[i].enabled = false;
+                        }
+                    }
+                }
+            }
+            
+            this.stateUpdateHandler({
+                audioTracks: videoElement.audioTracks,
+                textTracks: videoElement.textTracks
+            });
         });
-
-        // TODO audioTracklist
-        // TODO subtitleList
     }
 
     changeSource(dataUrl) {
@@ -222,6 +265,12 @@ export default class TV extends Component {
     render() {
         return (
             <div id="tv-wrapper" ref="video" tabIndex='-1' onKeyDown={this.handleKeyPress} className="tv" >
+                {this.state.isChannelSettingsState && <ChannelSettings ref="info" key={this.state.audioTracks}
+                    stateUpdateHandler={this.stateUpdateHandler}
+                    channelName={this.getCurrentChannel().getName()}
+                    audioTracks={this.state.audioTracks}
+                    textTracks={this.state.textTracks} />}
+
                 {this.state.isInfoState && <ChannelInfo ref="info" key={this.state.channelPosition} epgData={this.epgData}
                     imageCache={this.imageCache}
                     stateUpdateHandler={this.stateUpdateHandler}
@@ -229,13 +278,13 @@ export default class TV extends Component {
 
                 {this.state.isChannelListState && <ChannelList ref="list" key={this.state.isChannelListState} epgData={this.epgData}
                     imageCache={this.imageCache}
-                    stateUpdateHandler={this.stateUpdateHandler} 
-                    channelPosition={this.state.channelPosition}/>}
+                    stateUpdateHandler={this.stateUpdateHandler}
+                    channelPosition={this.state.channelPosition} />}
 
                 {this.state.isEpgState && <TVGuide ref="epg" key={this.state.isEpgState} epgData={this.epgData}
                     imageCache={this.imageCache}
-                    stateUpdateHandler={this.stateUpdateHandler} 
-                    channelPosition={this.state.channelPosition}/> }
+                    stateUpdateHandler={this.stateUpdateHandler}
+                    channelPosition={this.state.channelPosition} />}
 
                 <video id="myVideo" width={this.getWidth()} height={this.getHeight()} preload autoplay></video>
             </div>

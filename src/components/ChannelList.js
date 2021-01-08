@@ -311,19 +311,22 @@ export default class ChannelList extends Component {
             case 33:    // programm up
             case 38:    // arrow up
                 // channel down
-                if (channelPosition === 0) {
-                    return
-                }
                 channelPosition -= 1;
+                // if we reached < 0 we scroll to end of list
+                if (channelPosition < 0) {
+                    channelPosition = this.epgData.getChannelCount() - 1;
+                }
+                
                 this.scrollToChannelPosition(channelPosition, true);
                 break;
             case 34: // programm down
             case 40: // arrow down
                 // channel up
-                if (channelPosition === this.epgData.getChannelCount() - 1) {
-                    return;
-                }
                 channelPosition += 1;
+                // when channel position increased channelcount we scroll to beginning
+                if (channelPosition > this.epgData.getChannelCount() - 1) {
+                    channelPosition = 0;
+                }
                 this.scrollToChannelPosition(channelPosition, true);
                 break;
             case 404: // TODO yellow button + back button

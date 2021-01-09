@@ -25,7 +25,7 @@ export default class TVHDataService {
         }
         this.profile = settings.selectedProfile;
         this.dvrUuid = settings.dvrConfigUuid;
-        this.tvChannelUuid = settings.tvChannelTagUuid;
+        //this.tvChannelUuid = settings.tvChannelTagUuid;
         this.channels = [];
         this.channelMap = new Map();
     }
@@ -134,14 +134,14 @@ export default class TVHDataService {
      */
     async retrieveTvChannelTag() {
         // retrieve the default dvr config
-        let responsePromise = await this.serviceAdapter.call("proxy", {
+        let response = await this.serviceAdapter.call("proxy", {
             "url": this.url + TVHDataService.API_CHANNEL_TAGS
         });
         // return tv channels tag
-        for (var i = 0; i < responsePromise.result.entries.length; i++) {
-            if (responsePromise.result.entries[i].val === "TV channels") {
-                console.log("TV Channel Tag:", responsePromise.result.entries[i].key);
-                return responsePromise.result.entries[i].key;
+        for (var i = 0; i < response.result.entries.length; i++) {
+            if (response.result.entries[i].val === "TV channels") {
+                console.log("TV Channel Tag:", response.result.entries[i].key);
+                return response.result.entries[i].key;
             }
         };
     }
@@ -184,9 +184,9 @@ export default class TVHDataService {
                 success.result.entries.forEach((tvhChannel) => {
                     start++;
                     // check if channel contains is a tvchannel
-                    if (!tvhChannel.tags.includes(this.tvChannelUuid)) {
-                        return;
-                    }
+                    // if (!tvhChannel.tags.includes(this.tvChannelUuid)) {
+                    //     return;
+                    // }
                     let channel = new EPGChannel(
                         // complete icon url
                         this.url + tvhChannel.icon_public_url,

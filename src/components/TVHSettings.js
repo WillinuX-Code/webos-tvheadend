@@ -46,7 +46,7 @@ export default class TVHSettings extends Component {
             password: this.state.password,
             selectedProfile: this.state.selectedProfile,
             profiles: this.state.profiles,
-            tvChannelTagUuid: this.state.tvChannelTagUuid,
+            //tvChannelTagUuid: this.state.tvChannelTagUuid,
             dvrConfigUuid: this.state.dvrConfigUuid,
             isValid: this.state.isValid
         }));
@@ -133,12 +133,12 @@ export default class TVHSettings extends Component {
                 profiles.unshift('pass');
             }
             // retrieve channel tags
-            let tvChannelTagUuid = await service.retrieveTvChannelTag();
+            //let tvChannelTagUuid = await service.retrieveTvChannelTag();
             // retrieve the default dvr config
             let dvrConfigUuid = await service.retrieveDVRConfig();
             // state update
             this.setState((state, props) => ({
-                tvChannelTagUuid: tvChannelTagUuid,
+                //tvChannelTagUuid: tvChannelTagUuid,
                 dvrConfigUuid: dvrConfigUuid,
                 profiles: profiles,
                 selectedProfile: profiles[0],

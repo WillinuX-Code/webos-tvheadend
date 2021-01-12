@@ -58,6 +58,14 @@ export default class Rect {
         return this._bottom - this._top;
     }
 
+    get center() {
+        return this.left + this.width / 2;
+    }
+
+    get middle() {
+        return this.top + this.height / 2;
+    }
+
     clone() {
         return new Rect(this._top, this._left, this._bottom, this._right);
     }

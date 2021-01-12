@@ -136,7 +136,7 @@ export default class ChannelInfo extends Component {
             let left = drawingRect.left;
             drawingRect.right -= this.mChannelInfoTimeBoxWidth;
             // draw current event
-            canvas.fillText(this.canvasUtils.getShortenedText(canvas, currentEvent.getTitle(), drawingRect),
+            canvas.fillText(this.canvasUtils.getShortenedText(canvas, currentEvent.getTitle(), drawingRect.width),
                 drawingRect.left, drawingRect.top);
 
             drawingRect.right += this.mChannelInfoTimeBoxWidth;
@@ -152,7 +152,7 @@ export default class ChannelInfo extends Component {
                 drawingRect.left = left;
                 drawingRect.right -= this.mChannelInfoTimeBoxWidth;
                 canvas.fillStyle = this.mChannelLayoutTitleTextColor;
-                canvas.fillText(this.canvasUtils.getShortenedText(canvas, currentEvent.getSubTitle(), drawingRect),
+                canvas.fillText(this.canvasUtils.getShortenedText(canvas, currentEvent.getSubTitle(), drawingRect.width),
                     drawingRect.left, drawingRect.top);
 
                 drawingRect.right += this.mChannelInfoTimeBoxWidth;

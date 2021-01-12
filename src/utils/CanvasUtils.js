@@ -7,11 +7,10 @@ export default class CanvasUtils {
      * 
      * @param {CanvasRenderingContext2D} canvas 
      * @param {String} text 
-     * @param {Rect} drawingRect 
+     * @param {Number} drawingRect 
      */
-    getShortenedText(canvas, text, drawingRect) {
+    getShortenedText(canvas, text, maxWidth) {
         let result = text;
-        let maxWidth = drawingRect.right - drawingRect.left;
         // use test character to measure width per character
         var widthPerCharacter = canvas.measureText(CanvasUtils.MEASURE_STRING).width / CanvasUtils.MEASURE_STRING.length;
         var textLength = canvas.measureText(result).width;

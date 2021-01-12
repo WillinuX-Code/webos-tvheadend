@@ -403,7 +403,7 @@ export default class TVGuide extends Component {
         // draw title, description etc
         canvas.font = (this.mDetailsLayoutTitleTextSize - 4) + "px Arial";
         canvas.fillStyle = this.mDetailsLayoutSubTitleTextColor;
-        canvas.fillText(this.canvasUtils.getShortenedText(canvas, subtitle, drect), drect.left, drect.top);
+        canvas.fillText(this.canvasUtils.getShortenedText(canvas, subtitle, drect.width), drect.left, drect.top);
     }
 
     drawTimebar(canvas, drawingRect) {
@@ -630,7 +630,7 @@ export default class TVGuide extends Component {
         let title = event.getTitle();
         /*title = title.substring(0,
          mPaint.breakText(title, true, drawingRect.right - drawingRect.left, null));*/
-        canvas.fillText(this.canvasUtils.getShortenedText(canvas, title, drawingRect), drawingRect.left, drawingRect.top);
+        canvas.fillText(this.canvasUtils.getShortenedText(canvas, title, drawingRect.width), drawingRect.left, drawingRect.top);
         // if (event.getSubTitle()) {
         //     canvas.font = this.mEventLayoutTextSize - 6 + "px Arial";
         //     canvas.fillText(this.canvasUtils.getShortenedText(canvas, event.getSubTitle(), drawingRect), drawingRect.left, drawingRect.top + 18);

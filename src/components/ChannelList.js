@@ -190,7 +190,7 @@ export default class ChannelList extends Component {
         channelNameRect.right = this.mChannelLayoutWidth - this.mChannelLayoutHeight * 1.3 - this.mChannelLayoutPadding;
         canvas.font = 'bold ' + this.mChannelLayoutTextSize + 'px Arial';
         canvas.textAlign = 'left';
-        canvas.fillText(this.canvasUtils.getShortenedText(canvas, channel.getName(), channelNameRect), channelNameRect.left, channelNameRect.top + channelNameRect.height * 0.75);
+        canvas.fillText(this.canvasUtils.getShortenedText(canvas, channel.getName(), channelNameRect.width), channelNameRect.left, channelNameRect.top + channelNameRect.height * 0.75);
         this.drawDebugRect(canvas, channelNameRect);
 
         // channel event
@@ -215,7 +215,7 @@ export default class ChannelList extends Component {
                 channelEventRect.left = channelEventProgressRect.right + this.mChannelLayoutPadding;
                 channelEventRect.top -= 0.25 * this.mChannelLayoutEventTextSize;
                 channelEventRect.bottom += 0.25 * this.mChannelLayoutEventTextSize;
-                canvas.fillText(this.canvasUtils.getShortenedText(canvas, event.getTitle(), channelEventRect),
+                canvas.fillText(this.canvasUtils.getShortenedText(canvas, event.getTitle(), channelEventRect.width),
                 channelEventRect.left, channelEventRect.top + channelEventRect.height * 0.75);
                 this.drawDebugRect(canvas, channelEventRect);
 

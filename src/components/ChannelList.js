@@ -7,6 +7,7 @@ import CanvasUtils from '../utils/CanvasUtils';
 export default class ChannelList extends Component {
 
     static VERTICAL_SCROLL_TOP_PADDING_ITEM = 5;
+    static IS_DEBUG = false;
 
     constructor(props) {
         super(props);
@@ -22,6 +23,8 @@ export default class ChannelList extends Component {
         this.mMaxVerticalScroll = 0;
 
         this.mChannelLayoutTextSize = 32;
+        this.mChannelLayoutEventTextSize = 26;
+        this.mChannelLayoutNumberTextSize = 38;
         this.mChannelLayoutTextColor = '#d6d6d6';
         this.mChannelLayoutTitleTextColor = '#969696';
         this.mChannelLayoutMargin = 3;
@@ -147,69 +150,104 @@ export default class ChannelList extends Component {
             // } else {
             //     canvas.globalAlpha = 1;
             // }
-            this.drawChannelItem(canvas, pos, drawingRect);
+            this.drawChannelItem(canvas, pos);
         }
     }
 
-    drawChannelItem(canvas, position, drawingRect) {
-        drawingRect.left = this.mChannelLayoutMargin;
+    drawChannelItem(canvas, position) {
+        let isSelectedChannel = (position === this.channelPosition);
+        let channel = this.epgData.getChannel(position);
+        let drawingRect = new Rect();
+        drawingRect.left = 0;
         drawingRect.top = this.getTopFrom(position);
-        drawingRect.right = drawingRect.left + this.mChannelLayoutWidth;
+        drawingRect.right = this.mChannelLayoutWidth;
         drawingRect.bottom = drawingRect.top + this.mChannelLayoutHeight;
+        this.drawDebugRect(canvas, drawingRect);
 
-        if (position === this.channelPosition) {
+        // highlight selected channel
+        if (isSelectedChannel) {
             canvas.fillStyle = this.mChannelLayoutBackgroundFocus;
             canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
         }
 
-        let channel = this.epgData.getChannel(position);
         // channel number
-        drawingRect.left += 70;
-        canvas.font = "bold " + (this.mChannelLayoutTextSize + 6) + "px Arial";
+        let channelNumberRect = new Rect();
+        channelNumberRect.top = drawingRect.top + drawingRect.height / 2 - this.mChannelLayoutNumberTextSize / 2;
+        channelNumberRect.bottom = channelNumberRect.top + this.mChannelLayoutNumberTextSize;
+        channelNumberRect.left = drawingRect.left;
+        channelNumberRect.right = drawingRect.left + 70;
+        canvas.font = 'bold ' + this.mChannelLayoutNumberTextSize + 'px Arial';
         canvas.fillStyle = this.mChannelLayoutTextColor;
         canvas.textAlign = 'right';
-        canvas.fillText(channel.getChannelID(),
-            drawingRect.left, drawingRect.top + this.mChannelLayoutHeight / 2 + this.mChannelLayoutTextSize / 2);
+        canvas.fillText(channel.getChannelID(), channelNumberRect.right, channelNumberRect.top + channelNumberRect.height * 0.75);
+        this.drawDebugRect(canvas, channelNumberRect);
 
         // channel name
-        drawingRect.left += 20;
-        canvas.font = "bold " + this.mChannelLayoutTextSize + "px Arial";
+        let channelNameRect = new Rect(drawingRect.top, channelNumberRect.right + 20, drawingRect.top + this.mChannelLayoutTextSize, drawingRect.right);
+        channelNameRect.top = drawingRect.top + this.mChannelLayoutTextSize / 2;
+        channelNameRect.bottom = channelNameRect.top + this.mChannelLayoutTextSize;
+        channelNameRect.left = channelNumberRect.right + 20;
+        channelNameRect.right = this.mChannelLayoutWidth - this.mChannelLayoutHeight * 1.3 - this.mChannelLayoutPadding;
+        canvas.font = 'bold ' + this.mChannelLayoutTextSize + 'px Arial';
         canvas.textAlign = 'left';
-        canvas.fillText(this.canvasUtils.getShortenedText(canvas, channel.getName(), drawingRect),
-            drawingRect.left, drawingRect.top + this.mChannelLayoutTextSize + this.mChannelLayoutPadding);
+        canvas.fillText(this.canvasUtils.getShortenedText(canvas, channel.getName(), channelNameRect), channelNameRect.left, channelNameRect.top + channelNameRect.height * 0.75);
+        this.drawDebugRect(canvas, channelNameRect);
 
         // channel event
-        canvas.font = (this.mChannelLayoutTextSize - 5) + "px Arial";
-        canvas.fillStyle = this.mChannelLayoutTitleTextColor;
-        if (position === this.channelPosition) {
-            canvas.fillStyle = this.mChannelLayoutTextColor;
-        }
+        canvas.font = this.mChannelLayoutEventTextSize + 'px Arial';
+        canvas.fillStyle = isSelectedChannel ? this.mChannelLayoutTextColor : this.mChannelLayoutTitleTextColor;
         canvas.textAlign = 'left';
         for (let event of channel.getEvents()) {
             if (event.isCurrent()) {
-                canvas.fillText(this.canvasUtils.getShortenedText(canvas, event.getTitle(), drawingRect),
-                    drawingRect.left, drawingRect.top + (2 * this.mChannelLayoutTextSize) + this.mChannelLayoutPadding);
+                // channel event progress bar
+                let channelEventProgressRect = new Rect();
+                channelEventProgressRect.left = channelNameRect.left;
+                channelEventProgressRect.right = channelEventProgressRect.left + 80;
+                channelEventProgressRect.top = channelNameRect.bottom + this.mChannelLayoutPadding;
+                channelEventProgressRect.bottom = channelEventProgressRect.top + this.mChannelLayoutEventTextSize * 0.5;
+                canvas.strokeStyle = this.mChannelLayoutTextColor;
+                canvas.strokeRect(channelEventProgressRect.left, channelEventProgressRect.top, channelEventProgressRect.width, channelEventProgressRect.height);
+                canvas.fillRect(channelEventProgressRect.left + 2, channelEventProgressRect.top + 2, (channelEventProgressRect.width - 4) * event.getDoneFactor(), channelEventProgressRect.height - 4);
+
+                // channel event text
+                let channelEventRect = channelEventProgressRect.clone();
+                channelEventRect.right = this.mChannelLayoutWidth - this.mChannelLayoutHeight * 1.3 - this.mChannelLayoutPadding;
+                channelEventRect.left = channelEventProgressRect.right + this.mChannelLayoutPadding;
+                channelEventRect.top -= 0.25 * this.mChannelLayoutEventTextSize;
+                channelEventRect.bottom += 0.25 * this.mChannelLayoutEventTextSize;
+                canvas.fillText(this.canvasUtils.getShortenedText(canvas, event.getTitle(), channelEventRect),
+                channelEventRect.left, channelEventRect.top + channelEventRect.height * 0.75);
+                this.drawDebugRect(canvas, channelEventRect);
+
                 break;
             }
         };
 
         // channel logo
-        drawingRect.left = drawingRect.right - this.mChannelLayoutHeight * 1.3;
         let imageURL = channel.getImageURL();
         let image = this.imageCache.get(imageURL);
         if (image !== undefined) {
             canvas.textAlign = 'left';
-            drawingRect = this.getDrawingRectForChannelImage(drawingRect, image);
-            canvas.drawImage(image, drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
+            let channelImageRect = this.getDrawingRectForChannelImage(position, image);
+            canvas.drawImage(image, channelImageRect.left, channelImageRect.top, channelImageRect.width, channelImageRect.height);
+            this.drawDebugRect(canvas, channelImageRect);
         }
     }
 
-    getDrawingRectForChannelImage(drawingRect, image) {
-        drawingRect.left += this.mChannelLayoutPadding;
-        drawingRect.top += this.mChannelLayoutPadding;
-        drawingRect.right -= this.mChannelLayoutPadding;
-        drawingRect.bottom -= this.mChannelLayoutPadding;
+    drawDebugRect(canvas, drawingRect) {
+        if (ChannelList.IS_DEBUG) {
+            canvas.strokeStyle = '#FF0000';
+            canvas.strokeRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
+        }
+    }
 
+    getDrawingRectForChannelImage(position, image) {
+        let drawingRect = new Rect();
+        drawingRect.right = this.mChannelLayoutWidth - this.mChannelLayoutMargin;
+        drawingRect.left = drawingRect.right - this.mChannelLayoutHeight * 1.3;
+        drawingRect.top = this.getTopFrom(position);
+        drawingRect.bottom = drawingRect.top + this.mChannelLayoutHeight;
+        
         let imageWidth = image.width;
         let imageHeight = image.height;
         let imageRatio = imageHeight / parseFloat(imageWidth);

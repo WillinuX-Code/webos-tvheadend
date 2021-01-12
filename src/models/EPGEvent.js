@@ -44,6 +44,18 @@ export default class EPGEvent {
         return this.end;
     }
 
+    getDoneFactor() {
+        let now = this.epgUtils.getNow();
+        if (now > this.end) {
+            return 1;
+        } else if (now < this.start) {
+            return 0;
+        } else {
+            let duration = this.end - this.start;
+            return (now - this.start) / duration;
+        }
+    }
+
     isCurrent() {
         let now = this.epgUtils.getNow();
         return now >= this.start && now <= this.end;

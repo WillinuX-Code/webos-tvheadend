@@ -83,4 +83,50 @@ export default class CanvasUtils {
             }
         }
     }
+
+    /**
+     * Writes a text to a specific position without changing the canvas context
+     * 
+     * @param {CanvasRenderingContext2D} canvas 
+     * @param {String} text
+     * @param {Number} x 
+     * @param {Number} y 
+     * @param {{fontSize: Number, 
+     *          fillStyle: String, 
+     *          fontFace: String, 
+     *          textAlign: 'center'|'end'|'left'|'right'|'start', 
+     *          textBaseline: 'alphabetic'|'top'|'hanging'|'middle'|'ideographic'|'bottom', 
+     *          isBold: Boolean}} options
+     */
+    writeText(canvas, text, x, y, options) {
+        // set default options
+        options.fontFace = options.fontFace || 'Arial';
+        options.textAlign = options.textAlign || 'left';
+        options.textBaseline = options.textBaseline || 'middle';
+        options.fillStyle = options.fillStyle || '#FFFFFF';
+        options.fontSize = options.fontSize || 20;
+        options.isBold = options.isBold !== undefined || false;
+
+        // remember old text style
+        let oldFont = canvas.font;
+        let oldFillStyle = canvas.fillStyle;
+        let oldTextAlign = canvas.textAlign;
+        let oldTextBaseline = canvas.textBaseline;
+
+        // set new text style
+        canvas.font = options.fontSize + 'px ' + options.fontFace;
+        if(options.isBold) {canvas.font = 'bold ' + canvas.font}
+        canvas.fillStyle = options.fillStyle;
+        canvas.textAlign = options.textAlign;
+        canvas.textBaseline = options.textBaseline;
+
+        // write text
+        canvas.fillText(text, x, y);
+
+        // reset text style
+        canvas.font = oldFont;
+        canvas.fillStyle = oldFillStyle;
+        canvas.textAlign = oldTextAlign;
+        canvas.textBaseline = oldTextBaseline;
+    }
 }

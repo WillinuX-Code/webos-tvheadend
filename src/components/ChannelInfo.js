@@ -42,7 +42,8 @@ export default class ChannelInfo extends Component {
                 // do not pass this event to parent
                 event.stopPropagation();
                 this.stateUpdateHandler({
-                    isInfoState: false
+                    isInfoState: false,
+                    channelNumberText: ''
                 });
                 break;
         }
@@ -209,10 +210,11 @@ export default class ChannelInfo extends Component {
 
         // set timeout to automatically unmount
         this.timeoutReference = setTimeout(() => this.stateUpdateHandler({
-            isInfoState: false
+            isInfoState: false,
+            channelNumberText: ''
         }), 8 * 1000);
         this.intervalReference = setInterval(() => this.updateCanvas(), 500);
-
+        this.stateUpdateHandler({channelNumberText: this.channelPosition + 1});
     }
 
     componentDidUpdate(prevProps) {

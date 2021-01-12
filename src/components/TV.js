@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import ChannelInfo from './ChannelInfo';
 import TVGuide from './TVGuide';
+import ChannelHeader from './ChannelHeader';
 import ChannelList from './ChannelList';
 import ChannelSettings from './ChannelSettings';
 import EPGUtils from '../utils/EPGUtils';
@@ -13,12 +14,15 @@ export default class TV extends Component {
     constructor(props) {
         super(props);
 
+        //this.video = React.createRef();
+        this.channelHeader = React.createRef();
         this.state = {
             isChannelSettingsState: false,
             isInfoState: true,
             isEpgState: false,
             isChannelListState: false,
             channelPosition: 0,
+            channelNumberText: '',
             // audioTracks: [
             //     {enabled:true,id:1,language:"de"},
             //     {enabled:true,id:2,language:"mis"},
@@ -35,6 +39,7 @@ export default class TV extends Component {
         this.epgData = props.epgData;
         this.epgUtils = new EPGUtils();
         this.imageCache = props.imageCache;
+        this.timeoutChangeChannel = {};
     }
 
     componentDidMount() {
@@ -98,15 +103,27 @@ export default class TV extends Component {
     }
 
     focus() {
-        if (this.refs.video) {
-            this.refs.video.focus();
-        }
+        this.refs.video && this.refs.video.focus();
     }
 
     handleKeyPress(event) {
         let keyCode = event.keyCode;
         let channelPosition = this.state.channelPosition;
+
         switch (keyCode) {
+            case 48: // 0
+            case 49: // 1
+            case 50: // 2
+            case 51: // 3
+            case 52: // 4
+            case 53: // 5
+            case 54: // 6
+            case 55: // 7
+            case 56: // 8
+            case 57: // 9
+                event.stopPropagation();
+                this.enterChannelNumberPart(keyCode - 48);
+                break;
             case 34: // programm down
                 event.stopPropagation();
                 // channel down
@@ -207,14 +224,43 @@ export default class TV extends Component {
         return document.getElementById("myVideo");
     }
 
+    /**
+     * Enters a digit that is used as part of the new channel number
+     * 
+     * @param {Number} digit 
+     */
+    enterChannelNumberPart(digit) {
+        if (this.state.channelNumberText.length < 3) {
+            let newChannelHeaderText = this.state.channelNumberText + digit;
+            this.stateUpdateHandler({
+                channelNumberText: newChannelHeaderText
+            });
+            this.channelHeader.current && this.channelHeader.current.updateChannelNumberText(newChannelHeaderText);
+
+            // automatically switch to new channel after 3 seconds
+            this.timeoutChangeChannel = setTimeout(() => {
+                let channelPosition = parseInt(newChannelHeaderText) - 1;
+                
+                this.epgData.channels.forEach(channel => {
+                    if (channel.getChannelID() === channelPosition) {
+                        this.changeChannelPosition(channelPosition);
+                    }
+                });
+            }, 3000);
+        }
+    }
+
     changeChannelPosition(channelPosition) {
         if (channelPosition === this.state.channelPosition) {
             return;
-        } 
-        this.setState((state, props) => ({
+        }
+
+        this.stateUpdateHandler({
             isInfoState: true,
-            channelPosition: channelPosition
-        }));
+            channelPosition: channelPosition,
+            channelNumberText: channelPosition + 1
+        });
+
         // store last used channel
         localStorage.setItem(TV.STORAGE_KEY_LAST_CHANNEL, channelPosition.toString());
     }
@@ -281,26 +327,20 @@ export default class TV extends Component {
     render() {
         return (
             <div id="tv-wrapper" ref="video" tabIndex='-1' onKeyDown={this.handleKeyPress} className="tv" >
-                {this.state.isChannelSettingsState && <ChannelSettings ref="info" key={this.state.audioTracks}
-                    stateUpdateHandler={this.stateUpdateHandler}
-                    channelName={this.getCurrentChannel().getName()}
-                    audioTracks={this.state.audioTracks}
-                    textTracks={this.state.textTracks} />}
+                {this.state.isChannelSettingsState && <ChannelSettings stateUpdateHandler={this.stateUpdateHandler} 
+                channelName={this.getCurrentChannel().getName()} audioTracks={this.state.audioTracks} textTracks={this.state.textTracks} />}
 
-                {this.state.isInfoState && <ChannelInfo ref="info" key={this.state.channelPosition} epgData={this.epgData}
-                    imageCache={this.imageCache}
-                    stateUpdateHandler={this.stateUpdateHandler}
-                    channelPosition={this.state.channelPosition} />}
+                {this.state.channelNumberText !== '' && <ChannelHeader ref={this.channelHeader} stateUpdateHandler={this.stateUpdateHandler}
+                channelNumberText={this.state.channelNumberText} />}
 
-                {this.state.isChannelListState && <ChannelList ref="list" key={this.state.isChannelListState} epgData={this.epgData}
-                    imageCache={this.imageCache}
-                    stateUpdateHandler={this.stateUpdateHandler}
-                    channelPosition={this.state.channelPosition} />}
+                {this.state.isInfoState && <ChannelInfo epgData={this.epgData} imageCache={this.imageCache}
+                stateUpdateHandler={this.stateUpdateHandler} channelPosition={this.state.channelPosition} />}
 
-                {this.state.isEpgState && <TVGuide ref="epg" key={this.state.isEpgState} epgData={this.epgData}
-                    imageCache={this.imageCache}
-                    stateUpdateHandler={this.stateUpdateHandler}
-                    channelPosition={this.state.channelPosition} />}
+                {this.state.isChannelListState && <ChannelList epgData={this.epgData} imageCache={this.imageCache}
+                stateUpdateHandler={this.stateUpdateHandler} channelPosition={this.state.channelPosition} />}
+
+                {this.state.isEpgState && <TVGuide epgData={this.epgData}  imageCache={this.imageCache} 
+                stateUpdateHandler={this.stateUpdateHandler} channelPosition={this.state.channelPosition} />}
 
                 <video id="myVideo" width={this.getWidth()} height={this.getHeight()} autoplay></video>
             </div>

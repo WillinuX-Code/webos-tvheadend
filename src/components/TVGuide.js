@@ -383,7 +383,7 @@ export default class TVGuide extends Component {
         // draw title, description etc
         canvas.font = this.mDetailsLayoutDescriptionTextSize + "px Arial";
         canvas.fillStyle = this.mDetailsLayoutTextColor;
-        this.canvasUtils.wrapText(description, canvas, drect.left, drect.top, drect.width, this.mDetailsLayoutTitleTextSize + 5);
+        this.canvasUtils.wrapText(canvas, description, drect.left, drect.top, drect.width, this.mDetailsLayoutTitleTextSize + 5);
         //canvas.fillText(description, drect.left, drect.top);
     }
 
@@ -708,7 +708,7 @@ export default class TVGuide extends Component {
             canvas.textAlign = 'center';
             canvas.font = "bold 17px Arial";
             canvas.fillStyle = this.mEventLayoutTextColor;
-            this.canvasUtils.wrapText(channel.getName(), canvas, drawingRect.left + (drawingRect.width / 2), drawingRect.top + (drawingRect.bottom - drawingRect.top) / 2, drawingRect.width, 20);
+            this.canvasUtils.wrapText(canvas, channel.getName(), drawingRect.left + (drawingRect.width / 2), drawingRect.top + (drawingRect.bottom - drawingRect.top) / 2, drawingRect.width, 20);
             //canvas.fillText(this.canvasUtils.getShortenedText(canvas, channel.getName(), drawingRect), drawingRect.left + (drawingRect.width /2), drawingRect.top + 9+  (drawingRect.bottom - drawingRect.top) / 2);
             canvas.textAlign = 'left';
         }

@@ -1,7 +1,16 @@
 export default class CanvasUtils {
- 
-    static MEASURE_STRING = "One interesting Measure String";
     
+    static MEASURE_STRING = 'One interesting Measure String';
+    
+    /**
+     * Return character width approximation of current font
+     * 
+     * @param {CanvasRenderingContext2D} canvas 
+     */
+    getWidthPerCharacter(canvas) {
+        return canvas.measureText(CanvasUtils.MEASURE_STRING).width / CanvasUtils.MEASURE_STRING.length;
+    }
+
     /**
      * Faster shortened function with a complexity of 2
      * 
@@ -12,25 +21,35 @@ export default class CanvasUtils {
     getShortenedText(canvas, text, maxWidth) {
         let result = text;
         // use test character to measure width per character
-        var widthPerCharacter = canvas.measureText(CanvasUtils.MEASURE_STRING).width / CanvasUtils.MEASURE_STRING.length;
+        var widthPerCharacter = this.getWidthPerCharacter(canvas);
         var textLength = canvas.measureText(result).width;
         if (textLength > maxWidth) {
             var overLength = textLength - maxWidth;
-            // if(text.startsWith("Sebas")) {
-            //     console.log("text: \"%s\" maxWidth: %d, textWidth: %d, deltaWidth: %d, widthPerCharacter: %d, textLength: %d, textOverLength: %d", text, maxWidth, textLength, overLength, widthPerCharacter, result.length, overLength/widthPerCharacter);
+            // if(text.startsWith('Sebas')) {
+            //     console.log('text: "%s" maxWidth: %d, textWidth: %d, deltaWidth: %d, widthPerCharacter: %d, textLength: %d, textOverLength: %d', text, maxWidth, textLength, overLength, widthPerCharacter, result.length, overLength/widthPerCharacter);
             // }
             result = result.substring(0, result.length - 1 - parseInt(overLength/widthPerCharacter));
             if (result.length <= 3) {
-                return "...".substring(0, result.length);
+                return '...'.substring(0, result.length);
             }
-            result = result.substring(0, result.length - 3) + "...";
+            result = result.substring(0, result.length - 3) + '...';
         } 
         return result;
     }
 
-    wrapText(text, canvas, x, y, maxWidth, lineHeight) {
-        var line = ""; 
-        var widthPerCharacter = canvas.measureText(CanvasUtils.MEASURE_STRING).width / CanvasUtils.MEASURE_STRING.length;
+    /**
+     * Wraps a text inside a given area
+     * 
+     * @param {CanvasRenderingContext2D} canvas 
+     * @param {String} text 
+     * @param {Number} x 
+     * @param {Number} y 
+     * @param {Number} maxWidth 
+     * @param {Number} lineHeight 
+     */
+    wrapText(canvas, text, x, y, maxWidth, lineHeight) {
+        var line = ''; 
+        var widthPerCharacter = this.getWidthPerCharacter(canvas);
         var maxCharactersPerLine = maxWidth / widthPerCharacter - 1;
         var index = 0;
         var newIndex = 0;
@@ -39,7 +58,7 @@ export default class CanvasUtils {
             line = text.substring(index, newIndex);
             index = newIndex;
             // cutoff leading space
-            if(line.startsWith(" ")) {
+            if(line.startsWith(' ')) {
                 line = line.substring(1,line.length-1);
             }
             // if we reached the end print out the line 
@@ -48,14 +67,14 @@ export default class CanvasUtils {
                 break;
             }
             // lucky we sliced at a space
-            if(line.endsWith(" ")) {
+            if(line.endsWith(' ')) {
                 canvas.fillText(line, x, y);
                 y += lineHeight;
                 continue;
             } 
             // go back to find space first space
             for(var i=line.length-1; i>=0; i--) {
-                if(line[i] === " ") {
+                if(line[i] === ' ') {
                     canvas.fillText(line.substring(0, i), x, y);
                     y += lineHeight;
                     break;

@@ -302,7 +302,7 @@ export default class TV extends Component {
                     stateUpdateHandler={this.stateUpdateHandler}
                     channelPosition={this.state.channelPosition} />}
 
-                <video id="myVideo" width={this.getWidth()} height={this.getHeight()} preload autoplay></video>
+                <video id="myVideo" width={this.getWidth()} height={this.getHeight()} autoplay></video>
             </div>
         );
     }

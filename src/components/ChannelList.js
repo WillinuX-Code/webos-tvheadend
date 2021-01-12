@@ -171,53 +171,44 @@ export default class ChannelList extends Component {
         }
 
         // channel number
-        let channelNumberRect = new Rect();
-        channelNumberRect.top = drawingRect.top + drawingRect.height / 2 - this.mChannelLayoutNumberTextSize / 2;
-        channelNumberRect.bottom = channelNumberRect.top + this.mChannelLayoutNumberTextSize;
-        channelNumberRect.left = drawingRect.left;
-        channelNumberRect.right = drawingRect.left + 70;
-        canvas.font = 'bold ' + this.mChannelLayoutNumberTextSize + 'px Arial';
-        canvas.fillStyle = this.mChannelLayoutTextColor;
-        canvas.textAlign = 'right';
-        canvas.fillText(channel.getChannelID(), channelNumberRect.right, channelNumberRect.top + channelNumberRect.height * 0.75);
-        this.drawDebugRect(canvas, channelNumberRect);
+        this.canvasUtils.writeText(canvas, channel.getChannelID(), drawingRect.left + 70, drawingRect.middle, {
+            fontSize: this.mChannelLayoutNumberTextSize,
+            textAlign: 'right',
+            fillStyle: this.mChannelLayoutTextColor,
+            isBold: true
+        });
 
         // channel name
-        let channelNameRect = new Rect(drawingRect.top, channelNumberRect.right + 20, drawingRect.top + this.mChannelLayoutTextSize, drawingRect.right);
-        channelNameRect.top = drawingRect.top + this.mChannelLayoutTextSize / 2;
-        channelNameRect.bottom = channelNameRect.top + this.mChannelLayoutTextSize;
-        channelNameRect.left = channelNumberRect.right + 20;
-        channelNameRect.right = this.mChannelLayoutWidth - this.mChannelLayoutHeight * 1.3 - this.mChannelLayoutPadding;
-        canvas.font = 'bold ' + this.mChannelLayoutTextSize + 'px Arial';
-        canvas.textAlign = 'left';
-        canvas.fillText(this.canvasUtils.getShortenedText(canvas, channel.getName(), channelNameRect.width), channelNameRect.left, channelNameRect.top + channelNameRect.height * 0.75);
-        this.drawDebugRect(canvas, channelNameRect);
+        let channelIconWidth = this.mChannelLayoutHeight * 1.3;
+        let channelNameWidth = this.mChannelLayoutWidth - channelIconWidth - 90 - this.mChannelLayoutPadding;
+        let channelNameText = this.canvasUtils.getShortenedText(canvas, channel.getName(), channelNameWidth);
+        this.canvasUtils.writeText(canvas, channelNameText, drawingRect.left + 90, drawingRect.top + this.mChannelLayoutHeight * 0.33, {
+            fontSize: this.mChannelLayoutTextSize,
+            fillStyle: this.mChannelLayoutTextColor,
+            isBold: true
+        });
 
         // channel event
-        canvas.font = this.mChannelLayoutEventTextSize + 'px Arial';
-        canvas.fillStyle = isSelectedChannel ? this.mChannelLayoutTextColor : this.mChannelLayoutTitleTextColor;
-        canvas.textAlign = 'left';
         for (let event of channel.getEvents()) {
             if (event.isCurrent()) {
                 // channel event progress bar
                 let channelEventProgressRect = new Rect();
-                channelEventProgressRect.left = channelNameRect.left;
+                channelEventProgressRect.left = drawingRect.left + 90;
                 channelEventProgressRect.right = channelEventProgressRect.left + 80;
-                channelEventProgressRect.top = channelNameRect.bottom + this.mChannelLayoutPadding;
+                channelEventProgressRect.top = drawingRect.top + this.mChannelLayoutHeight * 0.66;
                 channelEventProgressRect.bottom = channelEventProgressRect.top + this.mChannelLayoutEventTextSize * 0.5;
                 canvas.strokeStyle = this.mChannelLayoutTextColor;
                 canvas.strokeRect(channelEventProgressRect.left, channelEventProgressRect.top, channelEventProgressRect.width, channelEventProgressRect.height);
+                canvas.fillStyle = isSelectedChannel ? this.mChannelLayoutTextColor : this.mChannelLayoutTitleTextColor;
                 canvas.fillRect(channelEventProgressRect.left + 2, channelEventProgressRect.top + 2, (channelEventProgressRect.width - 4) * event.getDoneFactor(), channelEventProgressRect.height - 4);
 
                 // channel event text
-                let channelEventRect = channelEventProgressRect.clone();
-                channelEventRect.right = this.mChannelLayoutWidth - this.mChannelLayoutHeight * 1.3 - this.mChannelLayoutPadding;
-                channelEventRect.left = channelEventProgressRect.right + this.mChannelLayoutPadding;
-                channelEventRect.top -= 0.25 * this.mChannelLayoutEventTextSize;
-                channelEventRect.bottom += 0.25 * this.mChannelLayoutEventTextSize;
-                canvas.fillText(this.canvasUtils.getShortenedText(canvas, event.getTitle(), channelEventRect.width),
-                channelEventRect.left, channelEventRect.top + channelEventRect.height * 0.75);
-                this.drawDebugRect(canvas, channelEventRect);
+                let channelEventWidth = this.mChannelLayoutWidth - channelIconWidth - 90 - channelEventProgressRect.width - this.mChannelLayoutPadding;
+                let channelEventText = this.canvasUtils.getShortenedText(canvas, event.getTitle(), channelEventWidth);
+                this.canvasUtils.writeText(canvas, channelEventText, channelEventProgressRect.right + this.mChannelLayoutPadding, channelEventProgressRect.middle, {
+                    fontSize: this.mChannelLayoutEventTextSize,
+                    fillStyle: canvas.fillStyle
+                });
 
                 break;
             }
@@ -227,7 +218,6 @@ export default class ChannelList extends Component {
         let imageURL = channel.getImageURL();
         let image = this.imageCache.get(imageURL);
         if (image !== undefined) {
-            canvas.textAlign = 'left';
             let channelImageRect = this.getDrawingRectForChannelImage(position, image);
             canvas.drawImage(image, channelImageRect.left, channelImageRect.top, channelImageRect.width, channelImageRect.height);
             this.drawDebugRect(canvas, channelImageRect);

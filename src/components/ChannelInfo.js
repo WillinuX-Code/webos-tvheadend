@@ -10,10 +10,10 @@ export default class ChannelInfo extends Component {
         super(props);
 
         this.handleKeyPress = this.handleKeyPress.bind(this);
-        this.stateUpdateHandler = props.stateUpdateHandler;
-        this.epgData = props.epgData;
-        this.imageCache = props.imageCache;
-        this.channelPosition = props.channelPosition;
+        this.stateUpdateHandler = this.props.stateUpdateHandler;
+        this.epgData = this.props.epgData;
+        this.imageCache =this.props.imageCache;
+        this.channelPosition = this.props.channelPosition;
         this.epgUtils = new EPGUtils(this.epgData.getLocale());
         this.canvasUtils = new CanvasUtils();
 

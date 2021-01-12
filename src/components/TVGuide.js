@@ -25,11 +25,11 @@ export default class TVGuide extends Component {
     constructor(props) {
         super(props);
 
-        this.stateUpdateHandler = props.stateUpdateHandler;
+        this.stateUpdateHandler = this.props.stateUpdateHandler;
         this.handleClick = this.handleClick.bind(this);
         this.handleScroll = this.handleScroll.bind(this);
         this.handleKeyPress = this.handleKeyPress.bind(this);
-        this.epgData = props.epgData;
+        this.epgData = this.props.epgData;
         this.epgUtils = new EPGUtils(this.epgData.getLocale());
         this.canvasUtils = new CanvasUtils();
         // read settings from storage
@@ -38,10 +38,10 @@ export default class TVGuide extends Component {
         this.scrollX = 0;
         this.scrollY = 0;
         this.timePosition = this.epgUtils.getNow();
-        this.focusedChannelPosition = props.channelPosition;
+        this.focusedChannelPosition = this.props.channelPosition;
         this.focusedEventPosition = -1;
 
-        this.mChannelImageCache = props.imageCache;
+        this.mChannelImageCache = this.props.imageCache;
         this.mClipRect = new Rect();
         this.mDrawingRect = new Rect();
         this.mMeasuringRect = new Rect();
@@ -80,7 +80,6 @@ export default class TVGuide extends Component {
 
         this.reapeater = {};
         //this.resetBoundaries();
-        this.backgroundImage = undefined;
     }
 
     resetBoundaries() {
@@ -226,6 +225,8 @@ export default class TVGuide extends Component {
             drawingRect.top = this.getScrollY();
             drawingRect.right = drawingRect.left + this.getWidth();
             drawingRect.bottom = drawingRect.top + this.getHeight();
+            // clear rect
+            canvas.clearRect(0, 0, this.getWidth(), this.getChannelListHeight());
             // draw background
             // canvas.fillStyle = '#000000';
             // canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
@@ -247,21 +248,14 @@ export default class TVGuide extends Component {
      * @param {CanvasRenderingContext2D} canvas 
      * @param {Rect} drawingRect 
      */
-    drawBackground(canvas, drawingRect) {
+    async drawBackground(canvas, drawingRect) {
         drawingRect.left = this.getScrollX();
         drawingRect.top = this.getScrollY();
         drawingRect.right = drawingRect.left + this.getWidth();
         drawingRect.bottom = drawingRect.top + this.getHeight();
 
-        // draw background from cache
-        if (this.backgroundImage) {
-            canvas.drawImage(this.backgroundImage, drawingRect.left, drawingRect.top, drawingRect.right, drawingRect.bottom);
-            return;
-        }
-
-        canvas.fillStyle = '#000000';
-        canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
-
+        // canvas.fillStyle = '#000000';
+        // canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
         // channel Background
         this.mMeasuringRect.left = this.getScrollX();
         this.mMeasuringRect.top = this.getScrollY();
@@ -313,11 +307,6 @@ export default class TVGuide extends Component {
         // Background
         canvas.fillStyle = this.mChannelLayoutBackground
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
-
-        // cache image
-        var backgroundImage = new Image();
-        backgroundImage.src = this.refs.canvas.toDataURL();
-        this.backgroundImage = backgroundImage;
     }
     drawDetails(canvas, drawingRect) {
         // Background
@@ -767,7 +756,6 @@ export default class TVGuide extends Component {
     recalculateAndRedraw(withAnimation) {
         if (this.epgData !== null && this.epgData.hasData()) {
             //this.resetBoundaries();
-
             this.calculateMaxVerticalScroll();
             this.calculateMaxHorizontalScroll();
 
@@ -969,6 +957,7 @@ export default class TVGuide extends Component {
 
     componentDidMount() {
         //this.updateCanvas();
+        //this.resetBoundaries();
         this.recalculateAndRedraw(false);
         this.focusEPG();
     }

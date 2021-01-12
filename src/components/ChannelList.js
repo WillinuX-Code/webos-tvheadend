@@ -180,12 +180,12 @@ export default class ChannelList extends Component {
 
         // channel name
         let channelIconWidth = this.mChannelLayoutHeight * 1.3;
-        let channelNameWidth = this.mChannelLayoutWidth - channelIconWidth - 90 - this.mChannelLayoutPadding;
-        let channelNameText = this.canvasUtils.getShortenedText(canvas, channel.getName(), channelNameWidth);
-        this.canvasUtils.writeText(canvas, channelNameText, drawingRect.left + 90, drawingRect.top + this.mChannelLayoutHeight * 0.33, {
+        let channelNameWidth = this.mChannelLayoutWidth - channelIconWidth - 90;
+        this.canvasUtils.writeText(canvas, channel.getName(), drawingRect.left + 90, drawingRect.top + this.mChannelLayoutHeight * 0.33, {
             fontSize: this.mChannelLayoutTextSize,
             fillStyle: this.mChannelLayoutTextColor,
-            isBold: true
+            isBold: true,
+            maxWidth: channelNameWidth
         });
 
         // channel event
@@ -203,11 +203,12 @@ export default class ChannelList extends Component {
                 canvas.fillRect(channelEventProgressRect.left + 2, channelEventProgressRect.top + 2, (channelEventProgressRect.width - 4) * event.getDoneFactor(), channelEventProgressRect.height - 4);
 
                 // channel event text
-                let channelEventWidth = this.mChannelLayoutWidth - channelIconWidth - 90 - channelEventProgressRect.width - this.mChannelLayoutPadding;
-                let channelEventText = this.canvasUtils.getShortenedText(canvas, event.getTitle(), channelEventWidth);
-                this.canvasUtils.writeText(canvas, channelEventText, channelEventProgressRect.right + this.mChannelLayoutPadding, channelEventProgressRect.middle, {
+                canvas.fontSize = this.mChannelLayoutEventTextSize;
+                let channelEventWidth = this.mChannelLayoutWidth - channelIconWidth - 90 - channelEventProgressRect.width;
+                this.canvasUtils.writeText(canvas, event.getTitle(), channelEventProgressRect.right + this.mChannelLayoutPadding, channelEventProgressRect.middle, {
                     fontSize: this.mChannelLayoutEventTextSize,
-                    fillStyle: canvas.fillStyle
+                    fillStyle: canvas.fillStyle,
+                    maxWidth: channelEventWidth
                 });
 
                 break;

@@ -226,7 +226,7 @@ export default class TVGuide extends Component {
             drawingRect.right = drawingRect.left + this.getWidth();
             drawingRect.bottom = drawingRect.top + this.getHeight();
             // clear rect
-            canvas.clearRect(0, 0, this.getWidth(), this.getChannelListHeight());
+            //canvas.clearRect(0, 0, this.getWidth(), this.getChannelListHeight());
             // draw background
             // canvas.fillStyle = '#000000';
             // canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
@@ -254,8 +254,8 @@ export default class TVGuide extends Component {
         drawingRect.right = drawingRect.left + this.getWidth();
         drawingRect.bottom = drawingRect.top + this.getHeight();
 
-        // canvas.fillStyle = '#000000';
-        // canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
+        canvas.fillStyle = '#000000';
+        canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
         // channel Background
         this.mMeasuringRect.left = this.getScrollX();
         this.mMeasuringRect.top = this.getScrollY();

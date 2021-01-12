@@ -21,7 +21,7 @@ export default class ChannelInfo extends Component {
         this.mChannelInfoTitleSize = 42;
         this.mChannelLayoutTextColor = '#d6d6d6';
         this.mChannelLayoutTitleTextColor = '#969696';
-        this.mChannelInfoTimeBoxWidth = 200;
+        this.mChannelInfoTimeBoxWidth = 270;
         //this.mChannelLayoutTitleTextColor = '#c6c6c6';
         this.mChannelLayoutMargin = 3;
         this.mChannelLayoutPadding = 7;

@@ -96,7 +96,9 @@ export default class CanvasUtils {
      *          fontFace: String, 
      *          textAlign: 'center'|'end'|'left'|'right'|'start', 
      *          textBaseline: 'alphabetic'|'top'|'hanging'|'middle'|'ideographic'|'bottom', 
-     *          isBold: Boolean}} options
+     *          isBold: Boolean
+     *          maxWidth: Number}} options
+     * @param 
      */
     writeText(canvas, text, x, y, options) {
         // set default options
@@ -106,6 +108,7 @@ export default class CanvasUtils {
         options.fillStyle = options.fillStyle || '#FFFFFF';
         options.fontSize = options.fontSize || 20;
         options.isBold = options.isBold !== undefined || false;
+        options.maxWidth = options.maxWidth || -1;
 
         // remember old text style
         let oldFont = canvas.font;
@@ -120,7 +123,9 @@ export default class CanvasUtils {
         canvas.textAlign = options.textAlign;
         canvas.textBaseline = options.textBaseline;
 
-        // write text
+        if(options.maxWidth > -1) {
+            text = this.getShortenedText(canvas, text, options.maxWidth);
+        }
         canvas.fillText(text, x, y);
 
         // reset text style

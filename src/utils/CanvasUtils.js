@@ -25,7 +25,7 @@ export default class CanvasUtils {
         var textLength = canvas.measureText(result).width;
         if (textLength > maxWidth) {
             var overLength = textLength - maxWidth;
-            // if(text.startsWith('Sebas')) {
+            // if(text.startsWith('Hitler und Luden')) {
             //     console.log('text: "%s" maxWidth: %d, textWidth: %d, deltaWidth: %d, widthPerCharacter: %d, textLength: %d, textOverLength: %d', text, maxWidth, textLength, overLength, widthPerCharacter, result.length, overLength/widthPerCharacter);
             // }
             result = result.substring(0, result.length - 1 - parseInt(overLength/widthPerCharacter));
@@ -108,7 +108,7 @@ export default class CanvasUtils {
         options.fillStyle = options.fillStyle || '#FFFFFF';
         options.fontSize = options.fontSize || 20;
         options.isBold = options.isBold !== undefined || false;
-        options.maxWidth = options.maxWidth || -1;
+        options.maxWidth = options.maxWidth || undefined;
 
         // remember old text style
         let oldFont = canvas.font;
@@ -123,8 +123,14 @@ export default class CanvasUtils {
         canvas.textAlign = options.textAlign;
         canvas.textBaseline = options.textBaseline;
 
-        if(options.maxWidth > -1) {
-            text = this.getShortenedText(canvas, text, options.maxWidth);
+        if(options.maxWidth) {
+            // fix negative width
+            if(options.maxWidth <= 0) {
+                options.maxWidth = 0;
+                text = "";
+            } else {
+                text = this.getShortenedText(canvas, text, options.maxWidth);
+            }
         }
         canvas.fillText(text, x, y);
 

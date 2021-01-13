@@ -231,18 +231,18 @@ export default class TV extends Component {
      */
     enterChannelNumberPart(digit) {
         if (this.state.channelNumberText.length < 3) {
-            let newChannelHeaderText = this.state.channelNumberText + digit;
+            let newChannelNumberText = this.state.channelNumberText + digit;
             this.stateUpdateHandler({
-                channelNumberText: newChannelHeaderText
+                channelNumberText: newChannelNumberText
             });
-            this.channelHeader.current && this.channelHeader.current.updateChannelNumberText(newChannelHeaderText);
+            this.channelHeader.current && this.channelHeader.current.updateChannelNumberText(newChannelNumberText);
 
             // automatically switch to new channel after 3 seconds
             this.timeoutChangeChannel = setTimeout(() => {
-                let channelPosition = parseInt(newChannelHeaderText) - 1;
+                let channelNumber = parseInt(newChannelNumberText) - 1;
                 
-                this.epgData.channels.forEach(channel => {
-                    if (channel.getChannelID() === channelPosition) {
+                this.epgData.channels.forEach((channel, channelPosition) => {
+                    if (channel.getChannelID() === channelNumber) {
                         this.changeChannelPosition(channelPosition);
                     }
                 });
@@ -255,10 +255,12 @@ export default class TV extends Component {
             return;
         }
 
+        let channel = this.epgData.getChannel(channelPosition);
+
         this.stateUpdateHandler({
             isInfoState: true,
             channelPosition: channelPosition,
-            channelNumberText: channelPosition + 1
+            channelNumberText: channel ? channel.getChannelID() : ''
         });
 
         // store last used channel

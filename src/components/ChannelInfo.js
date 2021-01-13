@@ -81,7 +81,6 @@ export default class ChannelInfo extends Component {
         drawingRect.right -= this.mChannelLayoutMargin;
         drawingRect.bottom -= this.mChannelLayoutMargin;
 
-
         let channel = this.epgData.getChannel(this.channelPosition);
 
         // channel number
@@ -214,7 +213,11 @@ export default class ChannelInfo extends Component {
             channelNumberText: ''
         }), 8 * 1000);
         this.intervalReference = setInterval(() => this.updateCanvas(), 500);
-        this.stateUpdateHandler({channelNumberText: this.channelPosition + 1});
+
+        let channel = this.epgData.getChannel(this.channelPosition);
+        this.stateUpdateHandler({ 
+            channelNumberText: channel ? channel.getChannelID() : ''
+        });
     }
 
     componentDidUpdate(prevProps) {

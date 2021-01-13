@@ -66,12 +66,14 @@ export default class TVGuide extends Component {
         this.mDetailsLayoutPadding = 8;
         this.mDetailsLayoutTextColor = '#d6d6d6';
         this.mDetailsLayoutTitleTextSize = 30;
+        this.mDetailsLayoutSubTitleTextSize = 26;
         this.mDetailsLayoutSubTitleTextColor = '#969696';
         this.mDetailsLayoutDescriptionTextSize = 28;
         this.mDetailsLayoutBackground = '#2d71ac';
 
         this.mTimeBarHeight = 70;
         this.mTimeBarTextSize = 24;
+        this.mTimeBarNowTextSize = 22;
         this.mTimeBarLineWidth = 3;
         this.mTimeBarLineColor = '#c57120';
         this.mTimeBarLinePositionColor = 'rgb(65,182,230)';
@@ -346,14 +348,12 @@ export default class TVGuide extends Component {
             drawingRect.top += this.mDetailsLayoutTitleTextSize + this.mDetailsLayoutMargin;
             drawingRect.right -= this.mDetailsLayoutMargin;
             drawingRect.bottom -= this.mDetailsLayoutMargin;
-
-            // title
-            //drawingRect.top += 5;
             // draw title, description etc
-            canvas.font = "bold " + this.mDetailsLayoutTitleTextSize + "px Arial";
-            canvas.fillStyle = this.mDetailsLayoutTextColor;
-            canvas.fillText(event.getTitle(), drawingRect.left, drawingRect.top);
-
+            this.canvasUtils.writeText(canvas, event.getTitle(), drawingRect.left, drawingRect.top, {
+                fontSize: this.mDetailsLayoutTitleTextSize,
+                isBold: true,
+                fillStyle: this.mDetailsLayoutTextColor
+            });
             if (event.getSubTitle() !== undefined) {
                 this.drawDetailsSubtitle(event.getSubTitle(), canvas, drawingRect);
             }
@@ -368,31 +368,34 @@ export default class TVGuide extends Component {
         let drect = drawingRect.clone();
         drect.left = drawingRect.left;
         drect.right = this.getWidth() - 10;
-        drect.top += this.mDetailsLayoutTitleTextSize * 2 + 3 * 5;
+        drect.top += (this.mDetailsLayoutTitleTextSize + this.mDetailsLayoutPadding) * 2 + 3;
         // draw title, description etc
         canvas.font = this.mDetailsLayoutDescriptionTextSize + "px Arial";
         canvas.fillStyle = this.mDetailsLayoutTextColor;
         this.canvasUtils.wrapText(canvas, description, drect.left, drect.top, drect.width, this.mDetailsLayoutTitleTextSize + 5);
-        //canvas.fillText(description, drect.left, drect.top);
     }
 
     drawDetailsTimeInfo(event, canvas, drawingRect) {
         let tDrawingRect = drawingRect.clone();
         tDrawingRect.right = this.getWidth() - 10;
-        canvas.font = "bold " + this.mDetailsLayoutTitleTextSize + "px Arial";
-        canvas.textAlign = "right";
-        canvas.fillText(this.epgUtils.toTimeFrameString(event.getStart(), event.getEnd()), tDrawingRect.right, tDrawingRect.top);
-        canvas.textAlign = "left";
+        let timeFrameText = this.epgUtils.toTimeFrameString(event.getStart(), event.getEnd());
+        this.canvasUtils.writeText(canvas, timeFrameText, tDrawingRect.right, tDrawingRect.top, {
+            fontSize: this.mDetailsLayoutTitleTextSize,
+            textAlign: "right",
+            isBold: true
+        });
     }
 
     drawDetailsSubtitle(subtitle, canvas, drawingRect) {
         let drect = drawingRect.clone();
         drect.left = drect.left;
-        drect.top += this.mDetailsLayoutTitleTextSize + 5;
-        // draw title, description etc
-        canvas.font = (this.mDetailsLayoutTitleTextSize - 4) + "px Arial";
-        canvas.fillStyle = this.mDetailsLayoutSubTitleTextColor;
-        canvas.fillText(this.canvasUtils.getShortenedText(canvas, subtitle, drect.width), drect.left, drect.top);
+        drect.top += this.mDetailsLayoutTitleTextSize + this.mDetailsLayoutPadding;
+        this.canvasUtils.writeText(canvas, subtitle, drect.left, drect.top, {
+            fontSize: this.mDetailsLayoutSubTitleTextSize,
+            fillStyle: this.mDetailsLayoutSubTitleTextColor,
+            isBold: true,
+            maxWidth: drect.width
+        });
     }
 
     drawTimebar(canvas, drawingRect) {
@@ -401,23 +404,23 @@ export default class TVGuide extends Component {
         drawingRect.top = this.getScrollY();
         drawingRect.right = drawingRect.left + this.getWidth();
         drawingRect.bottom = drawingRect.top + this.mTimeBarHeight;
-
-        // Time stamps
-        //mPaint.setColor(mEventLayoutTextColor);
-        //mPaint.setTextSize(mTimeBarTextSize);
-        canvas.font = "bold " + this.mTimeBarTextSize + "px Arial";
-        canvas.fillStyle = this.mEventLayoutTextColor;
-
+        // draw time stamps
         for (let i = 0; i < TVGuide.HOURS_IN_VIEWPORT_MILLIS / TVGuide.TIME_LABEL_SPACING_MILLIS; i++) {
             // Get time and round to nearest half hour
             let time = TVGuide.TIME_LABEL_SPACING_MILLIS *
                 (((this.mTimeLowerBoundary + (TVGuide.TIME_LABEL_SPACING_MILLIS * i)) +
                     (TVGuide.TIME_LABEL_SPACING_MILLIS / 2)) / TVGuide.TIME_LABEL_SPACING_MILLIS);
             time = this.epgUtils.getRoundedDate(30, new Date(time)).getTime();
-            canvas.textAlign = "center";
-            canvas.fillText(this.epgUtils.toTimeString(time),
-                this.getXFrom(time),
-                drawingRect.top + (((drawingRect.bottom - drawingRect.top) / 2) + (this.mTimeBarTextSize / 2)));
+            
+            let timeText = this.epgUtils.toTimeString(time);
+            let x = this.getXFrom(time);
+            let y = drawingRect.middle;  
+            this.canvasUtils.writeText(canvas, timeText, x, y, {
+                fontSize: this.mEventLayoutTextSize,
+                fillStyle: this.mEventLayoutTextColor,
+                textAlign: "center",
+                isBold: true
+            });
         }
 
         this.drawTimebarDayIndicator(canvas, drawingRect);
@@ -431,28 +434,17 @@ export default class TVGuide extends Component {
         drawingRect.bottom = drawingRect.top + this.mTimeBarHeight;
 
         // Background
-        //mPaint.setColor(mChannelLayoutBackground);
         canvas.fillStyle = this.mChannelLayoutBackground;
-        //canvas.drawRect(drawingRect, mPaint);
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
 
         // Text
-        //mPaint.setColor(mEventLayoutTextColor);
-        canvas.fillStyle = this.mEventLayoutTextColor;
-        //mPaint.setTextSize(mTimeBarTextSize);
-        //mPaint.setTextAlign(Paint.Align.CENTER);
-        canvas.textAlign = "center";
-        //canvas.drawText(EPGUtil.getWeekdayName(mTimeLowerBoundary),
-        //drawingRect.left + ((drawingRect.right - drawingRect.left) / 2),
-        //drawingRect.top + (((drawingRect.bottom - drawingRect.top) / 2) + (mTimeBarTextSize / 2)), mPaint);
-        canvas.font = "bold " + this.mTimeBarTextSize + "px Arial";
-        canvas.fillText(this.epgUtils.getWeekdayName(this.mTimeLowerBoundary),
-            drawingRect.left + ((drawingRect.right - drawingRect.left) / 2),
-            drawingRect.top + (((drawingRect.bottom - drawingRect.top) / 2) + (this.mTimeBarTextSize / 2))
-        );
-
-        //mPaint.setTextAlign(Paint.Align.LEFT);
-        canvas.textAlign = "left";
+        let weekdayText = this.epgUtils.getWeekdayName(this.mTimeLowerBoundary);
+        this.canvasUtils.writeText(canvas, weekdayText, drawingRect.center, drawingRect.middle, {
+            fontSize: this.mTimeBarTextSize,
+            fillStyle: this.mEventLayoutTextColor,
+            textAlign: "center",
+            isBold: true
+        });
     }
 
     drawTimebarBottomStroke(canvas, drawingRect) {
@@ -502,16 +494,18 @@ export default class TVGuide extends Component {
         drawingRect.right = drawingRect.left + this.mTimeBarLineWidth;
         drawingRect.bottom = drawingRect.top + this.getChannelListHeight();
 
-        //mPaint.setColor(mTimeBarLineColor);
+        // draw now time stroke
         canvas.fillStyle = this.mTimeBarLinePositionColor;
-        //canvas.drawRect(drawingRect, mPaint);
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
-
-        drawingRect.top += this.mTimeBarTextSize
+        // draw now time text
+        drawingRect.top += this.mTimeBarNowTextSize / 2;
         drawingRect.left = this.getXFrom(this.timePosition) + this.mChannelLayoutPadding;
-        canvas.font = this.mTimeBarTextSize - 2 + "px Arial"
-        canvas.fillText(this.epgUtils.toTimeString(this.timePosition), drawingRect.left, drawingRect.top);
-
+        let timeText = this.epgUtils.toTimeString(this.timePosition);
+        this.canvasUtils.writeText(canvas, timeText, drawingRect.left, drawingRect.top, {
+            fontSize: this.mTimeBarNowTextSize,
+            fillStyle: this.mTimeBarLinePositionColor,
+            isBold: true
+        });
     }
 
     drawEvents(canvas, drawingRect) {
@@ -599,7 +593,7 @@ export default class TVGuide extends Component {
 
         if (this.epgData.isRecording(event)) {
             canvas.fillStyle = this.mEventLayoutRecordingColor;
-            canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, 7);
+            canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, 4);
         }
 
         // Add left and right inner padding
@@ -607,19 +601,11 @@ export default class TVGuide extends Component {
         drawingRect.right -= this.mChannelLayoutPadding;
 
         // Text
-        //mPaint.setColor(mEventLayoutTextColor);
-        canvas.fillStyle = this.mEventLayoutTextColor;
-        //mPaint.setTextSize(mEventLayoutTextSize);
-        canvas.font = this.mEventLayoutTextSize + "px Arial";
-
-        // Move drawing.top so text will be centered (text is drawn bottom>up)
-        //mPaint.getTextBounds(event.getTitle(), 0, event.getTitle().length(), mMeasuringRect);
-        drawingRect.top += (((drawingRect.bottom - drawingRect.top) / 2) + (this.mEventLayoutTextSize / 2));
-
-        let title = event.getTitle();
-        /*title = title.substring(0,
-         mPaint.breakText(title, true, drawingRect.right - drawingRect.left, null));*/
-        canvas.fillText(this.canvasUtils.getShortenedText(canvas, title, drawingRect.width), drawingRect.left, drawingRect.top);
+        this.canvasUtils.writeText(canvas, event.getTitle(), drawingRect.left, drawingRect.middle, {
+            fontSize: this.mEventLayoutTextSize,
+            fillStyle: this.mEventLayoutTextColor,
+            maxWidth: drawingRect.width
+        });
         // if (event.getSubTitle()) {
         //     canvas.font = this.mEventLayoutTextSize - 6 + "px Arial";
         //     canvas.fillText(this.canvasUtils.getShortenedText(canvas, event.getSubTitle(), drawingRect), drawingRect.left, drawingRect.top + 18);
@@ -632,7 +618,6 @@ export default class TVGuide extends Component {
         drawingRect.top = this.getTopFrom(channelPosition);
         drawingRect.right = this.getXFrom(end) - this.mChannelLayoutMargin;
         drawingRect.bottom = drawingRect.top + this.mChannelLayoutHeight;
-
         return drawingRect;
     }
 
@@ -873,7 +858,9 @@ export default class TVGuide extends Component {
         }
         this.focusedEventPosition = programPosition;
         let targetEvent = this.epgData.getEvent(this.getFocusedChannelPosition(), programPosition);
-        this.scrollToTimePosition(targetEvent.getStart() + 1 - this.timePosition);
+        if(targetEvent) {
+            this.scrollToTimePosition(targetEvent.getStart() + 1 - this.timePosition);
+        }
     }
 
     scrollToTimePosition(timeDeltaInMillis) {

@@ -7,10 +7,10 @@
             "enabled": true,
             "create": 1607812784,
             "watched": 0,
-            "start": 1607815800,
+            "start": 1607466600,
             "start_extra": 0,
             "start_real": 1607815710,
-            "stop": 1607817600,
+            "stop": 1607471100,
             "stop_extra": 0,
             "stop_real": 1607817780,
             "duration": 2040,
@@ -20,9 +20,9 @@
             "image": "",
             "fanart_image": "",
             "title": {
-              "ger": "heute-show"
+              "ger": "Markus Lanz"
             },
-            "disp_title": "heute-show",
+            "disp_title": "Markus Lanz",
             "subtitle": {
               "ger": "Nachrichtensatire mit Oliver Welke"
             },

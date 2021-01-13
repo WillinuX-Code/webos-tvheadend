@@ -1,8 +1,12 @@
+import EPGChannel from "./EPGChannel";
+import EPGEvent from "./EPGEvent";
+
 /**
  * Created by satadru on 3/30/17.
  */
-export default class EPGData {
-
+export default class EPGData {  
+    channels: Array<EPGChannel>;
+    
     constructor() {
         this.channelMap = new Map();
         this.channels = [];
@@ -41,11 +45,11 @@ export default class EPGData {
         return events[programPosition];
     }
 
-    isRecording(epgEvent) {
+    isRecording(epgEvent: EPGEvent) {
         return this.getRecording(epgEvent) ? true : false;
     }
 
-    getRecording(epgEvent) {
+    getRecording(epgEvent: EPGEvent) {
         let result;
         this.recordings.forEach(recEvent => {
             if(epgEvent.isMatchingRecording(recEvent)) {
@@ -56,7 +60,7 @@ export default class EPGData {
         return result;
     }
 
-    getEventPosition(channelPosition, event) {
+    getEventPosition(channelPosition: number, event: EPGEvent) {
         let events = this.channels[channelPosition].getEvents();
         for (let i = 0; i < events.length; i++) {
             if (this.isEventSame(event, events[i])) {

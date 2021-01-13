@@ -8,13 +8,13 @@ export default class EPGEvent {
     /**
      * create new Instance
      * 
-     * @param {Number} id 
-     * @param {Number} start 
-     * @param {Number} end 
-     * @param {String} title 
-     * @param {String} description 
-     * @param {String} subTitle 
-     * @param {String} channelUuid 
+     * @param {number} id 
+     * @param {number} start 
+     * @param {number} end 
+     * @param {string} title 
+     * @param {string} description 
+     * @param {string} subTitle 
+     * @param {string} channelUuid 
      */
     constructor(id, start, end, title, description, subTitle, channelUuid) {
         this.id = id;

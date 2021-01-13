@@ -1,15 +1,19 @@
+import EPGEvent from "./EPGEvent";
+
 /**
  * Created by satadru on 3/30/17.
  */
 export default class EPGChannel {
 
+    events: Array<EPGEvent>;
+    
     /**
      * Create new instance
      * 
      * @param {URL} icon 
-     * @param {String} name 
-     * @param {Number} id 
-     * @param {String} uuid 
+     * @param {string} name 
+     * @param {number} id 
+     * @param {string} uuid 
      * @param {URL} streamUrl 
      */
     constructor(icon, name, id, uuid, streamUrl) {
@@ -41,7 +45,7 @@ export default class EPGChannel {
         return this.events;
     }
 
-    addEvent(event) {
+    addEvent(event: EPGEvent) {
         this.events.push(event);
     }
 

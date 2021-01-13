@@ -5,7 +5,8 @@ import EPGEvent from "./EPGEvent";
  * Created by satadru on 3/30/17.
  */
 export default class EPGData {  
-    channels: Array<EPGChannel>;
+    channels: EPGChannel[];
+    recordings: EPGEvent[];
     
     constructor() {
         this.channelMap = new Map();
@@ -25,21 +26,21 @@ export default class EPGData {
         //}
     }
 
-    getChannel(position) {
+    getChannel(position: number) {
         return this.channels[position];
     }
 
-    getEvents(channelPosition) {
+    getEvents(channelPosition: number) {
         let channel = this.channels[channelPosition];
         let events = channel.getEvents();
         return events
     }
 
-    getEventCount(channelPosition) {
+    getEventCount(channelPosition: number) {
         return this.getEvents(channelPosition).length;
     }
 
-    getEvent(channelPosition, programPosition) {
+    getEvent(channelPosition: number, programPosition: number) {
         let channel = this.channels[channelPosition];
         let events = channel.getEvents();
         return events[programPosition];
@@ -50,7 +51,7 @@ export default class EPGData {
     }
 
     getRecording(epgEvent: EPGEvent) {
-        let result;
+        let result: EPGEvent;
         this.recordings.forEach(recEvent => {
             if(epgEvent.isMatchingRecording(recEvent)) {
                 result = recEvent;
@@ -76,7 +77,7 @@ export default class EPGData {
         return this.channels.length;
     }
 
-    isEventSame(event1, event2) {
+    isEventSame(event1: EPGEvent, event2: EPGEvent) {
         if (event1.getStart() === event2.getStart() && event1.getEnd() === event2.getEnd()) {
             return true;
         }
@@ -87,17 +88,17 @@ export default class EPGData {
         return this.getChannelCount() > 0;
     }
 
-    updateChannels(channels) {
+    updateChannels(channels: EPGChannel[]) {
         console.log("updated epg data");
         this.channels = channels;
     }
 
-    updateRecordings(recordings) {
+    updateRecordings(recordings: EPGEvent[]) {
         console.log("updated recordings data");
         this.recordings = recordings;
     }
 
-    updateLanguage(lang) {
+    updateLanguage(lang: string) {
         console.log("updated language data");
         this.lang = lang;
     }

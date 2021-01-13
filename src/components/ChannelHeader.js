@@ -18,7 +18,7 @@ export default class ChannelHeader extends Component {
         this.mChannelHeaderTextSize = 56;
     }
 
-    updateChannelNumberText(numberText) {
+    updateChannelNumberText(numberText: string) {
         this.channelNumberText = numberText;
         this.resetUnmountTimeout();
     }

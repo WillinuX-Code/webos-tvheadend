@@ -43,7 +43,7 @@ export default class ChannelSettings extends Component {
        
     }
 
-    handleTextChange(object) {
+    textChangeHandler = (object) => {
         this.updateAutomaticUnmount();
 
         // disable previous track
@@ -56,9 +56,9 @@ export default class ChannelSettings extends Component {
         }));
         // do not pass this event further
         return false;
-    }
+    };
 
-    handleAudioChange(object) {
+    audioChangeHandler = (object) => {
         this.updateAutomaticUnmount();
         // disable previous track
         this.audioTracks[this.state.selectedAudioTrack].enabled = false;
@@ -72,25 +72,25 @@ export default class ChannelSettings extends Component {
         localStorage.setItem(this.state.channelName, object.value);
         // do not pass this event further
         return false;
-    }
+    };
 
     componentDidMount() {
         // automatic unmount
         this.updateAutomaticUnmount();
     }
 
-    unmountHandler() {
+    unmountHandler = () => {
         // clear timeout before unmount
         clearTimeout(this.timeoutId);
 
         this.props.stateUpdateHandler({
             isChannelSettingsState: false
         });
-    }
+    };
 
     updateAutomaticUnmount() {
         clearTimeout(this.timeoutId);
-        this.timeoutId = setTimeout(this.unmountHandler.bind(this), 7000);
+        this.timeoutId = setTimeout(this.unmountHandler, 7000);
     }
 
     componentDidUpdate(prevProps) {
@@ -108,7 +108,7 @@ export default class ChannelSettings extends Component {
                 {this.audioTracksDisplay.length > 0 &&
                     <>
                         <Icon>audio</Icon>
-                        <Picker defaultValue={this.state.selectedAudioTrack} onChange={this.handleAudioChange.bind(this)} size="large">
+                        <Picker defaultValue={this.state.selectedAudioTrack} onChange={this.audioChangeHandler} size="large">
                             {this.audioTracksDisplay}
                         </Picker>
                     </>
@@ -117,7 +117,7 @@ export default class ChannelSettings extends Component {
                 {this.textTracksDisplay.length > 0 &&
                     <>
                         <Icon>sub</Icon>
-                        <Picker defaultValue={this.state.selectedTextTrack} onChange={this.handleTextChange.bind(this)} size="large">
+                        <Picker defaultValue={this.state.selectedTextTrack} onChange={this.textChangeHandler} size="large">
                             {this.textTracksDisplay}
                         </Picker>
                     </>

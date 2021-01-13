@@ -5,11 +5,14 @@ import ChannelHeader from './ChannelHeader';
 import ChannelList from './ChannelList';
 import ChannelSettings from './ChannelSettings';
 import EPGUtils from '../utils/EPGUtils';
+import EPGData from '../models/EPGData';
 import '../styles/app.css';
 
 export default class TV extends Component {
 
-    static STORAGE_KEY_LAST_CHANNEL = "lastChannel";
+    static STORAGE_KEY_LAST_CHANNEL = 'lastChannel';
+
+    epgData: EPGData;
 
     constructor(props) {
         super(props);
@@ -31,9 +34,7 @@ export default class TV extends Component {
             // ],
             audioTracks: [],
             textTracks: [],
-        }
-        this.handleKeyPress = this.handleKeyPress.bind(this);
-        this.stateUpdateHandler = this.stateUpdateHandler.bind(this);
+        };
 
         this.tvhService = props.tvhService;
         this.epgData = props.epgData;
@@ -53,6 +54,7 @@ export default class TV extends Component {
         this.initVideoElement();
         this.focus();
     }
+
     getWidth() {
         return window.innerWidth;
     }
@@ -98,15 +100,13 @@ export default class TV extends Component {
         //this.setFocus();
     }
 
-    stateUpdateHandler(newState) {
-        this.setState((state, props) => (newState));
-    }
+    stateUpdateHandler = (newState) => this.setState((state, props) => newState);
 
     focus() {
         this.refs.video && this.refs.video.focus();
     }
 
-    handleKeyPress(event) {
+    handleKeyPress = (event: KeyboardEvent) => {
         let keyCode = event.keyCode;
         let channelPosition = this.state.channelPosition;
 
@@ -250,7 +250,7 @@ export default class TV extends Component {
         }
     }
 
-    changeChannelPosition(channelPosition) {
+    changeChannelPosition(channelPosition: number) {
         if (channelPosition === this.state.channelPosition) {
             return;
         }

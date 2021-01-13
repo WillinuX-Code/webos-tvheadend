@@ -73,11 +73,11 @@ export default class EPGEvent {
         return this.channelUuid;
     }
 
-    isMatchingRecording(epgEvent) {
+    isMatchingRecording(epgEvent: EPGEvent) {
         return epgEvent.getStart() === this.getStart() && epgEvent.getEnd() === this.getEnd() && epgEvent.getChannelUuid() === this.getChannelUuid();
     }
 
-    isPastDated(now) {
+    isPastDated(now: number) {
         return now >= this.getEnd();
     }
 }

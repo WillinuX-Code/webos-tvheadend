@@ -5,7 +5,7 @@ import EPGEvent from "./EPGEvent";
  */
 export default class EPGChannel {
 
-    events: Array<EPGEvent>;
+    events: EPGEvent[];
     
     /**
      * Create new instance

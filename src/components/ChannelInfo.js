@@ -9,7 +9,6 @@ export default class ChannelInfo extends Component {
     constructor(props) {
         super(props);
 
-        this.handleKeyPress = this.handleKeyPress.bind(this);
         this.stateUpdateHandler = this.props.stateUpdateHandler;
         this.epgData = this.props.epgData;
         this.imageCache =this.props.imageCache;
@@ -33,7 +32,7 @@ export default class ChannelInfo extends Component {
         this.intervalReference = {};
     }
 
-    handleKeyPress(event) {
+    handleKeyPress = (event: KeyboardEvent) => {
         let keyCode = event.keyCode;
 
         switch (keyCode) {

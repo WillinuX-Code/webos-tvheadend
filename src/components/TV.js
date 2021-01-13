@@ -12,7 +12,7 @@ export default class TV extends Component {
 
     static STORAGE_KEY_LAST_CHANNEL = 'lastChannel';
 
-    epgData: EPGData;
+    epgData;
 
     constructor(props) {
         super(props);
@@ -106,7 +106,7 @@ export default class TV extends Component {
         this.refs.video && this.refs.video.focus();
     }
 
-    handleKeyPress = (event: KeyboardEvent) => {
+    handleKeyPress = (event) => {
         let keyCode = event.keyCode;
         let channelPosition = this.state.channelPosition;
 
@@ -250,7 +250,7 @@ export default class TV extends Component {
         }
     }
 
-    changeChannelPosition(channelPosition: number) {
+    changeChannelPosition(channelPosition) {
         if (channelPosition === this.state.channelPosition) {
             return;
         }

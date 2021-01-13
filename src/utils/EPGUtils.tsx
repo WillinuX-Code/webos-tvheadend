@@ -3,12 +3,12 @@
  */
 export default class EPGUtils {
 
-    constructor(locale) {
-        this.locale = locale || "en-US";
+    constructor(private locale: string = "en-US") {
+
     }
 
-    getWeekdayName(dateMillis) {
-        var userLang = navigator.language || navigator.userLanguage;
+    getWeekdayName(dateMillis: number) {
+        var userLang = navigator.language;
         userLang = userLang.substring(0, 2);
         let dayMap = new Map();
         dayMap.set('de', ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']);
@@ -23,8 +23,8 @@ export default class EPGUtils {
         return days[date.getDay()];
     }
 
-    scaleBetween(unscaledNum, max, min = 0, minAllowed = 0, maxAllowed = 3840) {
-        return parseInt((maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed);
+    scaleBetween(unscaledNum: number, max: number, min = 0, minAllowed = 0, maxAllowed = 3840) {
+        return ((maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed);
     }
 
     /**
@@ -33,7 +33,7 @@ export default class EPGUtils {
      * @param {Number} minutes 
      * @param {Date} d
      */
-    getRoundedDate(minutes, d = new Date()) {
+    getRoundedDate(minutes: number, d = new Date()) {
         let ms = 1000 * 60 * minutes; // convert minutes to ms
         let roundedDate = new Date(Math.round(d.getTime() / ms) * ms);
         return roundedDate
@@ -43,7 +43,7 @@ export default class EPGUtils {
      * 
      * @param {Number} time 
      */
-    toTimeString(time) {
+    toTimeString(time: number) {
         let options = {
             hour: '2-digit',
             minute: '2-digit'
@@ -57,11 +57,11 @@ export default class EPGUtils {
      * @param {Number} start 
      * @param {Number} stop 
      */
-    toTimeFrameString(start, stop) {
+    toTimeFrameString(start: number, stop: number) {
         return this.toTimeString(start) + " - " + this.toTimeString(stop);
     }
 
-    toDuration(start, end) {
+    toDuration(start: number, end: number) {
         let date = new Date(end - start);
         var result = "";
         if (date.getUTCHours() > 0) {

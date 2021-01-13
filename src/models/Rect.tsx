@@ -3,19 +3,8 @@
  */
 export default class Rect {
 
-    /**
-     * create new instance
-     * 
-     * @param {Number} top 
-     * @param {Number} left 
-     * @param {Number} bottom 
-     * @param {Number} right 
-     */
-    constructor(top = 0, left = 0, bottom = 0, right = 0) {
-        this._top = top;
-        this._left = left;
-        this._bottom = bottom;
-        this._right = right;
+    constructor(private _top = 0, private _left = 0, private _bottom = 0, private _right = 0) {
+
     }
 
     get top() {

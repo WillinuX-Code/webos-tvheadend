@@ -5,14 +5,14 @@ import EPGEvent from "./EPGEvent";
  * Created by satadru on 3/30/17.
  */
 export default class EPGData {  
-    channels: EPGChannel[];
-    recordings: EPGEvent[];
+    private channels: EPGChannel[];
+    private recordings: EPGEvent[];
+    private language: string;
     
     constructor() {
-        this.channelMap = new Map();
         this.channels = [];
         this.recordings = [];
-        this.lang = "en-US";
+        this.language = "en-US";
         //new MockDataService().getChannels(this.channels);
         //if (this.data) {
             /*this.data.forEach((values, key) => {
@@ -51,7 +51,7 @@ export default class EPGData {
     }
 
     getRecording(epgEvent: EPGEvent) {
-        let result: EPGEvent;
+        let result: EPGEvent | null = null;
         this.recordings.forEach(recEvent => {
             if(epgEvent.isMatchingRecording(recEvent)) {
                 result = recEvent;
@@ -98,12 +98,12 @@ export default class EPGData {
         this.recordings = recordings;
     }
 
-    updateLanguage(lang: string) {
+    updateLanguage(language: string) {
         console.log("updated language data");
-        this.lang = lang;
+        this.language = language;
     }
 
     getLocale() {
-        return this.lang;
+        return this.language;
     }
 }

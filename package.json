@@ -46,6 +46,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react": "^17.0.0",
     "eslint-plugin-baseui": "^9.106.3"
   }
 }

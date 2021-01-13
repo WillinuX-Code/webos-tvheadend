@@ -5,23 +5,9 @@ import EPGEvent from "./EPGEvent";
  */
 export default class EPGChannel {
 
-    events: EPGEvent[];
-    
-    /**
-     * Create new instance
-     * 
-     * @param {URL} icon 
-     * @param {string} name 
-     * @param {number} id 
-     * @param {string} uuid 
-     * @param {URL} streamUrl 
-     */
-    constructor(icon, name, id, uuid, streamUrl) {
-        this.id = id;
-        this.name = name;
-        this.icon = icon;
-        this.uuid = uuid;
-        this.streamUrl = streamUrl;
+    private events: EPGEvent[];
+
+    constructor(private icon: URL, private name: string, private id: number, private uuid: string, private streamUrl: URL) {
         this.events = [];
     }
 

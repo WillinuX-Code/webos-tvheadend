@@ -5,26 +5,15 @@ import EPGUtils from "../utils/EPGUtils";
  */
 export default class EPGEvent {
 
-    /**
-     * create new Instance
-     * 
-     * @param {number} id 
-     * @param {number} start 
-     * @param {number} end 
-     * @param {string} title 
-     * @param {string} description 
-     * @param {string} subTitle 
-     * @param {string} channelUuid 
-     */
-    constructor(id, start, end, title, description, subTitle, channelUuid) {
-        this.id = id;
-        this.title = title;
-        this.start = start;
-        this.end = end;
-        this.description = description;
-        this.subTitle = subTitle;
-        this.channelUuid = channelUuid;
+    private epgUtils: EPGUtils;
 
+    constructor(private id: number, 
+                private start: number, 
+                private end: number, 
+                private title: string, 
+                private description: string, 
+                private subTitle: string, 
+                private channelUuid: string) {
         this.epgUtils = new EPGUtils();
     }
 

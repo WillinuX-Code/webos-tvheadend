@@ -32,7 +32,7 @@ export default class ChannelInfo extends Component {
         this.intervalReference = {};
     }
 
-    handleKeyPress = (event: KeyboardEvent) => {
+    handleKeyPress = (event) => {
         let keyCode = event.keyCode;
 
         switch (keyCode) {

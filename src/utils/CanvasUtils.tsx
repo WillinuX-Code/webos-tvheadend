@@ -7,7 +7,7 @@ export default class CanvasUtils {
      * 
      * @param {CanvasRenderingContext2D} canvas 
      */
-    getWidthPerCharacter(canvas) {
+    getWidthPerCharacter(canvas: CanvasRenderingContext2D) {
         return canvas.measureText(CanvasUtils.MEASURE_STRING).width / CanvasUtils.MEASURE_STRING.length;
     }
 
@@ -18,7 +18,7 @@ export default class CanvasUtils {
      * @param {String} text 
      * @param {Number} drawingRect 
      */
-    getShortenedText(canvas, text, maxWidth) {
+    getShortenedText(canvas: CanvasRenderingContext2D, text: string, maxWidth: number) {
         let result = text;
         // use test character to measure width per character
         var widthPerCharacter = this.getWidthPerCharacter(canvas);
@@ -28,7 +28,7 @@ export default class CanvasUtils {
             // if(text.startsWith('Hitler und Luden')) {
             //     console.log('text: "%s" maxWidth: %d, textWidth: %d, deltaWidth: %d, widthPerCharacter: %d, textLength: %d, textOverLength: %d', text, maxWidth, textLength, overLength, widthPerCharacter, result.length, overLength/widthPerCharacter);
             // }
-            result = result.substring(0, result.length - 1 - parseInt(overLength/widthPerCharacter));
+            result = result.substring(0, result.length - 1 - (overLength / widthPerCharacter));
             if (result.length <= 3) {
                 return '...'.substring(0, result.length);
             }
@@ -47,7 +47,7 @@ export default class CanvasUtils {
      * @param {Number} maxWidth 
      * @param {Number} lineHeight 
      */
-    wrapText(canvas, text, x, y, maxWidth, lineHeight) {
+    wrapText(canvas: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number) {
         var line = ''; 
         var widthPerCharacter = this.getWidthPerCharacter(canvas);
         var maxCharactersPerLine = maxWidth / widthPerCharacter - 1;
@@ -100,7 +100,7 @@ export default class CanvasUtils {
      *          maxWidth: Number}} options
      * @param 
      */
-    writeText(canvas, text, x, y, options) {
+    writeText(canvas: CanvasRenderingContext2D, text: string, x: number, y: number, options: any) {
         // set default options
         options.fontFace = options.fontFace || 'Arial';
         options.textAlign = options.textAlign || 'left';

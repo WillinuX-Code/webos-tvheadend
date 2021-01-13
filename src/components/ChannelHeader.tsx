@@ -5,7 +5,6 @@ import CanvasUtils from '../utils/CanvasUtils';
 export default class ChannelHeader extends Component {
 
     private canvas: React.RefObject<HTMLCanvasElement>;
-    private ctx: CanvasRenderingContext2D | null;
     private stateUpdateHandler: any;
     private channelNumberText: any;
     private canvasUtils: CanvasUtils;
@@ -19,7 +18,6 @@ export default class ChannelHeader extends Component {
         super(props);
 
         this.canvas = React.createRef();
-        this.ctx = null;
         this.stateUpdateHandler = props.stateUpdateHandler;
         this.channelNumberText = props.channelNumberText;
         this.canvasUtils = new CanvasUtils();
@@ -35,22 +33,20 @@ export default class ChannelHeader extends Component {
         this.resetUnmountTimeout();
     }
 
-    drawChannelNumber() {
-        if (this.ctx) {
-            // draw shadow
-            this.canvasUtils.writeText(this.ctx, this.channelNumberText, this.mChannelHeaderHeight - 3, this.mChannelHeaderTextSize / 2 + 3, {
-                fontSize: this.mChannelHeaderTextSize,
-                fillStyle: '#363636',
-                textAlign: 'right'
-            });
+    drawChannelNumber(canvas: CanvasRenderingContext2D) {
+        // draw shadow
+        this.canvasUtils.writeText(canvas, this.channelNumberText, this.mChannelHeaderHeight - 3, this.mChannelHeaderTextSize / 2 + 3, {
+            fontSize: this.mChannelHeaderTextSize,
+            fillStyle: '#363636',
+            textAlign: 'right'
+        });
 
-            // draw text
-            this.canvasUtils.writeText(this.ctx, this.channelNumberText, this.mChannelHeaderHeight, this.mChannelHeaderTextSize / 2, {
-                fontSize: this.mChannelHeaderTextSize,
-                fillStyle: '#D6D6D6',
-                textAlign: 'right'
-            });
-        }
+        // draw text
+        this.canvasUtils.writeText(canvas, this.channelNumberText, this.mChannelHeaderHeight, this.mChannelHeaderTextSize / 2, {
+            fontSize: this.mChannelHeaderTextSize,
+            fillStyle: '#D6D6D6',
+            textAlign: 'right'
+        });
     }
 
     getWidth() {
@@ -84,16 +80,18 @@ export default class ChannelHeader extends Component {
     }
 
     updateCanvas() {
-        // clear
-        this.ctx = this.canvas.current && this.canvas.current.getContext('2d');
-        this.ctx && this.ctx.clearRect(0, 0, this.getWidth(), this.getHeight());
+        if (this.canvas.current) {
+            let ctx = this.canvas.current.getContext('2d');
+            // clear
+            ctx && ctx.clearRect(0, 0, this.getWidth(), this.getHeight());
 
-        // draw children “components”
-        this.onDraw()
+            // draw child elements
+            ctx && this.onDraw(ctx);
+        }
     }
 
-    onDraw() {
-        this.drawChannelNumber();
+    onDraw(canvas: CanvasRenderingContext2D) {
+        this.drawChannelNumber(canvas);
     }
 
     render() {

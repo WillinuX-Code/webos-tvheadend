@@ -1,48 +1,59 @@
 import React, { Component } from 'react';
 import Rect from '../models/Rect';
-import EPGUtils from '../utils/EPGUtils';
 import '../styles/app.css';
 import CanvasUtils from '../utils/CanvasUtils';
+import EPGData from '../models/EPGData';
 
 export default class ChannelList extends Component {
 
     static VERTICAL_SCROLL_TOP_PADDING_ITEM = 5;
     static IS_DEBUG = false;
 
-    constructor(props) {
+    private canvas: React.RefObject<HTMLCanvasElement>;
+    private listWrapper: React.RefObject<HTMLDivElement>;
+    private stateUpdateHandler: any;
+    private epgData: EPGData;
+    private imageCache: any;
+    private channelPosition: number;
+    private scrollY: number;
+    private canvasUtils: CanvasUtils;
+    private reapeater: any;
+
+    private mMaxVerticalScroll = 0;
+    private mChannelLayoutTextSize = 32;
+    private mChannelLayoutEventTextSize = 26;
+    private mChannelLayoutNumberTextSize = 38;
+    private mChannelLayoutTextColor = '#d6d6d6';
+    private mChannelLayoutTitleTextColor = '#969696';
+    private mChannelLayoutMargin = 3;
+    private mChannelLayoutPadding = 7;
+    private mChannelLayoutHeight = 90;
+    private mChannelLayoutWidth = 900;
+    private mChannelLayoutBackground = '#323232';
+    private mChannelLayoutBackgroundFocus = 'rgba(65,182,230,1)';
+
+    constructor(public props: Readonly<any>) {
         super(props);
 
+        this.canvas = React.createRef();
+        this.listWrapper = React.createRef();
         this.stateUpdateHandler = props.stateUpdateHandler;
-        this.handleKeyPress = this.handleKeyPress.bind(this);
         this.epgData = props.epgData;
         this.imageCache = props.imageCache;
         this.channelPosition = props.channelPosition;
         this.scrollY = 0;
-        this.epgUtils = new EPGUtils(this.epgData.getLocale());
         this.canvasUtils = new CanvasUtils();
         this.mMaxVerticalScroll = 0;
-
-        this.mChannelLayoutTextSize = 32;
-        this.mChannelLayoutEventTextSize = 26;
-        this.mChannelLayoutNumberTextSize = 38;
-        this.mChannelLayoutTextColor = '#d6d6d6';
-        this.mChannelLayoutTitleTextColor = '#969696';
-        this.mChannelLayoutMargin = 3;
-        this.mChannelLayoutPadding = 7;
-        this.mChannelLayoutHeight = 90;
-        this.mChannelLayoutWidth = 900;
-        this.mChannelLayoutBackground = '#323232';
-        this.mChannelLayoutBackgroundFocus = 'rgba(65,182,230,1)';
 
         this.reapeater = {};
     }
 
-    showAtChannelPosition(channelPosition) {
+    showAtChannelPosition(channelPosition: number) {
         this.scrollToChannelPosition(channelPosition, false);
         this.focus();
     }
 
-    getTopFrom(position) {
+    getTopFrom(position: number) {
         let y = position * (this.mChannelLayoutHeight); //+ this.mChannelLayoutMargin;
         return y - this.scrollY;
     }
@@ -52,7 +63,7 @@ export default class ChannelList extends Component {
         this.mMaxVerticalScroll = maxVerticalScroll < this.getHeight() ? 0 : maxVerticalScroll - this.getHeight();
     }
 
-    scrollToChannelPosition(channelPosition, withAnimation) {
+    scrollToChannelPosition(channelPosition: number, withAnimation: boolean) {
         this.channelPosition = channelPosition;
         // start scrolling after padding position top
         if (channelPosition < ChannelList.VERTICAL_SCROLL_TOP_PADDING_ITEM) {
@@ -91,7 +102,7 @@ export default class ChannelList extends Component {
         //this.updateCanvas();
     }
 
-    animateScroll(scrollDelta, scrollTarget) {
+    animateScroll(scrollDelta: number, scrollTarget: number) {
         if (scrollDelta < 0 && this.scrollY <= scrollTarget) {
             //this.scrollY = scrollTarget;
             cancelAnimationFrame(this.reapeater);
@@ -110,7 +121,7 @@ export default class ChannelList extends Component {
         });
     }
 
-    drawChannelListItems(canvas) {
+    drawChannelListItems(canvas: CanvasRenderingContext2D) {
         // Background
         let drawingRect = new Rect();
         drawingRect.left = 0;
@@ -154,7 +165,7 @@ export default class ChannelList extends Component {
         }
     }
 
-    drawChannelItem(canvas, position) {
+    drawChannelItem(canvas: CanvasRenderingContext2D, position: number) {
         let isSelectedChannel = (position === this.channelPosition);
         let channel = this.epgData.getChannel(position);
         let drawingRect = new Rect();
@@ -171,7 +182,7 @@ export default class ChannelList extends Component {
         }
 
         // channel number
-        this.canvasUtils.writeText(canvas, channel.getChannelID(), drawingRect.left + 70, drawingRect.middle, {
+        this.canvasUtils.writeText(canvas, channel.getChannelID().toString(), drawingRect.left + 70, drawingRect.middle, {
             fontSize: this.mChannelLayoutNumberTextSize,
             textAlign: 'right',
             fillStyle: this.mChannelLayoutTextColor,
@@ -203,7 +214,6 @@ export default class ChannelList extends Component {
                 canvas.fillRect(channelEventProgressRect.left + 2, channelEventProgressRect.top + 2, (channelEventProgressRect.width - 4) * event.getDoneFactor(), channelEventProgressRect.height - 4);
 
                 // channel event text
-                canvas.fontSize = this.mChannelLayoutEventTextSize;
                 let channelEventWidth = this.mChannelLayoutWidth - channelIconWidth - 90 - channelEventProgressRect.width;
                 this.canvasUtils.writeText(canvas, event.getTitle(), channelEventProgressRect.right + this.mChannelLayoutPadding, channelEventProgressRect.middle, {
                     fontSize: this.mChannelLayoutEventTextSize,
@@ -225,14 +235,14 @@ export default class ChannelList extends Component {
         }
     }
 
-    drawDebugRect(canvas, drawingRect) {
+    drawDebugRect(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
         if (ChannelList.IS_DEBUG) {
             canvas.strokeStyle = '#FF0000';
             canvas.strokeRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
         }
     }
 
-    getDrawingRectForChannelImage(position, image) {
+    getDrawingRectForChannelImage(position: number, image: any) {
         let drawingRect = new Rect();
         drawingRect.right = this.mChannelLayoutWidth - this.mChannelLayoutMargin;
         drawingRect.left = drawingRect.right - this.mChannelLayoutHeight * 1.3;
@@ -248,11 +258,11 @@ export default class ChannelList extends Component {
 
         // Keep aspect ratio.
         if (imageWidth > imageHeight) {
-            let padding = parseInt((rectHeight - (rectWidth * imageRatio)) / 2);
+            let padding = (rectHeight - (rectWidth * imageRatio)) / 2;
             drawingRect.top += padding;
             drawingRect.bottom -= padding;
         } else if (imageWidth <= imageHeight) {
-            let padding = parseInt((rectWidth - (rectHeight / imageRatio)) / 2);
+            let padding = (rectWidth - (rectHeight / imageRatio)) / 2;
             drawingRect.left += padding;
             drawingRect.right -= padding;
         }
@@ -265,9 +275,7 @@ export default class ChannelList extends Component {
      */
     getFirstVisibleChannelPosition() {
         let y = this.scrollY;
-
-        let position = parseInt((y) /
-            (this.mChannelLayoutHeight));
+        let position = y / this.mChannelLayoutHeight;
 
         if (position < 0) {
             position = 0;
@@ -279,8 +287,7 @@ export default class ChannelList extends Component {
     getLastVisibleChannelPosition() {
         let y = this.scrollY;
         let screenHeight = this.getHeight();
-        let position = parseInt((y + screenHeight) /
-            (this.mChannelLayoutHeight));
+        let position = (y + screenHeight) / this.mChannelLayoutHeight;
 
         let channelCount = this.epgData.getChannelCount();
         // this will fade the bottom channel in while scrolling
@@ -295,7 +302,7 @@ export default class ChannelList extends Component {
         return position;
     }
 
-    recalculateAndRedraw(withAnimation) {
+    recalculateAndRedraw(withAnimation: boolean) {
         if (this.epgData !== null && this.epgData.hasData()) {
             this.calculateMaxVerticalScroll();
             this.scrollToChannelPosition(this.channelPosition, withAnimation);
@@ -317,7 +324,7 @@ export default class ChannelList extends Component {
         this.focus();
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps: any) {
         this.updateCanvas();
 
         //this.setFocus();
@@ -329,12 +336,13 @@ export default class ChannelList extends Component {
     }
 
     focus() {
-        this.refs.list.focus();
+        this.listWrapper.current && this.listWrapper.current.focus();
     }
 
-    handleKeyPress(event) {
+    keyPressHandler = (event: React.KeyboardEvent<HTMLDivElement>) => {
         let keyCode = event.keyCode;
         let channelPosition = this.channelPosition;
+
         event.stopPropagation();
         switch (keyCode) {
             case 33:    // programm up
@@ -397,32 +405,31 @@ export default class ChannelList extends Component {
                 // }
                 break;
             default:
-                console.log("ChannelList-keyPressed:", keyCode);
+                console.log('ChannelList-keyPressed:', keyCode);
         }
     };
 
     updateCanvas() {
-        this.ctx = this.refs.canvas.getContext('2d');
-        // clear
-        this.ctx.clearRect(0, 0, this.getWidth(), this.getHeight());
-        // draw children “components”
-        this.onDraw(this.ctx)
+        if (this.canvas.current) {
+            let ctx = this.canvas.current.getContext('2d');
+            // clear
+            ctx && ctx.clearRect(0, 0, this.getWidth(), this.getHeight());
+
+            // draw child elements
+            ctx && this.onDraw(ctx);
+        }
     }
 
-    onDraw(canvas) {
+    onDraw(canvas: CanvasRenderingContext2D) {
         if (this.epgData !== null && this.epgData.hasData()) {
             this.drawChannelListItems(canvas);
         }
     }
 
-    getCanvas() {
-        return this.refs.canvas;
-    }
-
     render() {
         return (
-            <div id="channellist-wrapper" ref="list" tabIndex='-1' onKeyDown={this.handleKeyPress} className="channelList">
-                <canvas ref="canvas"
+            <div id="channellist-wrapper" ref={this.listWrapper} tabIndex={-1} onKeyDown={this.keyPressHandler} className="channelList">
+                <canvas ref={this.canvas}
                     width={this.getWidth()}
                     height={this.getHeight()}
                     style={{ display: 'block' }} />

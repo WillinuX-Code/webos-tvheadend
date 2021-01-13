@@ -10,14 +10,22 @@ import Picker from '@enact/moonstone/Picker';
 import '../styles/app.css';
 export default class ChannelSettings extends Component {
 
-    constructor(props) {
+    private textTracks;
+    private audioTracks;
+    private textTracksDisplay;
+    private audioTracksDisplay;
+    private timeoutId: NodeJS.Timeout | null;
+
+    state: Readonly<any>;
+
+    constructor(public props: Readonly<any>) {
         super(props);
 
         this.textTracks = props.textTracks;
         this.audioTracks = props.audioTracks;
         this.textTracksDisplay = [];
         this.audioTracksDisplay = [];
-        this.timeoutId = {};
+        this.timeoutId = null;
 
         let selectedAudioTrack = -1;
         for (var i = 0; i < this.audioTracks.length; i++) {
@@ -43,7 +51,7 @@ export default class ChannelSettings extends Component {
        
     }
 
-    textChangeHandler = (object) => {
+    textChangeHandler = (object: any) => {
         this.updateAutomaticUnmount();
 
         // disable previous track
@@ -58,7 +66,7 @@ export default class ChannelSettings extends Component {
         return false;
     };
 
-    audioChangeHandler = (object) => {
+    audioChangeHandler = (object: any) => {
         this.updateAutomaticUnmount();
         // disable previous track
         this.audioTracks[this.state.selectedAudioTrack].enabled = false;
@@ -81,7 +89,7 @@ export default class ChannelSettings extends Component {
 
     unmountHandler = () => {
         // clear timeout before unmount
-        clearTimeout(this.timeoutId);
+        this.timeoutId && clearTimeout(this.timeoutId);
 
         this.props.stateUpdateHandler({
             isChannelSettingsState: false
@@ -89,26 +97,26 @@ export default class ChannelSettings extends Component {
     };
 
     updateAutomaticUnmount() {
-        clearTimeout(this.timeoutId);
+        this.timeoutId && clearTimeout(this.timeoutId);
         this.timeoutId = setTimeout(this.unmountHandler, 7000);
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps: any) {
         
     }
 
     componentWillUnmount() {
         // clear timeout in case component is unmounted (possible trigger also from TV Component)
-        clearTimeout(this.timeoutId);
+        this.timeoutId && clearTimeout(this.timeoutId);
     }
 
     render() {
         return (
-            <div id="channel-settings" tabIndex='-1' className="channelSettings">
+            <div id="channel-settings" tabIndex={-1} className="channelSettings">
                 {this.audioTracksDisplay.length > 0 &&
                     <>
                         <Icon>audio</Icon>
-                        <Picker defaultValue={this.state.selectedAudioTrack} onChange={this.audioChangeHandler} size="large">
+                        <Picker defaultValue={this.state.selectedAudioTrack} onChange={this.audioChangeHandler} width="large">
                             {this.audioTracksDisplay}
                         </Picker>
                     </>
@@ -117,7 +125,7 @@ export default class ChannelSettings extends Component {
                 {this.textTracksDisplay.length > 0 &&
                     <>
                         <Icon>sub</Icon>
-                        <Picker defaultValue={this.state.selectedTextTrack} onChange={this.textChangeHandler} size="large">
+                        <Picker defaultValue={this.state.selectedTextTrack} onChange={this.textChangeHandler} width="large">
                             {this.textTracksDisplay}
                         </Picker>
                     </>

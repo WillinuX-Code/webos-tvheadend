@@ -3,12 +3,36 @@ import Rect from '../models/Rect';
 import EPGUtils from '../utils/EPGUtils';
 import '../styles/app.css';
 import CanvasUtils from '../utils/CanvasUtils';
+import EPGData from '../models/EPGData';
 
 export default class ChannelInfo extends Component {
 
-    constructor(props) {
+    private canvas: React.RefObject<HTMLCanvasElement>;
+    private infoWrapper: React.RefObject<HTMLDivElement>;
+    private stateUpdateHandler: any;
+    private epgData: EPGData;
+    private epgUtils: EPGUtils;
+    private imageCache: any;
+    private channelPosition: number;
+    private canvasUtils: CanvasUtils;
+    private timeoutReference: NodeJS.Timeout | null;
+    private intervalReference: NodeJS.Timeout | null;
+
+    private mChannelInfoHeight = 150;
+    private mChannelInfoTitleSize = 42;
+    private mChannelLayoutTextColor = '#d6d6d6';
+    private mChannelLayoutTitleTextColor = '#969696';
+    private mChannelInfoTimeBoxWidth = 270;
+    private mChannelLayoutMargin = 3;
+    private mChannelLayoutPadding = 7;
+    private mChannelLayoutBackground = '#323232';
+    private mChannelLayoutBackgroundFocus = 'rgba(65,182,230,1)';
+
+    constructor(public props: Readonly<any>) {
         super(props);
 
+        this.canvas = React.createRef();
+        this.infoWrapper = React.createRef();
         this.stateUpdateHandler = this.props.stateUpdateHandler;
         this.epgData = this.props.epgData;
         this.imageCache =this.props.imageCache;
@@ -16,23 +40,11 @@ export default class ChannelInfo extends Component {
         this.epgUtils = new EPGUtils(this.epgData.getLocale());
         this.canvasUtils = new CanvasUtils();
 
-        this.mChannelInfoHeight = 150;
-        this.mChannelInfoTitleSize = 42;
-        this.mChannelLayoutTextColor = '#d6d6d6';
-        this.mChannelLayoutTitleTextColor = '#969696';
-        this.mChannelInfoTimeBoxWidth = 270;
-        //this.mChannelLayoutTitleTextColor = '#c6c6c6';
-        this.mChannelLayoutMargin = 3;
-        this.mChannelLayoutPadding = 7;
-        this.mChannelLayoutBackground = '#323232';
-        this.mChannelLayoutBackgroundFocus = 'rgba(65,182,230,1)';
-
-        this.reapeater = {};
-        this.timeoutReference = {};
-        this.intervalReference = {};
+        this.timeoutReference = null;
+        this.intervalReference = null;
     }
 
-    handleKeyPress = (event) => {
+    keyPressHandler = (event: React.KeyboardEvent<HTMLDivElement>) => {
         let keyCode = event.keyCode;
 
         switch (keyCode) {
@@ -49,7 +61,7 @@ export default class ChannelInfo extends Component {
 
     };
 
-    drawChannelInfo(canvas) {
+    drawChannelInfo(canvas: CanvasRenderingContext2D) {
         // Background
         let drawingRect = new Rect();
         drawingRect.left = 0;
@@ -145,7 +157,7 @@ export default class ChannelInfo extends Component {
                 drawingRect.left, drawingRect.top);
             canvas.textAlign = 'left';
             // draw subtitle event
-            canvas.font = "bold "+(this.mChannelInfoTitleSize - 8) + "px Arial";
+            canvas.font = 'bold ' + (this.mChannelInfoTitleSize - 8) + 'px Arial';
             drawingRect.top += this.mChannelInfoTitleSize + this.mChannelLayoutPadding;
             if (currentEvent.getSubTitle() !== undefined) {
                 drawingRect.left = left;
@@ -167,7 +179,7 @@ export default class ChannelInfo extends Component {
 
     }
 
-    getDrawingRectForChannelImage(drawingRect, image) {
+    getDrawingRectForChannelImage(drawingRect: Rect, image: any) {
         drawingRect.left += this.mChannelLayoutPadding;
         drawingRect.top += this.mChannelLayoutPadding;
         drawingRect.right -= this.mChannelLayoutPadding;
@@ -182,11 +194,11 @@ export default class ChannelInfo extends Component {
 
         // Keep aspect ratio.
         if (imageWidth > imageHeight) {
-            let padding = parseInt((rectHeight - (rectWidth * imageRatio)) / 2);
+            let padding = (rectHeight - (rectWidth * imageRatio)) / 2;
             drawingRect.top += padding;
             drawingRect.bottom -= padding;
         } else if (imageWidth <= imageHeight) {
-            let padding = parseInt((rectWidth - (rectHeight / imageRatio)) / 2);
+            let padding = (rectWidth - (rectHeight / imageRatio)) / 2;
             drawingRect.left += padding;
             drawingRect.right -= padding;
         }
@@ -219,32 +231,31 @@ export default class ChannelInfo extends Component {
         });
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps: any) {
         this.updateCanvas();
     }
 
     componentWillUnmount() {
-        clearTimeout(this.timeoutReference);
-        clearInterval(this.intervalReference);
+        this.timeoutReference && clearTimeout(this.timeoutReference);
+        this.intervalReference && clearInterval(this.intervalReference);
     }
 
     focus() {
-        this.refs.info.focus();
+        this.infoWrapper.current && this.infoWrapper.current.focus();
     }
 
     updateCanvas() {
-        this.ctx = this.refs.canvas.getContext('2d');
-        // clear
-        this.ctx.clearRect(0, 0, this.getWidth(), this.getHeight());
-        // draw children “components”
-        this.onDraw(this.ctx)
+        if (this.canvas.current) {
+            let ctx = this.canvas.current.getContext('2d');
+            // clear
+            ctx && ctx.clearRect(0, 0, this.getWidth(), this.getHeight());
+
+            // draw child elements
+            ctx && this.onDraw(ctx);
+        }
     }
 
-    /**
-     * 
-     * @param {CanvasRenderingContext2D} canvas 
-     */
-    onDraw(canvas) {
+    onDraw(canvas: CanvasRenderingContext2D) {
         if (this.epgData !== null && this.epgData.hasData()) {
             this.drawChannelInfo(canvas);
         }
@@ -256,7 +267,7 @@ export default class ChannelInfo extends Component {
 
     render() {
         return (
-            <div id="channelinfo-wrapper" ref="info" tabIndex='-1' onKeyDown={this.handleKeyPress} className="channelInfo">
+            <div id="channelinfo-wrapper" ref={this.infoWrapper} tabIndex={-1} onKeyDown={this.keyPressHandler} className="channelInfo">
                 <canvas ref="canvas" width={this.getWidth()} height={this.getHeight()} style={{ display: 'block' }} />
             </div>
         );

@@ -80,9 +80,6 @@ export default class EPGUtils {
      * return current date in millis (or nanos?)
      */
     getNow() {
-        return 1610642031232; // TODO: why is Date.now() returning a date in the past?!
-        // 1610577755018
-        //return Date.now(); // 1610577755018
-        //return Date.now();
+        return Date.now();
     }
 }

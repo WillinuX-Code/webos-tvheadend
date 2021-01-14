@@ -12,7 +12,7 @@ export default class EPGData {
     constructor() {
         this.channels = [];
         this.recordings = [];
-        this.language = "en-US";
+        this.language = 'en-US';
         //new MockDataService().getChannels(this.channels);
         //if (this.data) {
             /*this.data.forEach((values, key) => {
@@ -26,14 +26,15 @@ export default class EPGData {
         //}
     }
 
-    getChannel(position: number) {
-        return this.channels[position];
+    getChannel(channelPosition: number): EPGChannel | null {
+        let channel = this.channels[channelPosition];
+        return channel || null;
     }
 
     getEvents(channelPosition: number) {
-        let channel = this.channels[channelPosition];
-        let events = channel.getEvents();
-        return events
+        let channel = this.getChannel(channelPosition);
+        let events = channel && channel.getEvents();
+        return events || [];
     }
 
     getEventCount(channelPosition: number) {
@@ -99,7 +100,7 @@ export default class EPGData {
     }
 
     updateLanguage(language: string) {
-        console.log("updated language data");
+        console.log("updated language data", language);
         this.language = language;
     }
 

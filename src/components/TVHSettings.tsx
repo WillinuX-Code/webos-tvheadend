@@ -1,5 +1,3 @@
-//import { Button, KIND } from "baseui/button";
-//import { Input, SIZE } from "baseui/input";
 import Button from '@enact/moonstone/Button';
 import Spinner from '@enact/moonstone/Spinner';
 import Input from '@enact/moonstone/Input';
@@ -9,30 +7,43 @@ import Picker from '@enact/moonstone/Picker';
 import Heading from '@enact/moonstone/Heading';
 import React, { Component } from 'react';
 import TVHDataService from '../services/TVHDataService';
-//import '../styles/app.css';
 
 export default class TVHSettings extends Component {
 
-    static STORAGE_TVH_SETTING_KEY = "TVH_SETTINGS";
+    static STORAGE_TVH_SETTING_KEY = 'TVH_SETTINGS';
 
-    constructor(props) {
+    private testResult: string = '';
+
+    state: Readonly<{
+        tvhUrl: string;
+        user?: string;
+        password?: string;
+        selectedProfile: string;
+        profiles: Array<any>;
+        tvChannelTagUuid?: string;
+        dvrConfigUuid?: string;
+        connectButtonEnabled?: boolean;
+        isValid?: boolean;
+        isUserValid?: boolean;
+        isLoading?: boolean;
+    }>;
+
+    constructor(public props: Readonly<any>) {
         super(props);
 
         this.state = {
-            tvhUrl: "http://",
-            user: "",
-            password: "",
-            selectedProfile: "",
+            tvhUrl: 'http://',
+            user: '',
+            password: '',
+            selectedProfile: '',
             profiles: [],
-            tvChannelTagUuid: "",
-            dvrConfigUuid: "",
+            tvChannelTagUuid: '',
+            dvrConfigUuid: '',
             connectButtonEnabled: false,
             isValid: false,
             isLoading: false
             // TODO user password
         }
-
-        this.testResult = "";
     }
 
     handleSave() {
@@ -54,11 +65,11 @@ export default class TVHSettings extends Component {
         this.props.handleUnmountSettings();
     }
 
-    handleUserChange(object) {
+    handleUserChange(object: any) {
          // update state
          this.setState((state, props) => ({
             profiles: [],
-            selectedProfile: "",
+            selectedProfile: '',
             user: object.value,
             isValid: false,
             connectButtonEnabled: object.value.length > 0
@@ -68,12 +79,11 @@ export default class TVHSettings extends Component {
         return false;
     }
 
-    handlePasswordChange(object) {
-        
+    handlePasswordChange(object: any) {
         // update state
         this.setState((state, props) => ({
             profiles: [],
-            selectedProfile: "",
+            selectedProfile: '',
             password: object.value,
             isValid: false,
             connectButtonEnabled: object.value.length > 0
@@ -83,7 +93,7 @@ export default class TVHSettings extends Component {
         return false;
     }
 
-    handleProfileChange(object) {
+    handleProfileChange(object: any) {
         // update state
         this.setState((state, props) => ({
             selectedProfile: object.value
@@ -93,14 +103,14 @@ export default class TVHSettings extends Component {
         return false;
     }
 
-    handleUrlChange(object) {
+    handleUrlChange(object: any) {
         // if url changes we reset test result
-        this.testResult = "";
+        this.testResult = '';
 
         // update state
         this.setState((state, props) => ({
             profiles: [],
-            selectedProfile: "",
+            selectedProfile: '',
             tvhUrl: object.value,
             isValid: false,
             connectButtonEnabled: object.value.length > 0
@@ -110,7 +120,7 @@ export default class TVHSettings extends Component {
         return false;
     }
 
-    async handleConnectionTest(event) {
+    async handleConnectionTest(event: any) {
         event.preventDefault();
         this.setState((state, props) => ({
             isLoading: true
@@ -120,11 +130,11 @@ export default class TVHSettings extends Component {
         try {
             // retrieve server info
             let serverInfoResult = await service.retrieveServerInfo();
-            this.testResult = "Version: "+serverInfoResult.result.sw_version+" - API Version: "+serverInfoResult.result.api_version;
+            this.testResult = 'Version: ' + serverInfoResult.result.sw_version + ' - API Version: ' + serverInfoResult.result.api_version;
 
             let profilesResult = await service.retrieveProfileList();
-            let profiles = [];
-            profilesResult.result.entries.forEach(entry => {
+            let profiles: string[] = [];
+            profilesResult.result.entries.forEach((entry: any) => {
                 profiles.push(entry.val);
             });
             // move "pass" profile to beginning of array
@@ -147,7 +157,7 @@ export default class TVHSettings extends Component {
                 isLoading: false
             }));
         } catch (error) {
-            this.testResult = "Failed to connect: " + (error.errorText ? error.errorText : error);
+            this.testResult = 'Failed to connect: ' + (error.errorText ? error.errorText : error);
             this.setState((state, props) => ({
                 isLoading: false,
                 isValid: false
@@ -165,11 +175,11 @@ export default class TVHSettings extends Component {
         // read state from storage if exists
         let settings = localStorage.getItem(TVHSettings.STORAGE_TVH_SETTING_KEY);
         if (settings) {
-            this.setState((state, props) => (JSON.parse(settings)));
+            this.setState((state, props) => JSON.parse(settings || ''));
         }
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps: any) {
 
     }
 
@@ -179,7 +189,7 @@ export default class TVHSettings extends Component {
 
     render() {
         return (
-            <div id="tvh-settings" ref="tvhsettings" tabIndex='-1' className="tvhSettings">
+            <div id="tvh-settings" ref="tvhsettings" tabIndex={-1} className="tvhSettings">
                 <Panel>
                     <Header title="TVheadend Setup" type="compact" centered />
                     <Heading spacing="auto">TVheadend URL</Heading>
@@ -206,7 +216,7 @@ export default class TVHSettings extends Component {
                         placeholder="Password (Optional)" />
                     <br /> <br />
                     {!this.state.isLoading && <Button disabled={!this.state.connectButtonEnabled} backgroundOpacity="lightTranslucent" onClick={this.handleConnectionTest}>Connect</Button>}
-                    {this.state.isLoading && <Spinner></Spinner>}
+                    {this.state.isLoading && <Spinner component={Panel} size="medium" />}
                     <br /> <br />
                     <Heading spacing="auto">Connection Status</Heading>
                     {this.testResult.length === 0 && <Icon>question</Icon>}
@@ -222,7 +232,7 @@ export default class TVHSettings extends Component {
                         <>
                             <br /> <br />
                             <Heading spacing="auto">Stream profile</Heading>
-                            <Picker defaultValue={this.state.profiles.indexOf(this.state.selectedProfile)} onChange={this.handleProfileChange} size="medium">
+                            <Picker defaultValue={this.state.profiles.indexOf(this.state.selectedProfile)} onChange={this.handleProfileChange} width="medium">
                                 {this.state.profiles}
                             </Picker>
                         </>

@@ -169,6 +169,10 @@ export default class ChannelList extends Component {
         let isSelectedChannel = (position === this.channelPosition);
         let channel = this.epgData.getChannel(position);
         let drawingRect = new Rect();
+        
+        // should not happen, but better check it
+        if(!channel) return;
+        
         drawingRect.left = 0;
         drawingRect.top = this.getTopFrom(position);
         drawingRect.right = this.mChannelLayoutWidth;
@@ -275,7 +279,7 @@ export default class ChannelList extends Component {
      */
     getFirstVisibleChannelPosition() {
         let y = this.scrollY;
-        let position = y / this.mChannelLayoutHeight;
+        let position = Math.floor(y / this.mChannelLayoutHeight);
 
         if (position < 0) {
             position = 0;
@@ -287,7 +291,7 @@ export default class ChannelList extends Component {
     getLastVisibleChannelPosition() {
         let y = this.scrollY;
         let screenHeight = this.getHeight();
-        let position = (y + screenHeight) / this.mChannelLayoutHeight;
+        let position = Math.floor((y + screenHeight) / this.mChannelLayoutHeight);
 
         let channelCount = this.epgData.getChannelCount();
         // this will fade the bottom channel in while scrolling
@@ -432,7 +436,7 @@ export default class ChannelList extends Component {
                 <canvas ref={this.canvas}
                     width={this.getWidth()}
                     height={this.getHeight()}
-                    style={{ display: 'block' }} />
+                    style={{ display: "block" }} />
             </div>
         );
     }

@@ -94,6 +94,9 @@ export default class ChannelInfo extends Component {
 
         let channel = this.epgData.getChannel(this.channelPosition);
 
+        // should not happen, but better check it
+        if(!channel) return;
+
         // channel number
         //canvas.strokeStyle = ;
         // drawingRect.top = 70;
@@ -268,7 +271,7 @@ export default class ChannelInfo extends Component {
     render() {
         return (
             <div id="channelinfo-wrapper" ref={this.infoWrapper} tabIndex={-1} onKeyDown={this.keyPressHandler} className="channelInfo">
-                <canvas ref="canvas" width={this.getWidth()} height={this.getHeight()} style={{ display: 'block' }} />
+                <canvas ref={this.canvas} width={this.getWidth()} height={this.getHeight()} style={{ display: "block" }} />
             </div>
         );
     }

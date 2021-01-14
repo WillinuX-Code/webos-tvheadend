@@ -3,8 +3,10 @@
  */
 export default class EPGUtils {
 
-    constructor(private locale: string = "en-US") {
+    private locale: string;
 
+    constructor(locale?: string) {
+        this.locale = locale || 'en-US';
     }
 
     getWeekdayName(dateMillis: number) {
@@ -14,7 +16,7 @@ export default class EPGUtils {
         dayMap.set('de', ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']);
         dayMap.set('en', ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']);
         //let days = ['Sun','Mon','Tues','Wed','Thus','Fri','Sat'];
-        // TODO setting languagee - depend on country germany or englisch
+        // TODO setting language - depend on country germany or english
         let days = dayMap.get(userLang);
         if (days === undefined) {
             days = dayMap.get('en');
@@ -78,7 +80,9 @@ export default class EPGUtils {
      * return current date in millis (or nanos?)
      */
     getNow() {
-        //return 1607462851000;
-        return Date.now();
+        return 1610642031232; // TODO: why is Date.now() returning a date in the past?!
+        // 1610577755018
+        //return Date.now(); // 1610577755018
+        //return Date.now();
     }
 }

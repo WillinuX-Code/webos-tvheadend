@@ -2,6 +2,36 @@ import channelMock from './channels.json';
 import epgMock from './epg.json';
 import recordingMock from './recordings.json';
 import channelTagsMock from './channelTags.json';
+
+interface ProxySuccessResponse<TResult> extends WebOSTV.OnCompleteSuccessResponse {
+    result: TResult;
+}
+
+interface ProxyErrorResponse extends WebOSTV.OnCompleteFailureResponse {
+    errorText: String;
+}
+
+interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
+    method: string;
+    settings: {
+        localeInfo: {
+            clock: string;
+            keyboards: string[];
+            locales: {
+                UI: string,
+                TV: string,
+                FMT: string,
+                NLP: string,
+                STT: string,
+                AUD: string,
+                AUD2: string
+            };
+            timezone: string;
+        };
+    };
+    subscribed: boolean
+}
+
 /**
  * Depending on local development or emulator usage
  * the service bridge is differen
@@ -10,20 +40,21 @@ import channelTagsMock from './channelTags.json';
  */
 export default class MockServiceAdapter {
 
-    async call(method, params) {
+
+    async call<TResult = any>(method: string, params: any) {
         console.log('lsa:%s start', method);
         let url = params.url;
         if (url.includes('api/channel/grid')) {
-            return channelMock;
+            return channelMock as ProxySuccessResponse<any>;
         }
         else if (url.includes('api/epg/events/grid')) {
-            return epgMock;
+            return epgMock as ProxySuccessResponse<any>;
         }
         else if (url.includes('api/dvr/entry/grid_upcoming')) {
-            return recordingMock;
+            return recordingMock as ProxySuccessResponse<any>;
         }
         else if (url.includes('api/channeltag/list')) {
-            return channelTagsMock;
+            return channelTagsMock as ProxySuccessResponse<any>;
         }
         else if (url.includes('api/dvr/config/grid')) {
             return {
@@ -43,7 +74,7 @@ export default class MockServiceAdapter {
                         }
                     ]
                 }
-            };
+            } as ProxySuccessResponse<any>;
         }
         else if (url.includes('/api/serverinfo')) {
             return {
@@ -63,7 +94,7 @@ export default class MockServiceAdapter {
                         "caclient_advanced"
                     ]
                 }
-            };
+            } as ProxySuccessResponse<any>;
         }
         else if (url.includes('/api/profile/list')) {
             return {
@@ -84,21 +115,16 @@ export default class MockServiceAdapter {
                         }
                     ]
                 }
-            }
+            } as ProxySuccessResponse<any>;
         }
-
         else {
-            return { "returnValue": false, "errorText": "Unknown url " + url };
+            throw { "returnValue": false, "errorText": "Unknown url " + url } as ProxyErrorResponse;
         }
         console.log('lsa:%s end', method);
     }
 
-    toast(message, onsuccess, onerror) {
-        console.log('lsa:toast start');
-
-        onsuccess({
-            returnValue: true
-        });
+    toast(message: string) {
+        console.log('lsa:toast start', message);
     }
 
     async getLocaleInfo() {
@@ -111,6 +137,7 @@ export default class MockServiceAdapter {
                     }
                 }
             }
-        }
+        } as LocaleInfoSuccessResponse;
     }
+
 }

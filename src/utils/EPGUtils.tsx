@@ -80,6 +80,7 @@ export default class EPGUtils {
      * return current date in millis (or nanos?)
      */
     getNow() {
+        //return 1607462851000;
         return Date.now();
     }
 }

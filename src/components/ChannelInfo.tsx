@@ -157,6 +157,7 @@ export default class ChannelInfo extends Component {
             canvas.fillText(this.canvasUtils.getShortenedText(canvas, currentEvent.getTitle(), drawingRect.width),
                 drawingRect.left, drawingRect.top);
 
+            // draw title timeframe
             drawingRect.right += this.mChannelInfoTimeBoxWidth;
             drawingRect.left = drawingRect.right - this.mChannelLayoutPadding - 20;
             canvas.textAlign = 'right';
@@ -164,6 +165,7 @@ export default class ChannelInfo extends Component {
                 drawingRect.left, drawingRect.top);
             canvas.textAlign = 'left';
 
+            
             // draw subtitle event
             canvas.font = 'bold ' + (this.mChannelInfoTitleSize - 8) + 'px Arial';
             drawingRect.top += this.mChannelInfoTitleSize + this.mChannelLayoutPadding;
@@ -185,10 +187,26 @@ export default class ChannelInfo extends Component {
             canvas.fillStyle = this.mChannelLayoutTitleTextColor;
             canvas.fillText(runningTime + ' (+' + remainingTime + ') / '  + totalTime, drawingRect.left, drawingRect.top);
 
-            // draw channel event progress bar
-            let channelEventProgressRect = new Rect(0, 0, 10, this.getWidth());
-            canvas.fillStyle = this.mChannelLayoutTitleTextColor;
+            // draw upcoming progress
+            let channelEventProgressRect = new Rect(0, 0, 3, this.getWidth());
+            let grd = canvas.createLinearGradient(channelEventProgressRect.left, channelEventProgressRect.left, channelEventProgressRect.right, channelEventProgressRect.left);
+            grd.addColorStop(0, "rgba(100, 100, 100, 0.2)");
+            grd.addColorStop(0.4, "rgba(200, 200, 200, 0.7)");
+            grd.addColorStop(0.6, "rgba(200, 200, 200, 0.7)");
+            grd.addColorStop(1, 'rgba(120, 120, 120, 0.5)');
+            let grd2 = canvas.createLinearGradient(channelEventProgressRect.left, channelEventProgressRect.left, channelEventProgressRect.right, channelEventProgressRect.left);
+            grd2.addColorStop(0, "rgba(65,182,230, 0.2)");
+            grd2.addColorStop(0.4, "rgba(65,182,230, 0.7)");
+            grd2.addColorStop(0.6, "rgba(65,182,230, 0.7)");
+            grd2.addColorStop(1, 'rgba(65,182,230, 0.5)');
+            // draw past progress
+            canvas.fillStyle = grd2;
             canvas.fillRect(channelEventProgressRect.left, channelEventProgressRect.top, channelEventProgressRect.width * currentEvent.getDoneFactor(), channelEventProgressRect.height);
+            // draw upcoming progress
+            channelEventProgressRect.left += channelEventProgressRect.width * currentEvent.getDoneFactor();
+            canvas.fillStyle = grd;
+            canvas.fillRect(channelEventProgressRect.left, channelEventProgressRect.top, channelEventProgressRect.width, channelEventProgressRect.height);
+            
         }
 
     }

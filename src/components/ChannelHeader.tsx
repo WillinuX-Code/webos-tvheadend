@@ -25,14 +25,14 @@ export default class ChannelHeader extends Component {
 
     drawChannelNumber(canvas: CanvasRenderingContext2D) {
         // draw shadow
-        this.canvasUtils.writeText(canvas, this.channelNumberText, this.mChannelHeaderHeight - 3, this.mChannelHeaderTextSize / 2 + 3, {
+        this.canvasUtils.writeText(canvas, this.channelNumberText, this.getWidth() - 3, this.mChannelHeaderTextSize / 2 + 3, {
             fontSize: this.mChannelHeaderTextSize,
             fillStyle: '#363636',
             textAlign: 'right'
         });
 
         // draw text
-        this.canvasUtils.writeText(canvas, this.channelNumberText, this.mChannelHeaderHeight, this.mChannelHeaderTextSize / 2, {
+        this.canvasUtils.writeText(canvas, this.channelNumberText, this.getWidth(), this.mChannelHeaderTextSize / 2, {
             fontSize: this.mChannelHeaderTextSize,
             fillStyle: '#D6D6D6',
             textAlign: 'right'

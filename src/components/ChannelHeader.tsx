@@ -2,27 +2,25 @@ import React, { Component } from 'react';
 import '../styles/app.css';
 import CanvasUtils from '../utils/CanvasUtils';
 
-export default class ChannelHeader extends Component {
-
+export default class ChannelHeader2 extends Component {
+    
     private canvas: React.RefObject<HTMLCanvasElement>;
     private stateUpdateHandler: any;
-    private channelNumberText: any;
+    private channelNumberText: string;
     private canvasUtils: CanvasUtils;
-    private timeoutReference: any;
-    private intervalReference: any;
+    private timeoutReference?: NodeJS.Timeout;
+    private intervalReference?: NodeJS.Timeout;
 
     mChannelHeaderHeight = 80;
     mChannelHeaderTextSize = 56;
 
-    constructor(props: any) {
+    constructor(public props: Readonly<any>) {
         super(props);
 
         this.canvas = React.createRef();
         this.stateUpdateHandler = props.stateUpdateHandler;
         this.channelNumberText = props.channelNumberText;
         this.canvasUtils = new CanvasUtils();
-        this.timeoutReference = {};
-        this.intervalReference = {};
 
         this.mChannelHeaderHeight = 80;
         this.mChannelHeaderTextSize = 56;
@@ -75,8 +73,8 @@ export default class ChannelHeader extends Component {
     }
 
     componentWillUnmount() {
-        clearInterval(this.timeoutReference);
-        clearInterval(this.intervalReference);
+        this.timeoutReference && clearInterval(this.timeoutReference);
+        this.intervalReference && clearInterval(this.intervalReference);
     }
 
     updateCanvas() {
@@ -96,7 +94,7 @@ export default class ChannelHeader extends Component {
 
     render() {
         return (
-            <div id="channelheader-wrapper" tabIndex={-1} className="channelHeader">
+            <div id="channelheader-wrapper" tabIndex={-1} className="channelHeader2">
                 <canvas ref={this.canvas} width={this.getWidth()} height={this.getHeight()} style={{ display: 'block' }} />
             </div>
         );

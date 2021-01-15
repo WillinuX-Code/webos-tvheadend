@@ -150,8 +150,8 @@ export default class ChannelList extends Component {
         let lastPos = this.getLastVisibleChannelPosition();
 
         //console.log("Channel: First: " + firstPos + " Last: " + lastPos);
-        let transparentTop = firstPos + 3;
-        let transparentBottom = lastPos - 3;
+        //let transparentTop = firstPos + 3;
+        //let transparentBottom = lastPos - 3;
         canvas.globalAlpha = 1.0;
         for (let pos = firstPos; pos < lastPos; pos++) {
             // if (pos <= transparentTop) {
@@ -340,7 +340,7 @@ export default class ChannelList extends Component {
     }
 
     focus() {
-        this.listWrapper.current && this.listWrapper.current.focus();
+        this.listWrapper.current?.focus();
     }
 
     keyPressHandler = (event: React.KeyboardEvent<HTMLDivElement>) => {

@@ -6,7 +6,7 @@ import Icon from '@enact/moonstone/Icon';
 import Picker from '@enact/moonstone/Picker';
 import Heading from '@enact/moonstone/Heading';
 import React, { Component } from 'react';
-import TVHDataService from '../services/TVHDataService';
+import TVHDataService, { ITVHSettings } from '../services/TVHDataService';
 
 export default class TVHSettings extends Component {
 
@@ -14,19 +14,7 @@ export default class TVHSettings extends Component {
 
     private testResult: string = '';
 
-    state: Readonly<{
-        tvhUrl: string;
-        user?: string;
-        password?: string;
-        selectedProfile: string;
-        profiles: Array<any>;
-        tvChannelTagUuid?: string;
-        dvrConfigUuid?: string;
-        connectButtonEnabled?: boolean;
-        isValid?: boolean;
-        isUserValid?: boolean;
-        isLoading?: boolean;
-    }>;
+    state: Readonly<ITVHSettings>;
 
     constructor(public props: Readonly<any>) {
         super(props);
@@ -41,6 +29,7 @@ export default class TVHSettings extends Component {
             dvrConfigUuid: '',
             connectButtonEnabled: false,
             isValid: false,
+            isUserValid: false,
             isLoading: false
             // TODO user password
         }

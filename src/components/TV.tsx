@@ -6,19 +6,46 @@ import ChannelList from './ChannelList';
 import ChannelSettings from './ChannelSettings';
 import EPGUtils from '../utils/EPGUtils';
 import EPGData from '../models/EPGData';
+import EPGEvent from '../models/EPGEvent';
+import TVHDataService from '../services/TVHDataService';
 import '../styles/app.css';
+
+interface HTMLVideoElementEx extends HTMLVideoElement {
+    videoTracks: any[];
+    audioTracks: any[];
+}
 
 export default class TV extends Component {
 
     static STORAGE_KEY_LAST_CHANNEL = 'lastChannel';
 
-    epgData;
+    private tvWrapper: React.RefObject<HTMLDivElement>;
+    private channelHeaderElement: React.RefObject<ChannelHeader>;
+    private video: React.RefObject<HTMLVideoElementEx>;
+    private epgData: EPGData;
 
-    constructor(props) {
+    private tvhService: TVHDataService;
+    private epgUtils = new EPGUtils();
+    private imageCache: any;
+    private timeoutChangeChannel?: NodeJS.Timeout;
+
+    state: {
+        isChannelSettingsState: boolean;
+        isInfoState: boolean;
+        isEpgState: boolean;
+        isChannelListState: boolean;
+        channelPosition: number;
+        channelNumberText: string;
+        audioTracks: any[],
+        textTracks: any[],
+    }
+
+    constructor(public props: Readonly<any>) {
         super(props);
 
-        //this.video = React.createRef();
-        this.channelHeader = React.createRef();
+        this.tvWrapper = React.createRef();
+        this.channelHeaderElement = React.createRef();
+        this.video = React.createRef();
         this.state = {
             isChannelSettingsState: false,
             isInfoState: true,
@@ -38,9 +65,7 @@ export default class TV extends Component {
 
         this.tvhService = props.tvhService;
         this.epgData = props.epgData;
-        this.epgUtils = new EPGUtils();
         this.imageCache = props.imageCache;
-        this.timeoutChangeChannel = {};
     }
 
     componentDidMount() {
@@ -67,15 +92,20 @@ export default class TV extends Component {
         return this.epgData.getChannel(this.state.channelPosition);
     }
 
+    private getCurrentChannelName() {
+        let currentChannel = this.getCurrentChannel();
+        return currentChannel?.getName() || '';
+    }
+
     componentWillUnmount() {
-        var videoElement = this.getMediaElement();
+        let videoElement = this.getMediaElement();
         // Remove all source elements
-        while (videoElement.firstChild) {
+        while (videoElement?.firstChild) {
             videoElement.removeChild(videoElement.firstChild);
         }
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot) {
+    componentDidUpdate(prevProps: any, prevState: any, snapshot: any) {
         /*
          * if video doesn't have a source yet - we set it
          * this normally happens when the epg is loaded
@@ -85,9 +115,11 @@ export default class TV extends Component {
         // }
 
         // change channel in case we have channels retrieved and channel position changed or we don't have a channel active
+        let videoElement = this.getMediaElement();
         if (this.epgData.getChannelCount() > 0 &&
-            (prevState.channelPosition !== this.state.channelPosition || !this.getMediaElement().hasChildNodes())) {
-            this.changeSource(this.getCurrentChannel().getStreamUrl());
+            (prevState.channelPosition !== this.state.channelPosition || (!videoElement?.hasChildNodes()))) {
+                let currentChannel = this.getCurrentChannel();
+                currentChannel && this.changeSource(currentChannel.getStreamUrl());
         }
 
         // request focus if none of the other components are active
@@ -100,13 +132,15 @@ export default class TV extends Component {
         //this.setFocus();
     }
 
-    stateUpdateHandler = (newState) => this.setState((state, props) => newState);
+    stateUpdateHandler = (newState: any) => {
+        this.setState((state, props) => newState);
+    };
 
     focus() {
-        this.refs.video && this.refs.video.focus();
+        this.tvWrapper.current?.focus();
     }
 
-    handleKeyPress = (event) => {
+    handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
         let keyCode = event.keyCode;
         let channelPosition = this.state.channelPosition;
 
@@ -189,13 +223,17 @@ export default class TV extends Component {
                 // add current viewing channel to records
                 // get current event
                 let channel = this.getCurrentChannel()
-                let epgEvent = {};
+                let epgEvent: EPGEvent | null = null;
+                
+                if (!channel) break;
                 for (let e of channel.getEvents()) {
                     if (e.isCurrent()) {
                         epgEvent = e;
                         break;
                     }
                 };
+
+                if(!epgEvent) break;
                 if (epgEvent.isPastDated(this.epgUtils.getNow())) {
                     // past dated do nothing
                     return;
@@ -204,24 +242,24 @@ export default class TV extends Component {
                 let recEvent = this.epgData.getRecording(epgEvent);
                 if (recEvent) {
                     // cancel recording
-                    this.tvhService.cancelRec(recEvent, recordings => {
+                    this.tvhService.cancelRec(recEvent, (recordings) => {
                         this.epgData.updateRecordings(recordings);
-                        this.updateCanvas();
+                        //this.updateCanvas();
                     });
                 } else { // creat new recording from event
                     this.tvhService.createRec(epgEvent, recordings => {
                         this.epgData.updateRecordings(recordings);
-                        this.updateCanvas();
+                        //this.updateCanvas();
                     });
                 }
                 break;
             default:
-                console.log("TV-keyPressed:", keyCode);
+                console.log('TV-keyPressed:', keyCode);
         }
     };
 
-    getMediaElement() {
-        return document.getElementById("myVideo");
+    private getMediaElement() {
+        return this.video.current;
     }
 
     /**
@@ -229,19 +267,19 @@ export default class TV extends Component {
      * 
      * @param {Number} digit 
      */
-    enterChannelNumberPart(digit) {
+    enterChannelNumberPart(digit : number) {
         if (this.state.channelNumberText.length < 3) {
             let newChannelNumberText = this.state.channelNumberText + digit;
             this.stateUpdateHandler({
                 channelNumberText: newChannelNumberText
             });
-            this.channelHeader.current && this.channelHeader.current.updateChannelNumberText(newChannelNumberText);
+            this.channelHeaderElement.current?.updateChannelNumberText(newChannelNumberText);
 
             // automatically switch to new channel after 3 seconds
             this.timeoutChangeChannel = setTimeout(() => {
                 let channelNumber = parseInt(newChannelNumberText) - 1;
                 
-                this.epgData.channels.forEach((channel, channelPosition) => {
+                this.epgData.getChannels().forEach((channel, channelPosition) => {
                     if (channel.getChannelID() === channelNumber) {
                         this.changeChannelPosition(channelPosition);
                     }
@@ -250,7 +288,7 @@ export default class TV extends Component {
         }
     }
 
-    changeChannelPosition(channelPosition) {
+    changeChannelPosition(channelPosition: number) {
         if (channelPosition === this.state.channelPosition) {
             return;
         }
@@ -268,17 +306,22 @@ export default class TV extends Component {
     }
 
     initVideoElement() {
-        var videoElement = this.getMediaElement();
-        videoElement.addEventListener("loadedmetadata", event => {
+        let videoElement = this.getMediaElement();
+        
+        videoElement?.addEventListener('loadedmetadata', event => {
+            if (!videoElement) return;
             // console.log(JSON.stringify(event));
             console.log("Audio Tracks: ", videoElement.audioTracks);
             console.log("Video Tracks: ", videoElement.videoTracks);
             console.log("Text Tracks: ", videoElement.textTracks);
+            
             // restore selected audio channel from storage
-            let indexStr = localStorage.getItem(this.getCurrentChannel().getName());
-            if (indexStr !== undefined) {
+            let currentChannel = this.getCurrentChannel();
+            if (!currentChannel) return;
+            let indexStr = localStorage.getItem(currentChannel.getName());
+            if (indexStr) {
                 let index = parseInt(indexStr);
-                console.log("restore index %d for channel %s", index, this.getCurrentChannel().getName());
+                console.log("restore index %d for channel %s", index, this.getCurrentChannel()?.getName());
                 if (index < videoElement.audioTracks.length) {
                     for (let i = 0; i < videoElement.audioTracks.length; i++) {
                         if (videoElement.audioTracks[i].enabled === true && i === index) {
@@ -301,8 +344,9 @@ export default class TV extends Component {
         });
     }
 
-    changeSource(dataUrl) {
-        var videoElement = this.getMediaElement();
+    changeSource(dataUrl: URL) {
+        let videoElement = this.getMediaElement();
+        if (!videoElement) return;
 
         // Remove all source elements
         while (videoElement.firstChild) {
@@ -312,14 +356,14 @@ export default class TV extends Component {
         // after source elements have been removed
         videoElement.load();
 
-        var options = {};
-        options.mediaTransportType = "URI";
+        var options:any = {};
+        options.mediaTransportType = 'URI';
         //Convert the created object to JSON string and encode it.
         var mediaOption = encodeURI(JSON.stringify(options));
         // Add new source element
-        var source = document.createElement("source");
+        var source = document.createElement('source');
         //Add attributes to the created source element for media content.
-        source.setAttribute('src', dataUrl);
+        source.setAttribute('src', dataUrl.toString());
         source.setAttribute('type', 'video/mp2t;mediaOption=' + mediaOption);
 
         videoElement.appendChild(source)
@@ -328,12 +372,12 @@ export default class TV extends Component {
 
     render() {
         return (
-            <div id="tv-wrapper" ref="video" tabIndex='-1' onKeyDown={this.handleKeyPress} className="tv" >
+            <div id="tv-wrapper" ref={this.tvWrapper} tabIndex={-1} onKeyDown={this.handleKeyPress} className="tv" >
                 {this.state.isChannelSettingsState && <ChannelSettings stateUpdateHandler={this.stateUpdateHandler} 
-                channelName={this.getCurrentChannel().getName()} audioTracks={this.state.audioTracks} textTracks={this.state.textTracks} />}
+                channelName={this.getCurrentChannel()?.getName()} audioTracks={this.state.audioTracks} textTracks={this.state.textTracks} />}
 
-                {this.state.channelNumberText !== '' && <ChannelHeader ref={this.channelHeader} stateUpdateHandler={this.stateUpdateHandler}
-                channelNumberText={this.state.channelNumberText} />}
+                {this.state.channelNumberText !== '' && <ChannelHeader ref={this.channelHeaderElement} 
+                stateUpdateHandler={this.stateUpdateHandler} channelNumberText={this.state.channelNumberText} />}
 
                 {this.state.isInfoState && <ChannelInfo epgData={this.epgData} imageCache={this.imageCache}
                 stateUpdateHandler={this.stateUpdateHandler} channelPosition={this.state.channelPosition} />}
@@ -344,7 +388,7 @@ export default class TV extends Component {
                 {this.state.isEpgState && <TVGuide epgData={this.epgData}  imageCache={this.imageCache} 
                 stateUpdateHandler={this.stateUpdateHandler} channelPosition={this.state.channelPosition} />}
 
-                <video id="myVideo" width={this.getWidth()} height={this.getHeight()} autoplay></video>
+                <video id="myVideo" ref={this.video} width={this.getWidth()} height={this.getHeight()} autoPlay></video>
             </div>
         );
     }

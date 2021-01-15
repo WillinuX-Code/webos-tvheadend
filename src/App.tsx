@@ -1,15 +1,24 @@
 import React, { Component } from 'react';
 
-import "babel-polyfill";
+import 'babel-polyfill';
 import TVHDataService from './services/TVHDataService';
 import EPGData from './models/EPGData';
 import TV from './components/TV';
-import './App.css';
 import TVHSettings from './components/TVHSettings';
+import './App.css';
 
 export default class App extends Component {
 
-  constructor(props) {
+  private epgData: EPGData = new EPGData();
+  private imageCache: Map<URL, HTMLImageElement> = new Map();
+  private tvhDataService?: TVHDataService;
+
+  state: {
+    isSettingsState: boolean;
+    lastEpgUpdate: number;
+  }
+
+  constructor(public props: Readonly<any>) {
     super(props);
 
     this.state = {
@@ -23,34 +32,39 @@ export default class App extends Component {
     this.imageCache = new Map();
   }
 
-  async reloadData() {
+  async reloadData(tvhDataService: TVHDataService) {   
     // load locale
-    this.loadLocale();
+    this.loadLocale(tvhDataService);
+
     // retrieve channel infos etc
-    let channels = await this.tvhDataService.retrieveTVHChannels(0);
+    let channels = await tvhDataService.retrieveTVHChannels(0);
     this.epgData.updateChannels(channels); 
+
     // preload images
     this.preloadImages();
+
     // force update to load/preload video already
     this.forceUpdate();
+
     // reetrievee epg and update channels
-    this.tvhDataService.retrieveTVHEPG(0, channels => {
+    tvhDataService.retrieveTVHEPG(0, channels => {
       this.epgData.updateChannels(channels);
     });
-    this.tvhDataService.retrieveUpcomingRecordings(recordings => {
+
+    tvhDataService.retrieveUpcomingRecordings(recordings => {
       this.epgData.updateRecordings(recordings);
     });
      
   }
 
   handleUnmountSettings() {
-    this.settings = JSON.parse(localStorage.getItem(TVHSettings.STORAGE_TVH_SETTING_KEY));
-    if (this.settings.isValid) {
-      this.tvhDataService = new TVHDataService(this.settings);
+    let settingsString = localStorage.getItem(TVHSettings.STORAGE_TVH_SETTING_KEY);
+    if (settingsString) {
+      this.tvhDataService = new TVHDataService(JSON.parse(settingsString));
       this.setState((state, props) => ({
         isSettingsState: false
       }));
-      this.reloadData();
+      this.reloadData(this.tvhDataService);
     } else {
       this.setState((state, props) => ({
         isSettingsState: true
@@ -58,10 +72,10 @@ export default class App extends Component {
     }
   }
 
-  async loadLocale() {
+  async loadLocale(tvhDataService: TVHDataService) {
     try {
       // retrieve local info
-      let localInfoResult = await this.tvhDataService.getLocaleInfo();
+      let localInfoResult = await tvhDataService.getLocaleInfo();
       let locale = localInfoResult.settings.localeInfo.locales.UI;
       // udpate epg
       this.epgData.updateLanguage(locale);
@@ -76,13 +90,10 @@ export default class App extends Component {
    * if images cannot be loaded
    */
   preloadImages() {
-    if(!this.epgData.channels) {
-      return
-    }
-    this.epgData.channels.forEach(channel => {
+    this.epgData.getChannels().forEach(channel => {
       let imageURL = channel.getImageURL();
       let img = new Image();
-      img.src = imageURL;
+      img.src = imageURL.toString();
       img.onload = () => {
         this.imageCache.set(imageURL, img);
       }
@@ -132,7 +143,7 @@ function handleVisibilityChange() {
 }
 */
 
-  handleKeyPress(event) {
+  handleKeyPress(event: React.KeyboardEvent<HTMLDivElement>) {
     let keyCode = event.keyCode;
 
     switch (keyCode) {
@@ -144,7 +155,7 @@ function handleVisibilityChange() {
         }))
         break;
       default:
-        console.log("App-keyPressed:", keyCode);
+        console.log('App-keyPressed:', keyCode);
     }
   };
 
@@ -155,13 +166,13 @@ function handleVisibilityChange() {
 
   componentDidMount() {
     // update state in case setttings exist
-    this.settings = localStorage.getItem(TVHSettings.STORAGE_TVH_SETTING_KEY);
-    if (this.settings) {
-      this.tvhDataService = new TVHDataService(JSON.parse(this.settings));
+    let settingsString = localStorage.getItem(TVHSettings.STORAGE_TVH_SETTING_KEY);
+    if (settingsString) {
+      this.tvhDataService = new TVHDataService(JSON.parse(settingsString));
       this.setState((state, props) => ({
         isSettingsState: false
       }));
-      this.reloadData();
+      this.reloadData(this.tvhDataService);
     } else {
       this.setState((state, props) => ({
         isSettingsState: true
@@ -179,7 +190,7 @@ function handleVisibilityChange() {
           <TVHSettings handleUnmountSettings={this.handleUnmountSettings} />}
 
         {!this.state.isSettingsState &&
-          <TV ref="tv" tvhService={this.tvhDataService} epgData={this.epgData} imageCache={this.imageCache} />}
+          <TV tvhService={this.tvhDataService} epgData={this.epgData} imageCache={this.imageCache} />}
       </div>
     );
   }

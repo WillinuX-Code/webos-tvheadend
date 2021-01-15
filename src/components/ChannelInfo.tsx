@@ -136,16 +136,18 @@ export default class ChannelInfo extends Component {
         canvas.fillStyle = this.mChannelLayoutTextColor;
         canvas.textAlign = 'left';
         let currentEvent, nextEvent;
+
         for (let event of channel.getEvents()) {
             if (event.isCurrent()) {
                 currentEvent = event;
                 continue;
             }
-            if (currentEvent !== undefined) {
+            if (currentEvent) {
                 nextEvent = event;
                 break;
             }
         };
+
         if (currentEvent !== undefined) {
             let left = drawingRect.left;
             drawingRect.right -= this.mChannelInfoTimeBoxWidth;

@@ -56,10 +56,10 @@ service.register("proxy", function (message) {
     }).on("socket", function (socket) {
         socket.setTimeout(2000);  
         socket.on('timeout', function() {
-            req.abort();
+            req.destroy();
         });
     });
     req.setTimeout(2000, function() {                                                                                                                                                                                                                                              
-        req.abort();                                                                                                                                               
+        req.destroy();                                                                                                                                               
     });
 });

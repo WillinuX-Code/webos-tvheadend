@@ -261,7 +261,7 @@ export default class ChannelInfo extends Component {
     }
 
     focus() {
-        this.infoWrapper.current && this.infoWrapper.current.focus();
+        this.infoWrapper.current?.focus();
     }
 
     updateCanvas() {

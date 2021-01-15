@@ -179,10 +179,17 @@ export default class ChannelInfo extends Component {
             }
 
             // draw current time in programm as well as overall durations
+            let runningTime = this.epgUtils.toDuration(currentEvent.getStart(), this.epgUtils.getNow());
+            let totalTime = this.epgUtils.toDuration(currentEvent.getStart(), currentEvent.getEnd());
+            let remainingTime = Math.ceil((currentEvent.getEnd() - this.epgUtils.getNow()) / 1000 / 60);
             drawingRect.left = drawingRect.right - this.mChannelLayoutPadding - 20;
             canvas.textAlign = 'right';
-            canvas.fillText(this.epgUtils.toDuration(currentEvent.getStart(), this.epgUtils.getNow()) + " / " + this.epgUtils.toDuration(currentEvent.getStart(), currentEvent.getEnd()),
-                drawingRect.left, drawingRect.top);
+            canvas.fillText(runningTime + ' (+' + remainingTime + ') / '  + totalTime, drawingRect.left, drawingRect.top);
+
+            // draw channel event progress bar
+            let channelEventProgressRect = new Rect(0, 0, 10, this.getWidth());
+            canvas.fillStyle = this.mChannelLayoutTitleTextColor;
+            canvas.fillRect(channelEventProgressRect.left, channelEventProgressRect.top, channelEventProgressRect.width * currentEvent.getDoneFactor(), channelEventProgressRect.height);
         }
 
     }

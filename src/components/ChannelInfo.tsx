@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
 import Rect from '../models/Rect';
 import EPGUtils from '../utils/EPGUtils';
-import '../styles/app.css';
 import CanvasUtils from '../utils/CanvasUtils';
 import EPGData from '../models/EPGData';
+import { StateUpdateHandler } from './TV';
+import '../styles/app.css';
 
 export default class ChannelInfo extends Component {
 
     private canvas: React.RefObject<HTMLCanvasElement>;
     private infoWrapper: React.RefObject<HTMLDivElement>;
-    private stateUpdateHandler: any;
+    private stateUpdateHandler: StateUpdateHandler;
     private epgData: EPGData;
     private epgUtils: EPGUtils;
     private imageCache: any;
@@ -151,6 +152,7 @@ export default class ChannelInfo extends Component {
         if (currentEvent !== undefined) {
             let left = drawingRect.left;
             drawingRect.right -= this.mChannelInfoTimeBoxWidth;
+
             // draw current event
             canvas.fillText(this.canvasUtils.getShortenedText(canvas, currentEvent.getTitle(), drawingRect.width),
                 drawingRect.left, drawingRect.top);
@@ -161,6 +163,7 @@ export default class ChannelInfo extends Component {
             canvas.fillText(this.epgUtils.toTimeFrameString(currentEvent.getStart(), currentEvent.getEnd()),
                 drawingRect.left, drawingRect.top);
             canvas.textAlign = 'left';
+
             // draw subtitle event
             canvas.font = 'bold ' + (this.mChannelInfoTitleSize - 8) + 'px Arial';
             drawingRect.top += this.mChannelInfoTitleSize + this.mChannelLayoutPadding;
@@ -174,8 +177,8 @@ export default class ChannelInfo extends Component {
                 drawingRect.right += this.mChannelInfoTimeBoxWidth;
 
             }
-            // draw current time in programm as well as overall durations
 
+            // draw current time in programm as well as overall durations
             drawingRect.left = drawingRect.right - this.mChannelLayoutPadding - 20;
             canvas.textAlign = 'right';
             canvas.fillText(this.epgUtils.toDuration(currentEvent.getStart(), this.epgUtils.getNow()) + " / " + this.epgUtils.toDuration(currentEvent.getStart(), currentEvent.getEnd()),
@@ -219,25 +222,33 @@ export default class ChannelInfo extends Component {
         return this.mChannelInfoHeight;
     }
 
-    componentDidMount() {
-        this.updateCanvas();
-        this.focus();
-
-        // set timeout to automatically unmount
+    /** set timeout to automatically unmount */
+    resetUnmountTimeout() {
+        this.timeoutReference && clearTimeout(this.timeoutReference);
         this.timeoutReference = setTimeout(() => this.stateUpdateHandler({
             isInfoState: false,
             channelNumberText: ''
-        }), 8 * 1000);
-        this.intervalReference = setInterval(() => this.updateCanvas(), 500);
+        }), 8000);
+    }
+
+    componentDidMount() {
+        this.focus();
+
+        // update the canvas in short intervals, to display the remaining time live
+        this.intervalReference = setInterval(() => {
+            this.updateCanvas();
+        }, 500);
 
         let channel = this.epgData.getChannel(this.channelPosition);
         this.stateUpdateHandler({ 
-            channelNumberText: channel ? channel.getChannelID() : ''
+            channelNumberText: channel?.getChannelID() || ''
         });
     }
 
-    componentDidUpdate(prevProps: any) {
+    componentDidUpdate(prevProps: any, prevState: any) {
+        this.channelPosition = this.props.channelPosition;
         this.updateCanvas();
+        this.resetUnmountTimeout();
     }
 
     componentWillUnmount() {
@@ -264,10 +275,6 @@ export default class ChannelInfo extends Component {
         if (this.epgData !== null && this.epgData.hasData()) {
             this.drawChannelInfo(canvas);
         }
-    }
-
-    getCanvas() {
-        return this.refs.canvas;
     }
 
     render() {

@@ -56,7 +56,9 @@ export default class ChannelHeader extends Component {
     }
 
     componentDidMount() {
-
+        this.channelNumberText = this.props.channelNumberText;
+        this.resetUnmountTimeout();
+        this.updateCanvas();
     }
 
     componentDidUpdate(prevProps: any, prevState: any) {
@@ -86,8 +88,8 @@ export default class ChannelHeader extends Component {
 
     render() {
         return (
-            <div id="channelheader-wrapper" tabIndex={-1} className="channelHeader2">
-                <canvas ref={this.canvas} width={this.getWidth()} height={this.getHeight()} style={{ display: 'block' }} />
+            <div id="channelheader-wrapper" tabIndex={-1} className="channelHeader">
+                <canvas ref={this.canvas} width={this.getWidth()} height={this.getHeight()} style={{ display: "block" }} />
             </div>
         );
     }

@@ -11,6 +11,7 @@ import TVHSettings from './TVHSettings';
 import EPGData from '../models/EPGData';
 import EPGEvent from '../models/EPGEvent';
 import '../styles/app.css'
+import { StateUpdateHandler } from './TV';
 
 export default class TVGuide extends Component {
 
@@ -27,7 +28,7 @@ export default class TVGuide extends Component {
     private epgWrapper: React.RefObject<HTMLDivElement>;
 
     private ctx?: CanvasRenderingContext2D | null;
-    private stateUpdateHandler;
+    private stateUpdateHandler: StateUpdateHandler;
     private epgData: EPGData;
     private epgUtils: EPGUtils;
     private canvasUtils: CanvasUtils;

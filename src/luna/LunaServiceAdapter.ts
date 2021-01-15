@@ -1,10 +1,10 @@
 import '@procot/webostv/webOSTV';
 
-interface IProxySuccessResponse<TResult> extends WebOSTV.OnCompleteSuccessResponse {
+interface ProxySuccessResponse<TResult> extends WebOSTV.OnCompleteSuccessResponse {
     result: TResult;
 }
 
-interface ILocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
+interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
     method: string;
     settings: {
         localeInfo: {
@@ -33,12 +33,12 @@ interface ILocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
  */
 export default class LunaServiceAdapter {
         call<TResult = any>(method: string, params: any) {
-        return new Promise<IProxySuccessResponse<TResult>>((resolve, reject) => {
+        return new Promise<ProxySuccessResponse<TResult>>((resolve, reject) => {
             console.log('lsa:%s start', method);
             global.webOS.service.request('luna://com.willinux.tvh.app.proxy', {
                 method: method,
                 parameters: params,
-                onSuccess: (res: IProxySuccessResponse<TResult>) => resolve(res),
+                onSuccess: (res: ProxySuccessResponse<TResult>) => resolve(res),
                 onFailure: (res) => reject(res),
                 onComplete: () => {
                     console.log('lsa:%s end', method);
@@ -67,13 +67,13 @@ export default class LunaServiceAdapter {
     }
 
     getLocaleInfo() {
-        return new Promise<ILocaleInfoSuccessResponse>(function(resolve, reject) {
+        return new Promise<LocaleInfoSuccessResponse>(function(resolve, reject) {
             global.webOS.service.request('luna://com.webos.settingsservice', {
                 method: 'getSystemSettings',
                 parameters: {
                     'keys': ['localeInfo']
                 },
-                onSuccess: (res: ILocaleInfoSuccessResponse) => resolve(res),
+                onSuccess: (res: LocaleInfoSuccessResponse) => resolve(res),
                 onFailure: (res) => reject(res)
             });
         });

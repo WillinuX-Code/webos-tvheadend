@@ -15,12 +15,15 @@ interface HTMLVideoElementEx extends HTMLVideoElement {
     audioTracks: any[];
 }
 
+export interface StateUpdateHandler {
+    (newState: any): void;
+}
+
 export default class TV extends Component {
 
     static STORAGE_KEY_LAST_CHANNEL = 'lastChannel';
 
     private tvWrapper: React.RefObject<HTMLDivElement>;
-    private channelHeaderElement: React.RefObject<ChannelHeader>;
     private video: React.RefObject<HTMLVideoElementEx>;
     private epgData: EPGData;
 
@@ -44,7 +47,6 @@ export default class TV extends Component {
         super(props);
 
         this.tvWrapper = React.createRef();
-        this.channelHeaderElement = React.createRef();
         this.video = React.createRef();
         this.state = {
             isChannelSettingsState: false,
@@ -92,11 +94,6 @@ export default class TV extends Component {
         return this.epgData.getChannel(this.state.channelPosition);
     }
 
-    private getCurrentChannelName() {
-        let currentChannel = this.getCurrentChannel();
-        return currentChannel?.getName() || '';
-    }
-
     componentWillUnmount() {
         let videoElement = this.getMediaElement();
         // Remove all source elements
@@ -132,7 +129,7 @@ export default class TV extends Component {
         //this.setFocus();
     }
 
-    stateUpdateHandler = (newState: any) => {
+    private stateUpdateHandler: StateUpdateHandler = (newState: any) => {
         this.setState((state, props) => newState);
     };
 
@@ -273,9 +270,9 @@ export default class TV extends Component {
             this.stateUpdateHandler({
                 channelNumberText: newChannelNumberText
             });
-            this.channelHeaderElement.current?.updateChannelNumberText(newChannelNumberText);
 
             // automatically switch to new channel after 3 seconds
+            this.timeoutChangeChannel && clearTimeout(this.timeoutChangeChannel);
             this.timeoutChangeChannel = setTimeout(() => {
                 let channelNumber = parseInt(newChannelNumberText) - 1;
                 
@@ -288,7 +285,7 @@ export default class TV extends Component {
         }
     }
 
-    changeChannelPosition(channelPosition: number) {
+    private changeChannelPosition(channelPosition: number) {
         if (channelPosition === this.state.channelPosition) {
             return;
         }
@@ -298,7 +295,7 @@ export default class TV extends Component {
         this.stateUpdateHandler({
             isInfoState: true,
             channelPosition: channelPosition,
-            channelNumberText: channel ? channel.getChannelID() : ''
+            channelNumberText: channel?.getChannelID() || ''
         });
 
         // store last used channel
@@ -376,8 +373,8 @@ export default class TV extends Component {
                 {this.state.isChannelSettingsState && <ChannelSettings stateUpdateHandler={this.stateUpdateHandler} 
                 channelName={this.getCurrentChannel()?.getName()} audioTracks={this.state.audioTracks} textTracks={this.state.textTracks} />}
 
-                {this.state.channelNumberText !== '' && <ChannelHeader ref={this.channelHeaderElement} 
-                stateUpdateHandler={this.stateUpdateHandler} channelNumberText={this.state.channelNumberText} />}
+                {this.state.channelNumberText !== '' && <ChannelHeader stateUpdateHandler={this.stateUpdateHandler} 
+                channelNumberText={this.state.channelNumberText} />}
 
                 {this.state.isInfoState && <ChannelInfo epgData={this.epgData} imageCache={this.imageCache}
                 stateUpdateHandler={this.stateUpdateHandler} channelPosition={this.state.channelPosition} />}

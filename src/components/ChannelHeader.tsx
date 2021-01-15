@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
 import '../styles/app.css';
 import CanvasUtils from '../utils/CanvasUtils';
+import { StateUpdateHandler } from './TV';
 
-export default class ChannelHeader2 extends Component {
+export default class ChannelHeader extends Component {
     
     private canvas: React.RefObject<HTMLCanvasElement>;
-    private stateUpdateHandler: any;
+    private stateUpdateHandler: StateUpdateHandler;
     private channelNumberText: string;
     private canvasUtils: CanvasUtils;
     private timeoutReference?: NodeJS.Timeout;
-    private intervalReference?: NodeJS.Timeout;
 
     mChannelHeaderHeight = 80;
     mChannelHeaderTextSize = 56;
@@ -21,14 +21,6 @@ export default class ChannelHeader2 extends Component {
         this.stateUpdateHandler = props.stateUpdateHandler;
         this.channelNumberText = props.channelNumberText;
         this.canvasUtils = new CanvasUtils();
-
-        this.mChannelHeaderHeight = 80;
-        this.mChannelHeaderTextSize = 56;
-    }
-
-    updateChannelNumberText(numberText: string) {
-        this.channelNumberText = numberText;
-        this.resetUnmountTimeout();
     }
 
     drawChannelNumber(canvas: CanvasRenderingContext2D) {
@@ -57,24 +49,24 @@ export default class ChannelHeader2 extends Component {
 
     /** set timeout to automatically unmount */
     resetUnmountTimeout() {
+        this.timeoutReference && clearTimeout(this.timeoutReference);
         this.timeoutReference = setTimeout(() => this.stateUpdateHandler({
             channelNumberText: ''
         }), 5000);
     }
 
     componentDidMount() {
-        this.updateCanvas();
-        this.resetUnmountTimeout();
-        this.intervalReference = setInterval(() => this.updateCanvas(), 500);
+
     }
 
-    componentDidUpdate(prevProps: any) {
+    componentDidUpdate(prevProps: any, prevState: any) {
+        this.channelNumberText = this.props.channelNumberText;
+        this.resetUnmountTimeout();
         this.updateCanvas();
     }
 
     componentWillUnmount() {
-        this.timeoutReference && clearInterval(this.timeoutReference);
-        this.intervalReference && clearInterval(this.intervalReference);
+        this.timeoutReference && clearTimeout(this.timeoutReference);
     }
 
     updateCanvas() {

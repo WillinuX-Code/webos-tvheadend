@@ -3,6 +3,7 @@ import Rect from '../models/Rect';
 import '../styles/app.css';
 import CanvasUtils from '../utils/CanvasUtils';
 import EPGData from '../models/EPGData';
+import { StateUpdateHandler } from './TV';
 
 export default class ChannelList extends Component {
 
@@ -11,7 +12,7 @@ export default class ChannelList extends Component {
 
     private canvas: React.RefObject<HTMLCanvasElement>;
     private listWrapper: React.RefObject<HTMLDivElement>;
-    private stateUpdateHandler: any;
+    private stateUpdateHandler: StateUpdateHandler;
     private epgData: EPGData;
     private imageCache: any;
     private channelPosition: number;
@@ -330,8 +331,6 @@ export default class ChannelList extends Component {
 
     componentDidUpdate(prevProps: any) {
         this.updateCanvas();
-
-        //this.setFocus();
     }
 
     componentWillUnmount() {

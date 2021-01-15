@@ -6,7 +6,7 @@ import Icon from '@enact/moonstone/Icon';
 import Picker from '@enact/moonstone/Picker';
 import Heading from '@enact/moonstone/Heading';
 import React, { Component } from 'react';
-import TVHDataService, { ITVHSettings } from '../services/TVHDataService';
+import TVHDataService, { TVHSettingsOptions } from '../services/TVHDataService';
 
 export default class TVHSettings extends Component {
 
@@ -14,7 +14,7 @@ export default class TVHSettings extends Component {
 
     private testResult: string = '';
 
-    state: Readonly<ITVHSettings>;
+    state: Readonly<TVHSettingsOptions>;
 
     constructor(public props: Readonly<any>) {
         super(props);

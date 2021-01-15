@@ -3,7 +3,7 @@ import LunaServiceAdapter from '../luna/LunaServiceAdapter';
 import EPGChannel from '../models/EPGChannel';
 import EPGEvent from '../models/EPGEvent';
 
-export interface ITVHSettings {
+export interface TVHSettingsOptions {
     tvhUrl: string;
     user?: string;
     password?: string;
@@ -17,7 +17,7 @@ export interface ITVHSettings {
     isLoading: boolean;
 }
 
-export interface ITVHEvent {
+interface TVHEvent {
     eventId: number;
     start: number;
     stop: number;
@@ -27,7 +27,7 @@ export interface ITVHEvent {
     channelUuid: string;
 }
 
-export interface IRecordEntry {
+interface RecordEntry {
     uuid: number;
     start: number;
     stop: number;
@@ -37,11 +37,11 @@ export interface IRecordEntry {
     channel: string;
 }
 
-export interface IRecordingCallback {
+interface RecordingCallback {
     (recordings: EPGEvent[]): void;
 }
 
-export interface IEPGCallback {
+interface EPGCallback {
     (channels: EPGChannel[]): void;
 }
 
@@ -65,7 +65,7 @@ export default class TVHDataService {
     private profile: string;
     private dvrUuid: string;
 
-    constructor(settings: ITVHSettings) {
+    constructor(settings: TVHSettingsOptions) {
         this.url = settings.tvhUrl;
         // append trailing slash if it doesn't exist
         if (!this.url.endsWith('/')) {
@@ -103,7 +103,7 @@ export default class TVHDataService {
         });
     }
 
-    createRec(event: EPGEvent, callback: IRecordingCallback) {
+    createRec(event: EPGEvent, callback: RecordingCallback) {
         // now create rec by event
         this.serviceAdapter.call('proxy', {
             'url': this.url + TVHDataService.API_DVR_CREATE_BY_EVENT + 'event_id=' + event.getId() + '&config_uuid=' + this.dvrUuid + '&comment=webos-tvheadend'
@@ -118,7 +118,7 @@ export default class TVHDataService {
         });
     }
 
-    cancelRec(event: EPGEvent, callback: IRecordingCallback) {
+    cancelRec(event: EPGEvent, callback: RecordingCallback) {
         // now create rec by event
         this.serviceAdapter.call('proxy', {
             'url': this.url + TVHDataService.API_DVR_CANCEL + event.getId()
@@ -133,7 +133,7 @@ export default class TVHDataService {
         });
     }
 
-    retrieveUpcomingRecordings(callback: IRecordingCallback) {
+    retrieveUpcomingRecordings(callback: RecordingCallback) {
         // now create rec by event
         this.serviceAdapter.call('proxy', {
             'url': this.url + TVHDataService.API_DVR_UPCOMING
@@ -150,7 +150,7 @@ export default class TVHDataService {
         });
     }
 
-    toEpgEvent(tvhEvent: ITVHEvent) {
+    toEpgEvent(tvhEvent: TVHEvent) {
         return new EPGEvent(
             tvhEvent.eventId,
             tvhEvent.start * 1000,
@@ -162,7 +162,7 @@ export default class TVHDataService {
         )
     }
 
-    toEpgEventRec(recordEntry: IRecordEntry) {
+    toEpgEventRec(recordEntry: RecordEntry) {
         return new EPGEvent(
             recordEntry.uuid,
             recordEntry.start * 1000,
@@ -257,7 +257,7 @@ export default class TVHDataService {
         };
     }
 
-    retrieveTVHEPG(start: number, callback: IEPGCallback) {
+    retrieveTVHEPG(start: number, callback: EPGCallback) {
         let totalCount = 0;
 
         this.serviceAdapter.call('proxy', {

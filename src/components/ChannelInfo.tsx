@@ -243,6 +243,10 @@ export default class ChannelInfo extends Component {
         this.stateUpdateHandler({ 
             channelNumberText: channel?.getChannelID() || ''
         });
+
+        this.channelPosition = this.props.channelPosition;
+        this.updateCanvas();
+        this.resetUnmountTimeout();
     }
 
     componentDidUpdate(prevProps: any, prevState: any) {

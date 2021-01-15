@@ -274,7 +274,7 @@ export default class TV extends Component {
             // automatically switch to new channel after 3 seconds
             this.timeoutChangeChannel && clearTimeout(this.timeoutChangeChannel);
             this.timeoutChangeChannel = setTimeout(() => {
-                let channelNumber = parseInt(newChannelNumberText) - 1;
+                let channelNumber = parseInt(newChannelNumberText);
                 
                 this.epgData.getChannels().forEach((channel, channelPosition) => {
                     if (channel.getChannelID() === channelNumber) {

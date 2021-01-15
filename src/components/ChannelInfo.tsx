@@ -23,7 +23,7 @@ export default class ChannelInfo extends Component {
     private mChannelInfoTitleSize = 42;
     private mChannelLayoutTextColor = '#d6d6d6';
     private mChannelLayoutTitleTextColor = '#969696';
-    private mChannelInfoTimeBoxWidth = 270;
+    private mChannelInfoTimeBoxWidth = 375;
     private mChannelLayoutMargin = 3;
     private mChannelLayoutPadding = 7;
     private mChannelLayoutBackground = '#323232';
@@ -173,9 +173,7 @@ export default class ChannelInfo extends Component {
                 canvas.fillStyle = this.mChannelLayoutTitleTextColor;
                 canvas.fillText(this.canvasUtils.getShortenedText(canvas, currentEvent.getSubTitle(), drawingRect.width),
                     drawingRect.left, drawingRect.top);
-
                 drawingRect.right += this.mChannelInfoTimeBoxWidth;
-
             }
 
             // draw current time in programm as well as overall durations
@@ -184,6 +182,7 @@ export default class ChannelInfo extends Component {
             let remainingTime = Math.ceil((currentEvent.getEnd() - this.epgUtils.getNow()) / 1000 / 60);
             drawingRect.left = drawingRect.right - this.mChannelLayoutPadding - 20;
             canvas.textAlign = 'right';
+            canvas.fillStyle = this.mChannelLayoutTitleTextColor;
             canvas.fillText(runningTime + ' (+' + remainingTime + ') / '  + totalTime, drawingRect.left, drawingRect.top);
 
             // draw channel event progress bar

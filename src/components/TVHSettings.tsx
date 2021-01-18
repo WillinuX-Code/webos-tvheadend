@@ -203,6 +203,7 @@ export default class TVHSettings extends Component {
                         placeholder="http://192.168.0.10:9981/" />
                 
                     <Input 
+                        className="username"
                         value={this.state.user}
                         type="text"
                         onChange={this.handleUserChange}
@@ -211,6 +212,7 @@ export default class TVHSettings extends Component {
                         placeholder="User (Optional)" />
                    
                     <Input
+                        className="password"
                         value={this.state.password}
                         type="text"
                         onChange={this.handlePasswordChange}

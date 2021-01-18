@@ -51,3 +51,11 @@ body {
     right: 0;
     z-index: 10;
 }
+
+.tvhSettings .username {
+    width: 30%;
+}
+
+.tvhSettings .password {
+    width: 30%;
+}

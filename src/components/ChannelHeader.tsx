@@ -11,8 +11,8 @@ export default class ChannelHeader extends Component {
     private canvasUtils: CanvasUtils;
     private timeoutReference?: NodeJS.Timeout;
 
-    mChannelHeaderHeight = 80;
-    mChannelHeaderTextSize = 56;
+    private mChannelHeaderHeight = 80;
+    private mChannelHeaderTextSize = 56;
 
     constructor(public props: Readonly<any>) {
         super(props);
@@ -24,17 +24,16 @@ export default class ChannelHeader extends Component {
     }
 
     drawChannelNumber(canvas: CanvasRenderingContext2D) {
-        // draw shadow
-        this.canvasUtils.writeText(canvas, this.channelNumberText, this.getWidth() - 3, this.mChannelHeaderTextSize / 2 + 3, {
-            fontSize: this.mChannelHeaderTextSize,
-            fillStyle: '#363636',
-            textAlign: 'right'
-        });
+        // create gradient for text 
+        let gradient = canvas.createLinearGradient(0, 20, 0, this.mChannelHeaderTextSize + 20);
+        gradient.addColorStop(0, 'rgba(200, 200, 200, 1)');
+        gradient.addColorStop(0.5, 'rgba(255, 255, 255, 1)');
+        gradient.addColorStop(1, 'rgba(200, 200, 200, 1)');
 
         // draw text
-        this.canvasUtils.writeText(canvas, this.channelNumberText, this.getWidth(), this.mChannelHeaderTextSize / 2, {
+        this.canvasUtils.writeText(canvas, this.channelNumberText, this.getWidth() - 20, this.mChannelHeaderTextSize / 2 + 20, {
             fontSize: this.mChannelHeaderTextSize,
-            fillStyle: '#D6D6D6',
+            fillStyle: gradient,
             textAlign: 'right'
         });
     }

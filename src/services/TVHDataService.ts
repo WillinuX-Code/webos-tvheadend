@@ -110,7 +110,7 @@ export default class TVHDataService {
         }).then(success => {
             console.log('created record: %s', success.result.total)
             // toast information
-            this.serviceAdapter.toast('Added DVR entry: ' + event.getTitle())
+            this.showToastMessage('Added DVR entry: ' + event.getTitle())
             // update upcoming recordings
             this.retrieveUpcomingRecordings(callback);
         }).catch(error => {
@@ -125,7 +125,7 @@ export default class TVHDataService {
         }).then(success => {
             console.log('created record: %s', success.result.total)
             // toast information
-            this.serviceAdapter.toast('Cancelled DVR entry: ' + event.getTitle())
+            this.showToastMessage('Cancelled DVR entry: ' + event.getTitle())
             // update upcoming recordings
             this.retrieveUpcomingRecordings(callback);
         }).catch(error => {
@@ -286,5 +286,9 @@ export default class TVHDataService {
         }).catch(error => {
             console.log('Failed to retrieve epg data: ', JSON.stringify(error))
         });
+    }
+
+    showToastMessage(message: string) {
+        this.serviceAdapter.toast(message);
     }
 }

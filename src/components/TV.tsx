@@ -349,22 +349,31 @@ export default class TV extends Component {
         while (videoElement.firstChild) {
             videoElement.removeChild(videoElement.firstChild);
         }
-        // Initiating readyState of HTMLMediaElement to free resources 
-        // after source elements have been removed
-        videoElement.load();
 
-        var options:any = {};
+        let options:any = {};
         options.mediaTransportType = 'URI';
-        //Convert the created object to JSON string and encode it.
-        var mediaOption = encodeURI(JSON.stringify(options));
+
+        // Convert the created object to JSON string and encode it.
+        let mediaOption = encodeURI(JSON.stringify(options));
+
         // Add new source element
-        var source = document.createElement('source');
-        //Add attributes to the created source element for media content.
+        let source = document.createElement('source');
+
+        // Add attributes to the created source element for media content.
         source.setAttribute('src', dataUrl.toString());
         source.setAttribute('type', 'video/mp2t;mediaOption=' + mediaOption);
-
         videoElement.appendChild(source)
-        videoElement.play();
+
+        // autoplay video with error handling
+        let playPromise = videoElement.play();
+        if (playPromise !== undefined) {
+            playPromise.then(_ => {
+                // Automatic playback started!
+            }).catch(error => {
+                // Auto-play was prevented
+                this.tvhService.showToastMessage('Video playback failed!');
+            });
+        }
     }
 
     render() {
@@ -385,7 +394,7 @@ export default class TV extends Component {
                 {this.state.isEpgState && <TVGuide epgData={this.epgData}  imageCache={this.imageCache} 
                 stateUpdateHandler={this.stateUpdateHandler} channelPosition={this.state.channelPosition} />}
 
-                <video id="myVideo" ref={this.video} width={this.getWidth()} height={this.getHeight()} autoPlay></video>
+                <video id="myVideo" ref={this.video} width={this.getWidth()} height={this.getHeight()} preload="none"></video>
             </div>
         );
     }

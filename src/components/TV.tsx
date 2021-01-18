@@ -350,6 +350,9 @@ export default class TV extends Component {
             videoElement.removeChild(videoElement.firstChild);
         }
 
+        // Reset video
+        videoElement.load();
+
         let options:any = {};
         options.mediaTransportType = 'URI';
 
@@ -364,16 +367,12 @@ export default class TV extends Component {
         source.setAttribute('type', 'video/mp2t;mediaOption=' + mediaOption);
         videoElement.appendChild(source)
 
-        // autoplay video with error handling
-        let playPromise = videoElement.play();
-        if (playPromise !== undefined) {
-            playPromise.then(_ => {
-                // Automatic playback started!
-            }).catch(error => {
-                // Auto-play was prevented
-                this.tvhService.showToastMessage('Video playback failed!');
-            });
-        }
+        // Auto-play video with error handling
+        videoElement.play().then(_ => {
+            // Automatic playback started!
+        }).catch(error => {
+            // Auto-play was prevented...
+        });
     }
 
     render() {

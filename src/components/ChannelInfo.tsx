@@ -190,18 +190,18 @@ export default class ChannelInfo extends Component {
             // draw upcoming progress
             let channelEventProgressRect = new Rect(0, 0, 6, this.getWidth());
             let grd = canvas.createLinearGradient(channelEventProgressRect.left, channelEventProgressRect.left, channelEventProgressRect.right, channelEventProgressRect.left);
-            grd.addColorStop(0, "rgba(80, 80, 80, 0.5)");
-            grd.addColorStop(0.4, "rgba(200, 200, 200, 0.5)");
-            grd.addColorStop(0.6, "rgba(200, 200, 200, 0.5)");
-            grd.addColorStop(1, 'rgba(80, 80, 80, 0.5)');
+            grd.addColorStop(0, 'rgba(80, 80, 80, 0.75)');
+            grd.addColorStop(0.5, 'rgba(200, 200, 200, 0.75)');
+            grd.addColorStop(1, 'rgba(80, 80, 80, 0.75)');
             let grd2 = canvas.createLinearGradient(channelEventProgressRect.left, channelEventProgressRect.left, channelEventProgressRect.right, channelEventProgressRect.left);
-            grd2.addColorStop(0, "rgba(19, 126, 169, 0.5)");
-            grd2.addColorStop(0.4, "rgba(65,182,230, 0.5)");
-            grd2.addColorStop(0.6, "rgba(65,182,230, 0.5)");
-            grd2.addColorStop(1, 'rgba(19, 126, 169, 0.5)');
+            grd2.addColorStop(0, 'rgba(19, 126, 169, 0.75)');
+            grd2.addColorStop(0.5, 'rgba(65, 182, 230, 0.75)');
+            grd2.addColorStop(1, 'rgba(19, 126, 169, 0.75)');
+
             // draw base progress line
             canvas.fillStyle = grd;
             canvas.fillRect(channelEventProgressRect.left, channelEventProgressRect.top, channelEventProgressRect.width, channelEventProgressRect.height);
+            
             // draw past progress
             canvas.fillStyle = grd2;
             canvas.fillRect(channelEventProgressRect.left, channelEventProgressRect.top, channelEventProgressRect.width * currentEvent.getDoneFactor(), channelEventProgressRect.height)     

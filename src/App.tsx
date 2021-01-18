@@ -187,7 +187,7 @@ function handleVisibilityChange() {
     return (
       <div className="App" onKeyDown={this.handleKeyPress}>
         {this.state.isSettingsState &&
-          <TVHSettings handleUnmountSettings={this.handleUnmountSettings} />}
+          <TVHSettings handleUnmountSettings={this.handleUnmountSettings} tvhService={this.tvhDataService} />}
 
         {!this.state.isSettingsState &&
           <TV tvhService={this.tvhDataService} epgData={this.epgData} imageCache={this.imageCache} />}

@@ -35,10 +35,11 @@ export default class TVHSettings extends Component {
         }
     }
 
-    handleSave() {
+    private handleSave = () => {
         if (!this.state.isValid) {
             return
         }
+
         // put to storage
         localStorage.setItem(TVHSettings.STORAGE_TVH_SETTING_KEY, JSON.stringify({
             tvhUrl: this.state.tvhUrl,
@@ -50,11 +51,12 @@ export default class TVHSettings extends Component {
             dvrConfigUuid: this.state.dvrConfigUuid,
             isValid: this.state.isValid
         }));
+
         // call unmount
         this.props.handleUnmountSettings();
-    }
+    };
 
-    handleUserChange(object: any) {
+    private handleUserChange = (object: any) => {
          // update state
          this.setState((state, props) => ({
             profiles: [],
@@ -66,9 +68,9 @@ export default class TVHSettings extends Component {
 
         // do not pass this event further
         return false;
-    }
+    };
 
-    handlePasswordChange(object: any) {
+    private handlePasswordChange = (object: any) => {
         // update state
         this.setState((state, props) => ({
             profiles: [],
@@ -80,9 +82,9 @@ export default class TVHSettings extends Component {
 
         // do not pass this event further
         return false;
-    }
+    };
 
-    handleProfileChange(object: any) {
+    private handleProfileChange = (object: any) => {
         // update state
         this.setState((state, props) => ({
             selectedProfile: object.value
@@ -90,9 +92,9 @@ export default class TVHSettings extends Component {
 
         // do not pass this event further
         return false;
-    }
+    };
 
-    handleUrlChange(object: any) {
+    private handleUrlChange = (object: any) => {
         // if url changes we reset test result
         this.testResult = '';
 
@@ -107,19 +109,22 @@ export default class TVHSettings extends Component {
 
         // do not pass this event further
         return false;
-    }
+    };
 
-    async handleConnectionTest(event: any) {
+    private handleConnectionTest = async (event: any) => {
         event.preventDefault();
         this.setState((state, props) => ({
             isLoading: true
         }));
+
         //test url verify if it works
         let service = new TVHDataService(this.state);
+        
         try {
             // retrieve server info
-            let serverInfoResult = await service.retrieveServerInfo();
-            this.testResult = 'Version: ' + serverInfoResult.result.sw_version + ' - API Version: ' + serverInfoResult.result.api_version;
+            //let serverInfoResult = await service.retrieveServerInfo();
+            //this.testResult = 'Version: ' + serverInfoResult.result.sw_version + ' - API Version: ' + serverInfoResult.result.api_version;
+            this.getConnectionInfo(service);
 
             let profilesResult = await service.retrieveProfileList();
             let profiles: string[] = [];
@@ -146,34 +151,43 @@ export default class TVHSettings extends Component {
                 isLoading: false
             }));
         } catch (error) {
-            this.testResult = 'Failed to connect: ' + (error.errorText ? error.errorText : error);
+            // this.testResult = 'Failed to connect: ' + (error.errorText ? error.errorText : error);
             this.setState((state, props) => ({
                 isLoading: false,
                 isValid: false
             }));
         }
+    };
+
+    private async getConnectionInfo(service: TVHDataService) {
+        if (service) {
+            try {
+                let serverInfoResult = await service.retrieveServerInfo();
+                this.testResult = 'Version: ' + serverInfoResult.result.sw_version + ' - API Version: ' + serverInfoResult.result.api_version;
+            } catch (error) {
+                this.testResult = 'Failed to connect: ' + (error.errorText ? error.errorText : error);
+                this.setState((state, props) => ({
+                    isLoading: false,
+                    isValid: false
+                }));
+            }
+        } else {
+            this.testResult = '';
+        }
+
+        // force an update of the component
+        this.setState(this.state);
     }
 
     componentDidMount() {
-        this.handleSave = this.handleSave.bind(this);
-        this.handleUserChange = this.handleUserChange.bind(this);
-        this.handlePasswordChange = this.handlePasswordChange.bind(this);
-        this.handleProfileChange = this.handleProfileChange.bind(this);
-        this.handleUrlChange = this.handleUrlChange.bind(this);
-        this.handleConnectionTest = this.handleConnectionTest.bind(this);
         // read state from storage if exists
         let settings = localStorage.getItem(TVHSettings.STORAGE_TVH_SETTING_KEY);
         if (settings) {
             this.setState((state, props) => JSON.parse(settings || ''));
         }
-    }
 
-    componentDidUpdate(prevProps: any) {
-
-    }
-
-    componentWillUnmount() {
-
+        // get current connection info, if possible
+        this.getConnectionInfo(this.props.tvhService);
     }
 
     render() {
@@ -188,7 +202,7 @@ export default class TVHSettings extends Component {
                         onChange={this.handleUrlChange}
                         placeholder="http://192.168.0.10:9981/" />
                 
-                    <Input
+                    <Input 
                         value={this.state.user}
                         type="text"
                         onChange={this.handleUserChange}

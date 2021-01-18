@@ -1,11 +1,19 @@
+interface WriteTextOptions {
+    fontSize?: number;
+    fillStyle?: string | CanvasGradient | CanvasPattern;
+    fontFace?: string;
+    textAlign?: CanvasTextAlign;
+    textBaseline?: CanvasTextBaseline;
+    isBold?: boolean;
+    maxWidth?: number;
+}
+
 export default class CanvasUtils {
     
     static MEASURE_STRING = 'One interesting Measure String';
     
     /**
      * Return character width approximation of current font
-     * 
-     * @param {CanvasRenderingContext2D} canvas 
      */
     getWidthPerCharacter(canvas: CanvasRenderingContext2D) {
         return canvas.measureText(CanvasUtils.MEASURE_STRING).width / CanvasUtils.MEASURE_STRING.length;
@@ -13,10 +21,6 @@ export default class CanvasUtils {
 
     /**
      * Faster shortened function with a complexity of 2
-     * 
-     * @param {CanvasRenderingContext2D} canvas 
-     * @param {String} text 
-     * @param {Number} drawingRect 
      */
     getShortenedText(canvas: CanvasRenderingContext2D, text: string, maxWidth: number) {
         let result = text;
@@ -39,13 +43,6 @@ export default class CanvasUtils {
 
     /**
      * Wraps a text inside a given area
-     * 
-     * @param {CanvasRenderingContext2D} canvas 
-     * @param {String} text 
-     * @param {Number} x 
-     * @param {Number} y 
-     * @param {Number} maxWidth 
-     * @param {Number} lineHeight 
      */
     wrapText(canvas: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number) {
         var line = ''; 
@@ -86,21 +83,8 @@ export default class CanvasUtils {
 
     /**
      * Writes a text to a specific position without changing the canvas context
-     * 
-     * @param {CanvasRenderingContext2D} canvas 
-     * @param {String} text
-     * @param {Number} x 
-     * @param {Number} y 
-     * @param {{fontSize: Number, 
-     *          fillStyle: String, 
-     *          fontFace: String, 
-     *          textAlign: 'center'|'end'|'left'|'right'|'start', 
-     *          textBaseline: 'alphabetic'|'top'|'hanging'|'middle'|'ideographic'|'bottom', 
-     *          isBold: Boolean
-     *          maxWidth: Number}} options
-     * @param 
      */
-    writeText(canvas: CanvasRenderingContext2D, text: string, x: number, y: number, options: any) {
+    writeText(canvas: CanvasRenderingContext2D, text: string, x: number, y: number, options: WriteTextOptions = {}) {
         // set default options
         options.fontFace = options.fontFace || 'Arial';
         options.textAlign = options.textAlign || 'left';
@@ -118,16 +102,16 @@ export default class CanvasUtils {
 
         // set new text style
         canvas.font = options.fontSize + 'px ' + options.fontFace;
-        if(options.isBold) {canvas.font = 'bold ' + canvas.font}
+        if (options.isBold) {canvas.font = 'bold ' + canvas.font}
         canvas.fillStyle = options.fillStyle;
         canvas.textAlign = options.textAlign;
         canvas.textBaseline = options.textBaseline;
-
-        if(options.maxWidth) {
+        
+        if (options.maxWidth) {
             // fix negative width
-            if(options.maxWidth <= 0) {
+            if (options.maxWidth <= 0) {
                 options.maxWidth = 0;
-                text = "";
+                text = '';
             } else {
                 text = this.getShortenedText(canvas, text, options.maxWidth);
             }

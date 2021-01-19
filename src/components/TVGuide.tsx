@@ -832,12 +832,6 @@ export default class TVGuide extends Component {
                 }
                 break;
             case 461:
-                event.stopPropagation();
-                // back button
-                // do not pass this key to the browser/webos
-                this.cancelScrollAnimation();
-                event.preventDefault();
-                break;
             case 406: // blue or back button hide epg/show tv
             case 66: // keyboard 'b' 
                 event.stopPropagation();

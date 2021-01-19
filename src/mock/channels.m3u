@@ -1,0 +1,183 @@
+#EXTM3U
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7167?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="978ffcc9bede159db867631b28b2ce0a" tvg-chno="1",Das Erste HD
+http://userver.fritz.box:9981/stream/channelid/1241288599?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7166?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="f2ceba520639ad0ffaaf030edc7453ee" tvg-chno="2",ZDF HD
+http://userver.fritz.box:9981/stream/channelid/1387974386?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7165?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="3877bfe3fd6b244758f3ee0a237844f0" tvg-chno="3",ZDFinfo HD
+http://userver.fritz.box:9981/stream/channelid/1673492280?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7164?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="1872ba64b862f8db895193ec288e2a36" tvg-chno="4",zdf_neo HD
+http://userver.fritz.box:9981/stream/channelid/1689940504?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7163?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="67528561ea8dc7c8cf80cd6429a4b2c6" tvg-chno="5",hr-fernsehen HD
+http://userver.fritz.box:9981/stream/channelid/1636127335?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7162?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="a77946db8b6b22977ed8ba347863122e" tvg-chno="6",3sat HD
+http://userver.fritz.box:9981/stream/channelid/1531345319?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7161?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="178b5500a440df9ec58fcaaaf17485c8" tvg-chno="7",SAT.1 HD
+http://userver.fritz.box:9981/stream/channelid/5606167?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7160?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="2f079a9c4e1f5ba9e61f4cf08901c718" tvg-chno="8",RTL HD
+http://userver.fritz.box:9981/stream/channelid/479856431?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7159?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="727da6e8ae21dccd681495baf1ad277a" tvg-chno="9",ProSieben HD
+http://userver.fritz.box:9981/stream/channelid/1755741554?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7158?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="91718dbc2a6aff215535a74a7c46aee5" tvg-chno="10",Pro7 MAXX HD
+http://userver.fritz.box:9981/stream/channelid/1015902609?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7157?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="f8856ce001ea23004cc6c6479f565fdc" tvg-chno="11",RTLII HD
+http://userver.fritz.box:9981/stream/channelid/1617724920?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7156?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="f32017040910af0d27e5e3fefbd7fbbd" tvg-chno="12",SIXX HD
+http://userver.fritz.box:9981/stream/channelid/68624627?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7155?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="9125051ce13ab4ef58af0c87cb25d16d" tvg-chno="13",VOX HD
+http://userver.fritz.box:9981/stream/channelid/470099345?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7154?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="83ee25826bc89d34aca72ec6adb5fcd4" tvg-chno="14",DMAX HD
+http://userver.fritz.box:9981/stream/channelid/36040323?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7153?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="ecfd1f437d06e647a7de9786a5f5604c" tvg-chno="15",SUPER RTL HD
+http://userver.fritz.box:9981/stream/channelid/1126170092?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7152?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="2291fd867742e27bbe2f4fdf1ecc03b7" tvg-chno="16",kabel eins HD
+http://userver.fritz.box:9981/stream/channelid/117281058?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7151?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="328731fc89dc6dde389361359dbf04df" tvg-chno="17",arte HD
+http://userver.fritz.box:9981/stream/channelid/2083620658?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7150?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="1486d81c5e9af320c627fa91436e694e" tvg-chno="18",TLC HD
+http://userver.fritz.box:9981/stream/channelid/483952148?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7149?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="bbce3334e9708b7c664ad8cd167e92ee" tvg-chno="19",KiKA HD
+http://userver.fritz.box:9981/stream/channelid/875810491?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7146?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="a76560d798eb3d45ff591aed41e4189e" tvg-chno="22",Disney Channel HD
+http://userver.fritz.box:9981/stream/channelid/1465935271?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7145?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="e70bf2fce996054463a3cde6ef68c3b4" tvg-chno="23",Boomerang
+http://userver.fritz.box:9981/stream/channelid/2096237543?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7144?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="72e7f633c0ede8e8bcd185417b0bd7f1" tvg-chno="24",Comedy Central HD
+http://userver.fritz.box:9981/stream/channelid/871819122?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7143?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="d6a1cb2c221a7e0692450db873dc835f" tvg-chno="25",13th Street HD
+http://userver.fritz.box:9981/stream/channelid/751542742?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7142?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="0934d77f17e8b019774e6975f34987d6" tvg-chno="26",TNT Comedy HD
+http://userver.fritz.box:9981/stream/channelid/2144809993?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7141?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="968db7ae1c6b28fc966c21701eb53365" tvg-chno="27",TNT Serie HD
+http://userver.fritz.box:9981/stream/channelid/783781270?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7140?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="5143cc28d9553c696de399163cd0921e" tvg-chno="28",TNT Film HD
+http://userver.fritz.box:9981/stream/channelid/684475217?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7139?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="29b2a15f814988a8328e78c88743a5ed" tvg-chno="29",Fox HD
+http://userver.fritz.box:9981/stream/channelid/1604432425?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7138?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="defe0359350ad141afed04b540b0c348" tvg-chno="30",tagesschau24 HD
+http://userver.fritz.box:9981/stream/channelid/1493434078?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7137?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="0fbf8416c89200e95a7dfe20ffae35f8" tvg-chno="31",n-tv HD
+http://userver.fritz.box:9981/stream/channelid/377798415?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/10887?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="282976cb0ec55c184f866ae27559db8e" tvg-chno="32",N24 DOKU
+http://userver.fritz.box:9981/stream/channelid/1266034984?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7135?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="4abc5600e83c873b1de73920fbb112a3" tvg-chno="33",Sky Cinema Premieren HD
+http://userver.fritz.box:9981/stream/channelid/5684298?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/10886?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="faa710cd9e843c92ad4c58290f4c0041" tvg-chno="34",Sky Cinema Premieren +24 HD
+http://userver.fritz.box:9981/stream/channelid/1292937210?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7132?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="8663fee34c20a3622b10a27e8c47252e" tvg-chno="35",Sky Cinema Action HD
+http://userver.fritz.box:9981/stream/channelid/1677616006?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/10885?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="538c9f28f74c2a571d119dda9c8e948c" tvg-chno="36",Sky Cinema Special HD
+http://userver.fritz.box:9981/stream/channelid/681544787?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7131?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="bb5698711d3da3b88d5a548d9239a00f" tvg-chno="37",Sky Cinema Family HD
+http://userver.fritz.box:9981/stream/channelid/1905809083?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7130?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="8cbdc9ebb967ce6f8f399ded01e5e7d9" tvg-chno="38",Sky Atlantic HD
+http://userver.fritz.box:9981/stream/channelid/1808383372?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/10862?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="e9ce3178bb994016aaa2f825b19d8d57" tvg-chno="41",Sky Cinema Best Of HD
+http://userver.fritz.box:9981/stream/channelid/2016530153?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/10861?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="0917dbe4fa890e7c75c9cc4fa0e767de" tvg-chno="42",Sky Cinema Fun
+http://userver.fritz.box:9981/stream/channelid/1692079881?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7125?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="fe9b501f49a00d76146bd74f62d99cc6" tvg-chno="45",SPORT1 HD
+http://userver.fritz.box:9981/stream/channelid/525376510?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7124?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="4e96d3cb7cf81db3330f88727c75242e" tvg-chno="46",Eurosport 1 HD
+http://userver.fritz.box:9981/stream/channelid/1272157774?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7123?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="5194fd7af5770c16c46ad4bdfd5534f9" tvg-chno="47",Eurosport 2 HD
+http://userver.fritz.box:9981/stream/channelid/2063438929?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7122?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="560825ca6e1037a2d57d2e9adcaab138" tvg-chno="48",Eurosport 2 HD Xtra
+http://userver.fritz.box:9981/stream/channelid/1243940950?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7121?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="10fc09642a559881caed0824d83e154d" tvg-chno="49",DAZN 1 Bar HD
+http://userver.fritz.box:9981/stream/channelid/1678375952?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7120?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="9f2638eb00163ade2a4207bb070d6cd2" tvg-chno="50",DAZN 2 Bar HD
+http://userver.fritz.box:9981/stream/channelid/1798842015?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7119?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="e55c3284d474e7d0547042fc7408521c" tvg-chno="51",Sky Sport 1 HD
+http://userver.fritz.box:9981/stream/channelid/70409445?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7118?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="f30062f7b32e0b8921c16bbd65c83ae3" tvg-chno="52",Sky Sport 2 HD
+http://userver.fritz.box:9981/stream/channelid/2002911475?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7117?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="b24ee026804043fda3f908e0495a15d9" tvg-chno="53",Sky Sport 3 HD
+http://userver.fritz.box:9981/stream/channelid/652234418?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7116?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="49f183b62c201cd5ce5b951aa7d5be71" tvg-chno="54",Sky Sport 4 HD
+http://userver.fritz.box:9981/stream/channelid/914616649?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7115?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="eb1c1a2114c3a591b362ecb0b3a8d93f" tvg-chno="55",Sky Sport 5 HD
+http://userver.fritz.box:9981/stream/channelid/555359467?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7114?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="0cfe1b8c27486545daeba44c23c527c8" tvg-chno="56",Sky Sport 6 HD
+http://userver.fritz.box:9981/stream/channelid/203161100?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7113?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="20297cf579604ef9e35590424ee09920" tvg-chno="57",Sky Sport 7 HD
+http://userver.fritz.box:9981/stream/channelid/1971071264?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7112?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="be636b0a7d0cbbe27cfe96bca602cb00" tvg-chno="58",Sky Sport 8 HD
+http://userver.fritz.box:9981/stream/channelid/174810046?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7111?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="a74eb07c0ac5f1b11be9a769d6956271" tvg-chno="59",Sky Sport 9 HD
+http://userver.fritz.box:9981/stream/channelid/2091929255?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7110?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="e95950f77545b10c3afef0983ddf9005" tvg-chno="60",Sky Sport 10 HD
+http://userver.fritz.box:9981/stream/channelid/2001754601?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7109?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="b56c29c255d3ebeff6a7da582be01893" tvg-chno="61",Sky Sport 11 HD
+http://userver.fritz.box:9981/stream/channelid/1110011061?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7108?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="ad82eabedb2a110145a8beae71c2f558" tvg-chno="62",Sky Sport UHD
+http://userver.fritz.box:9981/stream/channelid/1055556269?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7107?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="74120bde1199d21ab9cdcaf7bd0a4451" tvg-chno="63",Sky Sport News HD
+http://userver.fritz.box:9981/stream/channelid/1577783924?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7106?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="cbb009108ab3d5ded75282920ca18329" tvg-chno="64",Sky Sport Bundesliga 1 HD
+http://userver.fritz.box:9981/stream/channelid/269070539?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7105?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="fa7005ef8cd5bee8a5163fc811478621" tvg-chno="65",Sky Sport Bundesliga 2 HD
+http://userver.fritz.box:9981/stream/channelid/1862627578?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7104?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="ffd38f31dffeb3960fd538d5af5ef1ba" tvg-chno="66",Sky Sport Bundesliga 3 HD
+http://userver.fritz.box:9981/stream/channelid/831509503?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7103?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="a478e9128604337a6ab40cda3eabf7de" tvg-chno="67",Sky Sport Bundesliga 4 HD
+http://userver.fritz.box:9981/stream/channelid/317290660?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7102?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="7e064e0223b8eb4ab21ee078d1612e3c" tvg-chno="68",Sky Sport Bundesliga 5 HD
+http://userver.fritz.box:9981/stream/channelid/38667902?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7101?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="c8d5175ec9d2ec223f6ce9230ff546e6" tvg-chno="69",Sky Sport Bundesliga 6 HD
+http://userver.fritz.box:9981/stream/channelid/1578620360?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7100?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="50be74859a8930cb49d53f12e55fd2de" tvg-chno="70",Sky Sport Bundesliga 7 HD
+http://userver.fritz.box:9981/stream/channelid/91536976?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7099?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="92dcff40998559822afa9ad69632b24d" tvg-chno="71",Sky Sport Bundesliga 8 HD
+http://userver.fritz.box:9981/stream/channelid/1090509970?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7098?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="f444e49c6b567510b202fe7a94b4b52d" tvg-chno="72",Sky Sport Bundesliga 9 HD
+http://userver.fritz.box:9981/stream/channelid/484721908?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7097?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="d7bec2cce2f2ab7a5025788d50d86cb1" tvg-chno="73",Sky Sport Bundesliga 10 HD
+http://userver.fritz.box:9981/stream/channelid/1287831255?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7096?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="c347840677274137fdc24bf4dac25d08" tvg-chno="74",Sky Sport Bundesliga UHD
+http://userver.fritz.box:9981/stream/channelid/109332419?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/9648?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="468eb800fc7f9b8f610692bfbabad7b3" tvg-chno="75",R. Madrid TV
+http://userver.fritz.box:9981/stream/channelid/12095046?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/10884?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="8da96306b40e08f397e19a83c28ff81c" tvg-chno="76",Barca TV
+http://userver.fritz.box:9981/stream/channelid/107194765?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7093?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="e20d6aa2a2d878bff8717a62a0bc502c" tvg-chno="78",ARD-alpha HD
+http://userver.fritz.box:9981/stream/channelid/577375714?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7092?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="cf00e1df5c911e7dfb581ea72500a5b5" tvg-chno="79",WDR HD Köln
+http://userver.fritz.box:9981/stream/channelid/1608581327?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/10883?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="55ea66e5403cf08cda22e772404f9eab" tvg-chno="80",BR Fernsehen Nord
+http://userver.fritz.box:9981/stream/channelid/1701243477?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7090?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="3324816d0b5c9c917267bb7b66d09867" tvg-chno="81",SWR RP HD
+http://userver.fritz.box:9981/stream/channelid/1837179955?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7089?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="6a25dffa3cc2f1b8a0b131d62e986f2b" tvg-chno="82",MDR Thüringen HD
+http://userver.fritz.box:9981/stream/channelid/2061444458?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7088?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="8be7bff6b271140bcd7b6cd0ab7ba2df" tvg-chno="83",ServusTV HD Deutschland
+http://userver.fritz.box:9981/stream/channelid/1992288139?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/10882?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="da09cc8bc3a83d1a522ba9ffc4a73243" tvg-chno="84",rhein main tv
+http://userver.fritz.box:9981/stream/channelid/197921242?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/10881?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="e0457df0218678c0b3089596b50184f6" tvg-chno="86",M. LaLiga 2 HD
+http://userver.fritz.box:9981/stream/channelid/1887258080?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7085?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="ead8d538f37c9a4add44687e07d4317c" tvg-chno="87",Nat Geo Wild HD
+http://userver.fritz.box:9981/stream/channelid/953538794?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7084?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="6991cf0008fd358a0d9c7464866f2574" tvg-chno="88",Discovery HD
+http://userver.fritz.box:9981/stream/channelid/13603177?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7083?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="69040f87501c1e6e1ce721845315acf7" tvg-chno="89",NatGeo HD
+http://userver.fritz.box:9981/stream/channelid/118424681?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7082?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="b3f8e5c8d84fedc7e211ffbd39c2aab6" tvg-chno="90",MTV HD
+http://userver.fritz.box:9981/stream/channelid/1223030963?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7081?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="1a95aa58e128594a42feb3ea128f6b3d" tvg-chno="93",BBC World News Europe HD
+http://userver.fritz.box:9981/stream/channelid/1487574298?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/10019?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="723c360d1491161420deac4e6bfff65c" tvg-chno="99",Sky Arts HD
+http://userver.fritz.box:9981/stream/channelid/221658226?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7079?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="b0f5faebab2e1c708064f29faa134636" tvg-chno="100",Universal TV HD
+http://userver.fritz.box:9981/stream/channelid/1811609008?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/9705?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="e40dca140bb90531d1d61d7650eef365" tvg-chno="102",Zee One HD
+http://userver.fritz.box:9981/stream/channelid/348786148?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7077?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="16b4d547ca97f5184ab9cdb788c293d4" tvg-chno="114",ONE HD
+http://userver.fritz.box:9981/stream/channelid/1205187606?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/10880?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="d227c6bccd5ef6fec125e9687ac1f260" tvg-chno="118",Deutsches Musik Fernsehen
+http://userver.fritz.box:9981/stream/channelid/1019619282?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7075?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="75234ac35238a7dddc0813af43c9448f" tvg-chno="122",Spiegel Geschichte HD
+http://userver.fritz.box:9981/stream/channelid/1128932213?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7074?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="d98ce9440cc881985c676d89eca21771" tvg-chno="135",Motorvision TV
+http://userver.fritz.box:9981/stream/channelid/1156156633?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass
+#EXTINF:-1 logo="http://userver.fritz.box:9981/imagecache/7073?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw" tvg-id="762edc2e6896ebe0a2acd2e18a6e9f94" tvg-chno="140",RTL UHD
+http://userver.fritz.box:9981/stream/channelid/786181750?auth=Ps4Lz4D7VbgU-fyB0F6m0T6YIvlw&profile=pass

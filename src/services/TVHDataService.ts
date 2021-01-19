@@ -65,6 +65,8 @@ export default class TVHDataService {
     private url: string;
     private profile: string;
     private dvrUuid: string;
+    private user?: string;
+    private password?: string;
 
     constructor(settings: TVHSettingsOptions) {
         this.url = settings.tvhUrl;
@@ -74,6 +76,8 @@ export default class TVHDataService {
         }
         this.profile = settings.selectedProfile;
         this.dvrUuid = settings.dvrConfigUuid;
+        this.user = settings.user;
+        this.password = settings.password;
     }
 
     /**
@@ -91,7 +95,9 @@ export default class TVHDataService {
     async retrieveServerInfo() {
         // now create rec by event
         return this.serviceAdapter.call('proxy', {
-            'url': this.url + TVHDataService.API_SERVER_INFO
+            'url': this.url + TVHDataService.API_SERVER_INFO,
+            'user': this.user,
+            'password': this.password
         });
     }
 
@@ -100,14 +106,18 @@ export default class TVHDataService {
      */
     async retrieveProfileList() {
         return this.serviceAdapter.call('proxy', {
-            'url': this.url + TVHDataService.API_PROFILE_LIST
+            'url': this.url + TVHDataService.API_PROFILE_LIST,
+            'user': this.user,
+            'password': this.password
         });
     }
 
     createRec(event: EPGEvent, callback: RecordingCallback) {
         // now create rec by event
         this.serviceAdapter.call('proxy', {
-            'url': this.url + TVHDataService.API_DVR_CREATE_BY_EVENT + 'event_id=' + event.getId() + '&config_uuid=' + this.dvrUuid + '&comment=webos-tvheadend'
+            'url': this.url + TVHDataService.API_DVR_CREATE_BY_EVENT + 'event_id=' + event.getId() + '&config_uuid=' + this.dvrUuid + '&comment=webos-tvheadend',
+            'user': this.user,
+            'password': this.password
         }).then(success => {
             console.log('created record: %s', success.result.total)
             // toast information
@@ -122,7 +132,9 @@ export default class TVHDataService {
     cancelRec(event: EPGEvent, callback: RecordingCallback) {
         // now create rec by event
         this.serviceAdapter.call('proxy', {
-            'url': this.url + TVHDataService.API_DVR_CANCEL + event.getId()
+            'url': this.url + TVHDataService.API_DVR_CANCEL + event.getId(),
+            'user': this.user,
+            'password': this.password
         }).then(success => {
             console.log('created record: %s', success.result.total)
             // toast information
@@ -137,7 +149,9 @@ export default class TVHDataService {
     retrieveUpcomingRecordings(callback: RecordingCallback) {
         // now create rec by event
         this.serviceAdapter.call('proxy', {
-            'url': this.url + TVHDataService.API_DVR_UPCOMING
+            'url': this.url + TVHDataService.API_DVR_UPCOMING,
+            'user': this.user,
+            'password': this.password
         }).then(success => {
             console.log('retrieved upcoming records: %s', success.result.total)
             let recordings: EPGEvent[] = [];
@@ -181,7 +195,9 @@ export default class TVHDataService {
     async retrieveTvChannelTag() {
         // retrieve the default dvr config
         let response = await this.serviceAdapter.call('proxy', {
-            'url': this.url + TVHDataService.API_CHANNEL_TAGS
+            'url': this.url + TVHDataService.API_CHANNEL_TAGS,
+            'user': this.user,
+            'password': this.password
         });
         // return tv channels tag
         for (var i = 0; i < response.result.entries.length; i++) {
@@ -195,7 +211,9 @@ export default class TVHDataService {
     async retrieveDVRConfig() {
         // retrieve the default dvr config
         this.serviceAdapter.call('proxy', {
-            'url': this.url + TVHDataService.API_DVR_CONFIG
+            'url': this.url + TVHDataService.API_DVR_CONFIG,
+            'user': this.user,
+            'password': this.password
         }).then((success) => {
             console.log('dvr configs received: %d', success.result.total)
             // try first enabled
@@ -222,7 +240,9 @@ export default class TVHDataService {
         let totalCount = 0;
         try {
             let success = await this.serviceAdapter.call('proxy', {
-                'url': this.url + TVHDataService.API_INITIAL_CHANNELS + start
+                'url': this.url + TVHDataService.API_INITIAL_CHANNELS + start,
+                'user': this.user,
+                'password': this.password
             });
             console.log('channels received: %d of %d', start + success.result.entries.length, success.result.total)
             if (success.result.entries.length > 0) {
@@ -262,7 +282,9 @@ export default class TVHDataService {
         let totalCount = 0;
 
         this.serviceAdapter.call('proxy', {
-            'url': this.url + TVHDataService.API_EPG + start
+            'url': this.url + TVHDataService.API_EPG + start,
+            'user': this.user,
+            'password': this.password
         }).then(success => {
             console.log('epg events received: %d of %d', start + success.result.entries.length, success.result.totalCount)
             if (success.result.entries.length > 0) {

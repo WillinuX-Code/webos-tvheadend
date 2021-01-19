@@ -201,8 +201,6 @@ export default class TVHSettings extends Component {
                         value={this.state.user}
                         type="text"
                         onChange={this.handleUserChange}
-                        invalidMessage=""
-                        invalid={!this.state.isUserValid}
                         placeholder="User (Optional)" />
                    
                     <Input
@@ -210,8 +208,6 @@ export default class TVHSettings extends Component {
                         value={this.state.password}
                         type="text"
                         onChange={this.handlePasswordChange}
-                        invalidMessage=""
-                        invalid={!this.state.isUserValid}
                         placeholder="Password (Optional)" />
                     <br /> <br />
                     {!this.state.isLoading && <Button disabled={!this.state.connectButtonEnabled} backgroundOpacity="lightTranslucent" onClick={this.handleConnectionTest}>Connect</Button>}

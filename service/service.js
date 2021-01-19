@@ -87,10 +87,9 @@ function request(options, user, password, message) {
             });
             // The whole response has been received. Print out the result.
             resp.on('end', function () {
-                // todo handle no json
                 message.respond({
                     "returnValue": true,
-                    "result": JSON.parse(data)
+                    "result": data
                 });
             });
         }

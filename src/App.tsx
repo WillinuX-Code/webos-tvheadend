@@ -37,7 +37,7 @@ export default class App extends Component {
     this.loadLocale(tvhDataService);
 
     // retrieve channel infos etc
-    let channels = await tvhDataService.retrieveTVHChannels(0);
+    let channels = await tvhDataService.retrieveM3UChannels();
     this.epgData.updateChannels(channels); 
 
     // preload images

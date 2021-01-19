@@ -22,15 +22,14 @@ export default class TVHSettings extends Component {
             user: '',
             password: '',
             connectionStatus: '',
-            selectedProfile: '',
-            profiles: [],
-            tvChannelTagUuid: '',
+            // selectedProfile: '',
+            // profiles: [],
+            // tvChannelTagUuid: '',
             dvrConfigUuid: '',
             connectButtonEnabled: false,
             isValid: false,
             isUserValid: false,
             isLoading: false
-            // TODO user password
         }
     }
 
@@ -44,8 +43,8 @@ export default class TVHSettings extends Component {
             tvhUrl: this.state.tvhUrl,
             user: this.state.user,
             password: this.state.password,
-            selectedProfile: this.state.selectedProfile,
-            profiles: this.state.profiles,
+            // selectedProfile: this.state.selectedProfile,
+            // profiles: this.state.profiles,
             //tvChannelTagUuid: this.state.tvChannelTagUuid,
             dvrConfigUuid: this.state.dvrConfigUuid,
             isValid: this.state.isValid
@@ -58,8 +57,8 @@ export default class TVHSettings extends Component {
     private handleUserChange = (object: any) => {
          // update state
          this.setState((state, props) => ({
-            profiles: [],
-            selectedProfile: '',
+            // profiles: [],
+            // selectedProfile: '',
             user: object.value,
             isValid: false,
             connectButtonEnabled: object.value.length > 0
@@ -72,8 +71,8 @@ export default class TVHSettings extends Component {
     private handlePasswordChange = (object: any) => {
         // update state
         this.setState((state, props) => ({
-            profiles: [],
-            selectedProfile: '',
+            // profiles: [],
+            // selectedProfile: '',
             password: object.value,
             isValid: false,
             connectButtonEnabled: object.value.length > 0
@@ -96,8 +95,8 @@ export default class TVHSettings extends Component {
     private handleUrlChange = (object: any) => {
         // update state
         this.setState((state, props) => ({
-            profiles: [],
-            selectedProfile: '',
+            // profiles: [],
+            // selectedProfile: '',
             connectionStatus: '',
             tvhUrl: object.value,
             isValid: false,
@@ -123,16 +122,17 @@ export default class TVHSettings extends Component {
             //this.testResult = 'Version: ' + serverInfoResult.result.sw_version + ' - API Version: ' + serverInfoResult.result.api_version;
             this.getConnectionInfo(service);
 
-            let profilesResult = await service.retrieveProfileList();
-            let profiles: string[] = [];
-            profilesResult.result.entries.forEach((entry: any) => {
-                profiles.push(entry.val);
-            });
+            // TODO profile is not required anymore (already inlcuded in m3u list)
+            // let profilesResult = await service.retrieveProfileList();
+            // let profiles: string[] = [];
+            // profilesResult.entries.forEach((entry: any) => {
+            //     profiles.push(entry.val);
+            // });
             // move "pass" profile to beginning of array
-            if (profiles.indexOf('pass') > 0) {
-                profiles.splice(profiles.indexOf('pass'), 1);
-                profiles.unshift('pass');
-            }
+            // if (profiles.indexOf('pass') > 0) {
+            //     profiles.splice(profiles.indexOf('pass'), 1);
+            //     profiles.unshift('pass');
+            // }
             // retrieve channel tags
             //let tvChannelTagUuid = await service.retrieveTvChannelTag();
             // retrieve the default dvr config
@@ -141,8 +141,8 @@ export default class TVHSettings extends Component {
             this.setState((state, props) => ({
                 //tvChannelTagUuid: tvChannelTagUuid,
                 dvrConfigUuid: dvrConfigUuid,
-                profiles: profiles,
-                selectedProfile: profiles[0],
+                // profiles: profiles,
+                // selectedProfile: profiles[0],
                 connectButtonEnabled: false,
                 isValid: true,
                 isLoading: false
@@ -160,7 +160,7 @@ export default class TVHSettings extends Component {
         try {
             let serverInfoResult = await service.retrieveServerInfo();
             this.setState((state, props) => ({
-                connectionStatus: 'Version: ' + serverInfoResult.result.sw_version + ' - API Version: ' + serverInfoResult.result.api_version,
+                connectionStatus: 'Version: ' + serverInfoResult.sw_version + ' - API Version: ' + serverInfoResult.api_version,
                 isLoading: false,
                 isValid: true
             }));
@@ -223,7 +223,7 @@ export default class TVHSettings extends Component {
                         </>
                     }
 
-                    {this.state.profiles.length > 0 &&
+                    {/*this.state.profiles.length > 0 &&
                         <>
                             <br /> <br />
                             <Heading spacing="auto">Stream profile</Heading>
@@ -231,7 +231,7 @@ export default class TVHSettings extends Component {
                                 {this.state.profiles}
                             </Picker>
                         </>
-                    }
+                    */}
                     
                     <br /> <br />
                     <Button disabled={!this.state.isValid} backgroundOpacity="lightTranslucent" onClick={this.handleSave}>Save</Button>

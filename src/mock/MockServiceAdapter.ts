@@ -2,7 +2,7 @@ import channelMock from './channels.json';
 import epgMock from './epg.json';
 import recordingMock from './recordings.json';
 import channelTagsMock from './channelTags.json';
-
+import channelM3UMock from './channels.m3u.json';
 interface ProxySuccessResponse<TResult> extends WebOSTV.OnCompleteSuccessResponse {
     result: TResult;
 }
@@ -48,18 +48,30 @@ export default class MockServiceAdapter {
             return channelMock as ProxySuccessResponse<any>;
         }
         else if (url.includes('api/epg/events/grid')) {
-            return epgMock as ProxySuccessResponse<any>;
+            let value = JSON.stringify(epgMock)
+            return {
+                returnValue: true,
+                result: value
+            }
+            //return epgMock;
         }
         else if (url.includes('api/dvr/entry/grid_upcoming')) {
-            return recordingMock as ProxySuccessResponse<any>;
+            let value = JSON.stringify(recordingMock)
+            return {
+                returnValue: true,
+                result: value
+            }
         }
         else if (url.includes('api/channeltag/list')) {
             return channelTagsMock as ProxySuccessResponse<any>;
         }
+        else if (url.includes('playlist/auth/channels') || url.includes('playlist/channels')) {
+            return channelM3UMock as ProxySuccessResponse<any>;
+        }
         else if (url.includes('api/dvr/config/grid')) {
             return {
                 returnValue: true,
-                result: {
+                result: JSON.stringify({
                     total: 2,
                     entries: [
                         {
@@ -73,13 +85,13 @@ export default class MockServiceAdapter {
                             name: "aName",
                         }
                     ]
-                }
+                })
             } as ProxySuccessResponse<any>;
         }
         else if (url.includes('/api/serverinfo')) {
             return {
                 returnValue: true,
-                result: {
+                result: JSON.stringify({
                     "sw_version": "4.3-1919~g52b255940",
                     "api_version": 19,
                     "name": "Tvheadend",
@@ -93,13 +105,13 @@ export default class MockServiceAdapter {
                         "libav",
                         "caclient_advanced"
                     ]
-                }
+                })
             } as ProxySuccessResponse<any>;
         }
         else if (url.includes('/api/profile/list')) {
             return {
                 returnValue: true,
-                result: {
+                result: JSON.stringify({
                     "entries": [
                         {
                             "key": "37e63ea3fcda682086adaab175dde991",
@@ -114,7 +126,7 @@ export default class MockServiceAdapter {
                             "key": "b90da9e0bc0633515b261714a966910d"
                         }
                     ]
-                }
+                })
             } as ProxySuccessResponse<any>;
         }
         else {

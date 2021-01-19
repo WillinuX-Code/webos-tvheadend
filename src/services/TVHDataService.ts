@@ -7,6 +7,7 @@ export interface TVHSettingsOptions {
     tvhUrl: string;
     user?: string;
     password?: string;
+    connectionStatus: string;
     selectedProfile: string;
     profiles: Array<any>;
     tvChannelTagUuid: string;

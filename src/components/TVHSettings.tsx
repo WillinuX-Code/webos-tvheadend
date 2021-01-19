@@ -12,8 +12,6 @@ export default class TVHSettings extends Component {
 
     static STORAGE_TVH_SETTING_KEY = 'TVH_SETTINGS';
 
-    private testResult: string = '';
-
     state: Readonly<TVHSettingsOptions>;
 
     constructor(public props: Readonly<any>) {
@@ -23,6 +21,7 @@ export default class TVHSettings extends Component {
             tvhUrl: 'http://',
             user: '',
             password: '',
+            connectionStatus: '',
             selectedProfile: '',
             profiles: [],
             tvChannelTagUuid: '',
@@ -95,13 +94,11 @@ export default class TVHSettings extends Component {
     };
 
     private handleUrlChange = (object: any) => {
-        // if url changes we reset test result
-        this.testResult = '';
-
         // update state
         this.setState((state, props) => ({
             profiles: [],
             selectedProfile: '',
+            connectionStatus: '',
             tvhUrl: object.value,
             isValid: false,
             connectButtonEnabled: object.value.length > 0
@@ -160,23 +157,20 @@ export default class TVHSettings extends Component {
     };
 
     private async getConnectionInfo(service: TVHDataService) {
-        if (service) {
-            try {
-                let serverInfoResult = await service.retrieveServerInfo();
-                this.testResult = 'Version: ' + serverInfoResult.result.sw_version + ' - API Version: ' + serverInfoResult.result.api_version;
-            } catch (error) {
-                this.testResult = 'Failed to connect: ' + (error.errorText ? error.errorText : error);
-                this.setState((state, props) => ({
-                    isLoading: false,
-                    isValid: false
-                }));
-            }
-        } else {
-            this.testResult = '';
+        try {
+            let serverInfoResult = await service.retrieveServerInfo();
+            this.setState((state, props) => ({
+                connectionStatus: 'Version: ' + serverInfoResult.result.sw_version + ' - API Version: ' + serverInfoResult.result.api_version,
+                isLoading: false,
+                isValid: true
+            }));
+        } catch (error) {
+            this.setState((state, props) => ({
+                connectionStatus: 'Failed to connect: ' + (error.errorText ? error.errorText : error),
+                isLoading: false,
+                isValid: false
+            }));
         }
-
-        // force an update of the component
-        this.setState(this.state);
     }
 
     componentDidMount() {
@@ -224,12 +218,12 @@ export default class TVHSettings extends Component {
                     {this.state.isLoading && <Spinner component={Panel} size="medium" />}
                     <br /> <br />
                     <Heading spacing="auto">Connection Status</Heading>
-                    {this.testResult.length === 0 && <Icon>question</Icon>}
-                    {this.testResult.length > 0 &&
+                    {this.state.connectionStatus.length === 0 && <Icon>question</Icon>}
+                    {this.state.connectionStatus.length > 0 &&
                         <>
                             {this.state.isValid && <Icon>check</Icon>}
                             {!this.state.isValid && <Icon>warning</Icon>}
-                            {this.testResult}
+                            {this.state.connectionStatus}
                         </>
                     }
 

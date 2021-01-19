@@ -180,12 +180,20 @@ export default class ChannelInfo extends Component {
 
             // draw current time in programm as well as overall durations
             let runningTime = this.epgUtils.toDuration(currentEvent.getStart(), this.epgUtils.getNow());
-            let totalTime = this.epgUtils.toDuration(currentEvent.getStart(), currentEvent.getEnd());
             let remainingTime = Math.ceil((currentEvent.getEnd() - this.epgUtils.getNow()) / 1000 / 60);
             drawingRect.left = drawingRect.right - this.mChannelLayoutPadding - 20;
             canvas.textAlign = 'right';
+            canvas.font = (this.mChannelInfoTitleSize - 8) + 'px Arial';
             canvas.fillStyle = this.mChannelLayoutTitleTextColor;
-            canvas.fillText(runningTime + ' (+' + remainingTime + ') / '  + totalTime, drawingRect.left, drawingRect.top);
+            canvas.fillText(runningTime + ' (+' + remainingTime + ')', drawingRect.left, drawingRect.top);
+
+            // draw next event
+            if(nextEvent !== undefined){
+                drawingRect.top += (this.mChannelInfoTitleSize - 15) + this.mChannelLayoutPadding;
+                canvas.font = (this.mChannelInfoTitleSize - 15) + 'px Arial';
+                canvas.fillStyle = 'rgb(19, 126, 169)';
+                canvas.fillText(this.epgUtils.toTimeFrameString(nextEvent.getStart(), nextEvent.getEnd())+ ":   "+nextEvent.getTitle() , drawingRect.left, drawingRect.top);
+            }
 
             // draw upcoming progress
             let channelEventProgressRect = new Rect(0, 0, 6, this.getWidth());

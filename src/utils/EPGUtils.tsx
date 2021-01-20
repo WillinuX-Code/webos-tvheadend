@@ -3,10 +3,7 @@
  */
 export default class EPGUtils {
 
-    private locale: string;
-
-    constructor(locale?: string) {
-        this.locale = locale || 'en-US';
+    constructor() {
     }
 
     getWeekdayName(dateMillis: number) {
@@ -45,12 +42,12 @@ export default class EPGUtils {
      * 
      * @param {Number} time 
      */
-    toTimeString(time: number) {
+    toTimeString(time: number, locale: string) {
         let options = {
             hour: '2-digit',
             minute: '2-digit'
         }
-        return new Intl.DateTimeFormat(this.locale, options).format(new Date(time));
+        return new Intl.DateTimeFormat(locale, options).format(new Date(time));
     }
 
     /**
@@ -59,8 +56,8 @@ export default class EPGUtils {
      * @param {Number} start 
      * @param {Number} stop 
      */
-    toTimeFrameString(start: number, stop: number) {
-        return this.toTimeString(start) + " - " + this.toTimeString(stop);
+    toTimeFrameString(start: number, stop: number, locale: string) {
+        return this.toTimeString(start, locale) + " - " + this.toTimeString(stop, locale);
     }
 
     toDuration(start: number, end: number) {

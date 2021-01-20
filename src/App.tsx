@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 
-import 'babel-polyfill';
 import TVHDataService from './services/TVHDataService';
 import EPGData from './models/EPGData';
 import TV from './components/TV';

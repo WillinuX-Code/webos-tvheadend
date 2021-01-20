@@ -77,10 +77,9 @@ export default class ChannelInfo extends Component {
         // Create gradient
         var grd = canvas.createLinearGradient(drawingRect.left, drawingRect.left, drawingRect.right, drawingRect.left);
         // Important bit here is to use rgba()
-        grd.addColorStop(0, "rgba(11, 39, 58, 0.7)");
-        grd.addColorStop(0.4, "rgba(35, 64, 84, 0.9)");
-        grd.addColorStop(0.6, "rgba(35, 64, 84, 0.9)");
-        grd.addColorStop(1, 'rgba(11, 39, 58, 0.7)');
+        grd.addColorStop(0, "rgba(11, 39, 58, 0.9)");
+        grd.addColorStop(0.5, "rgba(35, 64, 84, 0.9)");
+        grd.addColorStop(1, 'rgba(11, 39, 58, 0.9)');
 
         // Fill with gradient
         canvas.fillStyle = grd;
@@ -191,7 +190,7 @@ export default class ChannelInfo extends Component {
             if(nextEvent !== undefined){
                 drawingRect.top += (this.mChannelInfoTitleSize - 15) + this.mChannelLayoutPadding;
                 canvas.font = (this.mChannelInfoTitleSize - 15) + 'px Arial';
-                canvas.fillStyle = 'rgb(19, 126, 169)';
+                canvas.fillStyle = 'rgb(65, 182, 230)';
                 canvas.fillText(this.epgUtils.toTimeFrameString(nextEvent.getStart(), nextEvent.getEnd())+ ":   "+nextEvent.getTitle() , drawingRect.left, drawingRect.top);
             }
 

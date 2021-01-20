@@ -6,20 +6,9 @@ export default class EPGUtils {
     constructor() {
     }
 
-    getWeekdayName(dateMillis: number) {
-        var userLang = navigator.language;
-        userLang = userLang.substring(0, 2);
-        let dayMap = new Map();
-        dayMap.set('de', ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']);
-        dayMap.set('en', ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']);
-        //let days = ['Sun','Mon','Tues','Wed','Thus','Fri','Sat'];
-        // TODO setting language - depend on country germany or english
-        let days = dayMap.get(userLang);
-        if (days === undefined) {
-            days = dayMap.get('en');
-        }
+    getWeekdayName(dateMillis: number, locale: string) {
         let date = new Date(dateMillis);
-        return days[date.getDay()];
+        return date.toLocaleString(locale, {weekday: 'short'});
     }
 
     scaleBetween(unscaledNum: number, max: number, min = 0, minAllowed = 0, maxAllowed = 3840) {
@@ -77,7 +66,7 @@ export default class EPGUtils {
      * return current date in millis (or nanos?)
      */
     getNow() {
-        //return 1607462851000;
-        return Date.now();
+        return 1607462851000;
+        //return Date.now();
     }
 }

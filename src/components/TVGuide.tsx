@@ -69,7 +69,7 @@ export default class TVGuide extends Component {
     private mDetailsLayoutBackground = '#2d71ac';
 
     private mTimeBarHeight = 70;
-    private mTimeBarTextSize = 24;
+    private mTimeBarTextSize = 32;
     private mTimeBarNowTextSize = 22;
     private mTimeBarLineWidth = 3;
     private mTimeBarLineColor = '#c57120';
@@ -461,7 +461,7 @@ export default class TVGuide extends Component {
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
 
         // Text
-        let weekdayText = this.epgUtils.getWeekdayName(this.mTimeLowerBoundary);
+        let weekdayText = this.epgUtils.getWeekdayName(this.mTimeLowerBoundary, this.context.locale);
         this.canvasUtils.writeText(canvas, weekdayText, drawingRect.center, drawingRect.middle, {
             fontSize: this.mTimeBarTextSize,
             fillStyle: this.mEventLayoutTextColor,
@@ -513,7 +513,7 @@ export default class TVGuide extends Component {
 
         // draw current position
         drawingRect.left = this.getXFrom(this.timePosition);
-        drawingRect.top = this.getScrollY() + this.mTimeBarHeight - this.mTimeBarTextSize + 2;
+        drawingRect.top = this.getScrollY() + this.mTimeBarHeight - this.mTimeBarTextSize + 10;
         drawingRect.right = drawingRect.left + this.mTimeBarLineWidth;
         drawingRect.bottom = drawingRect.top + this.getChannelListHeight();
 

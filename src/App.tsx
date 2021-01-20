@@ -5,7 +5,7 @@ import TVHDataService from './services/TVHDataService';
 import EPGData from './models/EPGData';
 import TV from './components/TV';
 import TVHSettings from './components/TVHSettings';
-import './App.css';
+import './styles/app.css';
 
 export default class App extends Component {
 
@@ -32,13 +32,13 @@ export default class App extends Component {
     this.imageCache = new Map();
   }
 
-  async reloadData(tvhDataService: TVHDataService) {   
+  async reloadData(tvhDataService: TVHDataService) {
     // load locale
     this.loadLocale(tvhDataService);
 
     // retrieve channel infos etc
     let channels = await tvhDataService.retrieveM3UChannels();
-    this.epgData.updateChannels(channels); 
+    this.epgData.updateChannels(channels);
 
     // preload images
     this.preloadImages();
@@ -54,7 +54,6 @@ export default class App extends Component {
     tvhDataService.retrieveUpcomingRecordings(recordings => {
       this.epgData.updateRecordings(recordings);
     });
-     
   }
 
   handleUnmountSettings() {
@@ -77,9 +76,10 @@ export default class App extends Component {
       // retrieve local info
       let localInfoResult = await tvhDataService.getLocaleInfo();
       let locale = localInfoResult.settings.localeInfo.locales.UI;
+
       // udpate epg
       this.epgData.updateLanguage(locale);
-      console.log("Retrieved locale info:",locale);
+      console.log("Retrieved locale info:", locale);
     } catch (error) {
       console.log("Failed to retrieve locale info: ", error);
     };
@@ -180,12 +180,9 @@ function handleVisibilityChange() {
     }
   }
 
-  componentDidUpdate() {
-  }
-
   render() {
     return (
-      <div className="App" onKeyDown={this.handleKeyPress}>
+      <div className="app" onKeyDown={this.handleKeyPress}>
         {this.state.isSettingsState &&
           <TVHSettings handleUnmountSettings={this.handleUnmountSettings} tvhService={this.tvhDataService} />}
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
 import AppContent from './App';
+import './index.css';
 import kind from "@enact/core/kind";
 import MoonstoneDecorator from "@enact/moonstone/MoonstoneDecorator";
 
@@ -20,10 +20,6 @@ import MoonstoneDecorator from "@enact/moonstone/MoonstoneDecorator";
 
 const AppBase = kind({
   name: "App",
-  /*styles: {
-    className: "app",
-    css: "./App.css"
-  },*/
   render: props => {
     return (
       <AppContent />

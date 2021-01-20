@@ -2,6 +2,14 @@ body {
     background-color: #000000;
 }
 
+.app {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    /*margin: 0;*/
+    z-index: 1;
+  }
+
 .epg {
     width: 100%;
     height: 100%;            
@@ -14,9 +22,10 @@ body {
 .tv {
     width: 100%;
     height: 100%;            
-    position: relative;
+    position: absolute;
     top: 0;
     left: 0;
+    z-index: 2;
 }
 
 .channelList {
@@ -50,6 +59,16 @@ body {
     top: 0;
     right: 0;
     z-index: 10;
+}
+
+.tvhSettings {
+    background-color: rgba(11, 39, 58, 0.7);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 3;
 }
 
 .tvhSettings .username {

@@ -1,13 +1,18 @@
-import EPGEvent from "./EPGEvent";
+import EPGEvent from './EPGEvent';
 
 /**
  * Created by satadru on 3/30/17.
  */
 export default class EPGChannel {
-
     private events: EPGEvent[];
 
-    constructor(private icon: URL, private name: string, private id: number, private uuid: string, private streamUrl: URL) {
+    constructor(
+        private icon: URL,
+        private name: string,
+        private id: number,
+        private uuid: string,
+        private streamUrl: URL
+    ) {
         this.events = [];
     }
 

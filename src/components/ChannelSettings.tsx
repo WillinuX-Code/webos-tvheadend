@@ -1,19 +1,13 @@
-/**
- * Allow settings of
- * - audio tracks
- * - text/subtitle tracks
- * - aspect ratio
- */
-import React, { Component } from 'react';
 import Icon from '@enact/moonstone/Icon';
 import Picker from '@enact/moonstone/Picker';
-import '../styles/app.css';
-export default class ChannelSettings extends Component {
+import React from 'react';
+import { Component } from 'react';
 
-    private textTracks;
-    private audioTracks;
-    private textTracksDisplay;
-    private audioTracksDisplay;
+export default class ChannelSettings extends Component {
+    private textTracks: [{ enabled: boolean; language: string }];
+    private audioTracks: [{ enabled: boolean; language: string }];
+    private textTracksDisplay: string[];
+    private audioTracksDisplay: string[];
     private timeoutId: NodeJS.Timeout | null;
 
     state: Readonly<any>;
@@ -28,27 +22,26 @@ export default class ChannelSettings extends Component {
         this.timeoutId = null;
 
         let selectedAudioTrack = -1;
-        for (var i = 0; i < this.audioTracks.length; i++) {
-            if (this.audioTracks[i].enabled === true) {
-                selectedAudioTrack = i;
+        this.audioTracks.forEach((audioTrack, index) => {
+            if (audioTrack.enabled) {
+                selectedAudioTrack = index;
             }
-            this.audioTracksDisplay.push(this.audioTracks[i].language);
-        }
+            this.audioTracksDisplay.push(audioTrack.language);
+        });
 
-        let selectedTextTrack = -1;
-        for (i = 0; i < this.textTracks.length; i++) {
-            if (this.textTracks[i].enabled === true) {
-                selectedTextTrack = i;
+        const selectedTextTrack = -1;
+        this.textTracks.forEach((textTrack, index) => {
+            if (textTrack.enabled) {
+                selectedAudioTrack = index;
             }
-            this.textTracksDisplay.push(this.textTracks[i].language);
-        }
+            this.textTracksDisplay.push(textTrack.language);
+        });
 
         this.state = {
             channelName: props.channelName,
             selectedAudioTrack: selectedAudioTrack,
-            selectedTextTrack: selectedTextTrack
-        }
-       
+            selectedTextTrack: selectedTextTrack,
+        };
     }
 
     textChangeHandler = (object: any) => {
@@ -60,7 +53,7 @@ export default class ChannelSettings extends Component {
         this.textTracks[object.value].enabled = true;
         // enable current selected audio
         this.setState((state, props) => ({
-            selectedTextTrack: object.value
+            selectedTextTrack: object.value,
         }));
         // do not pass this event further
         return false;
@@ -70,11 +63,11 @@ export default class ChannelSettings extends Component {
         this.updateAutomaticUnmount();
         // disable previous track
         this.audioTracks[this.state.selectedAudioTrack].enabled = false;
-         // enable new track
+        // enable new track
         this.audioTracks[object.value].enabled = true;
         // enable current selected audio
         this.setState((state, props) => ({
-            selectedAudioTrack: object.value
+            selectedAudioTrack: object.value,
         }));
         // save selected audio track index for channel
         localStorage.setItem(this.state.channelName, object.value);
@@ -92,17 +85,13 @@ export default class ChannelSettings extends Component {
         this.timeoutId && clearTimeout(this.timeoutId);
 
         this.props.stateUpdateHandler({
-            isChannelSettingsState: false
+            isChannelSettingsState: false,
         });
     };
 
     updateAutomaticUnmount() {
         this.timeoutId && clearTimeout(this.timeoutId);
         this.timeoutId = setTimeout(this.unmountHandler, 7000);
-    }
-
-    componentDidUpdate(prevProps: any) {
-        
     }
 
     componentWillUnmount() {
@@ -113,23 +102,31 @@ export default class ChannelSettings extends Component {
     render() {
         return (
             <div id="channel-settings" tabIndex={-1} className="channelSettings">
-                {this.audioTracksDisplay.length > 0 &&
+                {this.audioTracksDisplay.length > 0 && (
                     <>
                         <Icon>audio</Icon>
-                        <Picker defaultValue={this.state.selectedAudioTrack} onChange={this.audioChangeHandler} width="large">
+                        <Picker
+                            defaultValue={this.state.selectedAudioTrack}
+                            onChange={this.audioChangeHandler}
+                            width="large"
+                        >
                             {this.audioTracksDisplay}
                         </Picker>
                     </>
-                }
+                )}
 
-                {this.textTracksDisplay.length > 0 &&
+                {this.textTracksDisplay.length > 0 && (
                     <>
                         <Icon>sub</Icon>
-                        <Picker defaultValue={this.state.selectedTextTrack} onChange={this.textChangeHandler} width="large">
+                        <Picker
+                            defaultValue={this.state.selectedTextTrack}
+                            onChange={this.textChangeHandler}
+                            width="large"
+                        >
                             {this.textTracksDisplay}
                         </Picker>
                     </>
-                }
+                )}
             </div>
         );
     }

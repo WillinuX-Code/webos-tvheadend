@@ -2,10 +2,10 @@ const http = require('http');
 const https = require('https');
 const urlUtil = require('url');
 const crypto = require('crypto');
-const Service = require("webos-service");
+const Service = require('webos-service');
 
 // create webos service
-var service = new Service("com.willinux.tvh.app.proxy");
+var service = new Service('com.willinux.tvh.app.proxy');
 
 if (!String.prototype.startsWith) {
     String.prototype.startsWith = function (searchString, position) {
@@ -16,35 +16,37 @@ if (!String.prototype.startsWith) {
 
 /**
  * create md5 hex string
- * 
- * @param {string} s 
+ *
+ * @param {string} s
  */
 function hex_md5(s) {
     return crypto.createHash('md5').update(s).digest('hex');
 }
 
 function genNonce(b) {
-    var c = [], e = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", a = e.length;
+    var c = [],
+        e = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
+        a = e.length;
     for (var d = 0; d < b; ++d) {
-        c.push(e[Math.random() * a | 0])
+        c.push(e[(Math.random() * a) | 0]);
     }
-    return c.join("")
-};
-// Parse the parameters (check existence and validity) and extract the values. 
-// Note that quoted-string values can be folded, so you need to unfold them with this function                  
+    return c.join('');
+}
+// Parse the parameters (check existence and validity) and extract the values.
+// Note that quoted-string values can be folded, so you need to unfold them with this function
 function unq(quotedString) {
-    if (quotedString.startsWith("\'") || quotedString.startsWith("\"")) {
-        return quotedString.substr(1, quotedString.length - 2).replace(/(?:(?:\r\n)?[ \t])+/g, " ");
+    if (quotedString.startsWith("'") || quotedString.startsWith('"')) {
+        return quotedString.substr(1, quotedString.length - 2).replace(/(?:(?:\r\n)?[ \t])+/g, ' ');
     } else {
         // actually unquoted
-        return quotedString.replace(/(?:(?:\r\n)?[ \t])+/g, " ");
+        return quotedString.replace(/(?:(?:\r\n)?[ \t])+/g, ' ');
     }
 }
 /**
  * backend proxy for requests to tvheadend as they are
  * not possible from browser due to cors restrictions
  */
-service.register("proxy", function (message) {
+service.register('proxy', function (message) {
     /** local node js mock setup 
     function MockMessage() { };
     MockMessage.prototype.respond = function (object) {
@@ -66,7 +68,7 @@ service.register("proxy", function (message) {
         host: parsedURL.hostname,
         port: parsedURL.port,
         path: parsedURL.path,
-        method: message.payload.method || 'GET'
+        method: message.payload.method || 'GET',
     };
 
     request(options, user, password, message);
@@ -74,55 +76,60 @@ service.register("proxy", function (message) {
 
 /**
  * send request
- * 
- * @param {http.RequestOptions} options 
- * @param {WebOSTV.OnCompleteResponse} message 
+ *
+ * @param {http.RequestOptions} options
+ * @param {WebOSTV.OnCompleteResponse} message
  */
 function request(options, user, password, message) {
-    var protocolHandler = (options.protocol === 'https:' ? https : http)
-    var req = protocolHandler.request(options, function (resp) {
-        var data = '';
-        // handle http status unauthorized only if did not already tried to authorize
-        if (resp.statusCode == 401 && (options.headers === undefined || options.headers.Authorization === undefined)) {
-            var authHeader = resp.headers["www-authenticate"];
-            handleAuthentication(options, user, password, authHeader, message);
-        } else if (resp.statusCode < 200 || resp.statusCode > 299) {
-            // return error in case of unexpected status code
-            message.respond({
-                "returnValue": false,
-                "errorText": "Server answered with StatusCode " + resp.statusCode,
-                "errorCode": 1
-            });
-            //console.log(resp.statusCode, resp);
-        } else {
-            // A chunk of data has been recieved.
-            resp.on('data', function (chunk) {
-                data += chunk;
-            });
-            // The whole response has been received. Print out the result.
-            resp.on('end', function () {
+    var protocolHandler = options.protocol === 'https:' ? https : http;
+    var req = protocolHandler
+        .request(options, function (resp) {
+            var data = '';
+            // handle http status unauthorized only if did not already tried to authorize
+            if (
+                resp.statusCode == 401 &&
+                (options.headers === undefined || options.headers.Authorization === undefined)
+            ) {
+                var authHeader = resp.headers['www-authenticate'];
+                handleAuthentication(options, user, password, authHeader, message);
+            } else if (resp.statusCode < 200 || resp.statusCode > 299) {
+                // return error in case of unexpected status code
                 message.respond({
-                    "returnValue": true,
-                    "result": data
+                    returnValue: false,
+                    errorText: 'Server answered with StatusCode ' + resp.statusCode,
+                    errorCode: 1,
                 });
+                //console.log(resp.statusCode, resp);
+            } else {
+                // A chunk of data has been recieved.
+                resp.on('data', function (chunk) {
+                    data += chunk;
+                });
+                // The whole response has been received. Print out the result.
+                resp.on('end', function () {
+                    message.respond({
+                        returnValue: true,
+                        result: data,
+                    });
+                });
+            }
+        })
+        .on('error', function (err) {
+            console.log('error:', err.message);
+            message.respond({
+                returnValue: false,
+                errorText: err.message,
+                errorCode: 1,
             });
-        }
-    }).on("error", function (err) {
-        console.log("error:", err.message);
-        message.respond({
-            "returnValue": false,
-            "errorText": err.message,
-            "errorCode": 1
+        })
+        .on('socket', function (socket) {
+            socket.setTimeout(10000);
+            socket.on('timeout', function () {
+                req.destroy();
+            });
         });
-    }).on("socket", function (socket) {
-        socket.setTimeout(10000);
-        socket.on('timeout', function () {
-            req.destroy();
-        });
-    });
     req.end();
 }
-
 
 function handleAuthentication(options, user, password, authHeader, message) {
     var ws = '(?:(?:\\r\\n)?[ \\t])+',
@@ -134,69 +141,69 @@ function handleAuthentication(options, user, password, authHeader, message) {
     var type = tokens[0];
     var authorizationHeader = null;
     //'Digest realm="tvheadend", qop="auth", nonce="b8/cJWAebqXycYezwKvNRZL/gi9NL1jUeCHjTiphh30=", opaque="wpjG3XYw4UxxNM9lSbjaJqfDTkvCAAJLd4k5Nt6HH4E="'
-    if (type == "Digest") {
+    if (type == 'Digest') {
         authorizationHeader = digestAuth(options, user, password, tokens);
-    } else if (type == "Basic") {
+    } else if (type == 'Basic') {
         authorizationHeader = basicAuth(user, password);
     } else {
         message.respond({
-            "returnValue": false,
-            "errorText": "Unsupported authentication type " + type,
-            "errorCode": 1
+            returnValue: false,
+            errorText: 'Unsupported authentication type ' + type,
+            errorCode: 1,
         });
         return;
     }
     options.headers = options.headers || {};
     options.headers.Authorization = authorizationHeader;
 
-    console.log("auth options:", options);
+    console.log('auth options:', options);
     // request again with authorization header
     request(options, user, password, message);
 }
 /**
  * create basic authentication header
- * 
- * @param {http.RequestOptions} options 
- * @param {String} user 
- * @param {String} password 
+ *
+ * @param {http.RequestOptions} options
+ * @param {String} user
+ * @param {String} password
  */
 function basicAuth(user, password) {
-    return "Basic " + new Buffer(user + ":" + password).toString('base64');
+    return 'Basic ' + new Buffer(user + ':' + password).toString('base64');
 }
 
 /**
  * create digest authentication header
- * 
- * @param {http.RequestOptions} options 
- * @param {String} user 
- * @param {String} password 
- * @param {String[]} tokens 
+ *
+ * @param {http.RequestOptions} options
+ * @param {String} user
+ * @param {String} password
+ * @param {String[]} tokens
  */
 function digestAuth(options, user, password, tokens) {
     var nonce, realm, qop;
     for (var i = 1; i < tokens.length; i++) {
         var value = tokens[i];
-        if (value.match("nonce")) nonce = unq(value.substring(value.indexOf('=') + 1));
-        if (value.match("realm")) realm = unq(value.substring(value.indexOf('=') + 1));
-        if (value.match("qop")) qop = unq(value.substring(value.indexOf('=') + 1));
-    };
+        if (value.match('nonce')) nonce = unq(value.substring(value.indexOf('=') + 1));
+        if (value.match('realm')) realm = unq(value.substring(value.indexOf('=') + 1));
+        if (value.match('qop')) qop = unq(value.substring(value.indexOf('=') + 1));
+    }
     //console.log("process digest:", nonce);
     var cnonce = genNonce(20); // opaque random string value provided by the client
     var nc = 0;
     /*
-    * HA1 = MD5(USER:REALM:PASS) --> john:your.realm:pass
-    */
-    var HA1 = hex_md5(user + ":" + realm + ":" + password);
+     * HA1 = MD5(USER:REALM:PASS) --> john:your.realm:pass
+     */
+    var HA1 = hex_md5(user + ':' + realm + ':' + password);
 
     /*
-        * HA2 = MD5(METHOD:URI)--> GET:your.realm
-        */
-    var HA2 = hex_md5(options.method + ":" + options.path);
+     * HA2 = MD5(METHOD:URI)--> GET:your.realm
+     */
+    var HA2 = hex_md5(options.method + ':' + options.path);
 
     /*
-        * response = digest = MD5(HA1 + ":" + NONCE + ":" + NC + ":" + CNONCE + ":" + QOP + ":" + HA2);
-        */
-    var res = hex_md5(HA1 + ":" + nonce + ":" + nc + ":" + cnonce + ":" + qop + ":" + HA2);
+     * response = digest = MD5(HA1 + ":" + NONCE + ":" + NC + ":" + CNONCE + ":" + QOP + ":" + HA2);
+     */
+    var res = hex_md5(HA1 + ':' + nonce + ':' + nc + ':' + cnonce + ':' + qop + ':' + HA2);
 
     /*
     *  Authorization header:
@@ -206,10 +213,24 @@ function digestAuth(options, user, password, tokens) {
                     cnonce="MDAwODM0", nc=00000001, qop="auth", 
                     response="77f88f3f6b4623eedf17af206098ebf8"
     */
-    var header = 'Digest username="' + user + '", realm="' + realm
-        + '", nonce="' + nonce + '", uri="' + options.path + '", cnonce="'
-        + cnonce + '", nc="' + nc + '", qop="' + qop + '", response="'
-        + res + '"';
+    var header =
+        'Digest username="' +
+        user +
+        '", realm="' +
+        realm +
+        '", nonce="' +
+        nonce +
+        '", uri="' +
+        options.path +
+        '", cnonce="' +
+        cnonce +
+        '", nc="' +
+        nc +
+        '", qop="' +
+        qop +
+        '", response="' +
+        res +
+        '"';
 
     return header;
 }

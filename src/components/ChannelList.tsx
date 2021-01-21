@@ -6,7 +6,6 @@ import EPGData from '../models/EPGData';
 import { StateUpdateHandler } from './TV';
 
 export default class ChannelList extends Component {
-
     static VERTICAL_SCROLL_TOP_PADDING_ITEM = 5;
     static IS_DEBUG = false;
 
@@ -55,12 +54,12 @@ export default class ChannelList extends Component {
     }
 
     getTopFrom(position: number) {
-        let y = position * (this.mChannelLayoutHeight); //+ this.mChannelLayoutMargin;
+        const y = position * this.mChannelLayoutHeight; //+ this.mChannelLayoutMargin;
         return y - this.scrollY;
     }
 
     calculateMaxVerticalScroll() {
-        let maxVerticalScroll = this.getTopFrom(this.epgData.getChannelCount() - 1) + this.mChannelLayoutHeight;
+        const maxVerticalScroll = this.getTopFrom(this.epgData.getChannelCount() - 1) + this.mChannelLayoutHeight;
         this.mMaxVerticalScroll = maxVerticalScroll < this.getHeight() ? 0 : maxVerticalScroll - this.getHeight();
     }
 
@@ -74,7 +73,7 @@ export default class ChannelList extends Component {
         }
 
         // stop scrolling before top padding position
-        let maxPosition = this.epgData.getChannelCount() - ChannelList.VERTICAL_SCROLL_TOP_PADDING_ITEM;
+        const maxPosition = this.epgData.getChannelCount() - ChannelList.VERTICAL_SCROLL_TOP_PADDING_ITEM;
         if (channelPosition >= maxPosition) {
             // fix scroll to channel in case it is within bottom padding
             if (this.scrollY === 0) {
@@ -85,15 +84,16 @@ export default class ChannelList extends Component {
         }
 
         // scroll to channel position
-        let scrollTarget = this.mChannelLayoutHeight * (channelPosition - ChannelList.VERTICAL_SCROLL_TOP_PADDING_ITEM);
+        const scrollTarget =
+            this.mChannelLayoutHeight * (channelPosition - ChannelList.VERTICAL_SCROLL_TOP_PADDING_ITEM);
         if (!withAnimation) {
             this.scrollY = scrollTarget;
             this.updateCanvas();
             return;
         }
 
-        let scrollDistance = scrollTarget - this.scrollY;
-        let scrollDelta = scrollDistance / (this.mChannelLayoutHeight / 5);
+        const scrollDistance = scrollTarget - this.scrollY;
+        const scrollDelta = scrollDistance / (this.mChannelLayoutHeight / 5);
         // stop existing animation if we have a new request
         cancelAnimationFrame(this.reapeater);
         this.reapeater = requestAnimationFrame(() => {
@@ -124,7 +124,7 @@ export default class ChannelList extends Component {
 
     drawChannelListItems(canvas: CanvasRenderingContext2D) {
         // Background
-        let drawingRect = new Rect();
+        const drawingRect = new Rect();
         drawingRect.left = 0;
         drawingRect.top = 0;
         drawingRect.right = drawingRect.left + this.mChannelLayoutWidth;
@@ -132,23 +132,28 @@ export default class ChannelList extends Component {
         canvas.globalAlpha = 1.0;
         // put stroke color to transparent
         //canvas.strokeStyle = "transparent";
-        canvas.strokeStyle = "gradient";
+        canvas.strokeStyle = 'gradient';
         //mPaint.setColor(mChannelLayoutBackground);
         // canvas.fillStyle = this.mChannelLayoutBackground;
         // Create gradient
-        var grd = canvas.createLinearGradient(drawingRect.bottom, drawingRect.top, drawingRect.bottom, drawingRect.bottom);
+        const grd = canvas.createLinearGradient(
+            drawingRect.bottom,
+            drawingRect.top,
+            drawingRect.bottom,
+            drawingRect.bottom
+        );
         // Important bit here is to use rgba()
-        grd.addColorStop(0, "rgba(11, 39, 58, 0.7)");
-        grd.addColorStop(0.2, "rgba(35, 64, 84, 0.9)");
-        grd.addColorStop(0.8, "rgba(35, 64, 84, 0.9)");
+        grd.addColorStop(0, 'rgba(11, 39, 58, 0.7)');
+        grd.addColorStop(0.2, 'rgba(35, 64, 84, 0.9)');
+        grd.addColorStop(0.8, 'rgba(35, 64, 84, 0.9)');
         grd.addColorStop(1, 'rgba(11, 39, 58, 0.7)');
 
         // Fill with gradient
         canvas.fillStyle = grd;
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
 
-        let firstPos = this.getFirstVisibleChannelPosition();
-        let lastPos = this.getLastVisibleChannelPosition();
+        const firstPos = this.getFirstVisibleChannelPosition();
+        const lastPos = this.getLastVisibleChannelPosition();
 
         //console.log("Channel: First: " + firstPos + " Last: " + lastPos);
         //let transparentTop = firstPos + 3;
@@ -167,13 +172,13 @@ export default class ChannelList extends Component {
     }
 
     drawChannelItem(canvas: CanvasRenderingContext2D, position: number) {
-        let isSelectedChannel = (position === this.channelPosition);
-        let channel = this.epgData.getChannel(position);
-        let drawingRect = new Rect();
-        
+        const isSelectedChannel = position === this.channelPosition;
+        const channel = this.epgData.getChannel(position);
+        const drawingRect = new Rect();
+
         // should not happen, but better check it
-        if(!channel) return;
-        
+        if (!channel) return;
+
         drawingRect.left = 0;
         drawingRect.top = this.getTopFrom(position);
         drawingRect.right = this.mChannelLayoutWidth;
@@ -187,55 +192,88 @@ export default class ChannelList extends Component {
         }
 
         // channel number
-        this.canvasUtils.writeText(canvas, channel.getChannelID().toString(), drawingRect.left + 70, drawingRect.middle, {
-            fontSize: this.mChannelLayoutNumberTextSize,
-            textAlign: 'right',
-            fillStyle: this.mChannelLayoutTextColor,
-            isBold: true
-        });
+        this.canvasUtils.writeText(
+            canvas,
+            channel.getChannelID().toString(),
+            drawingRect.left + 70,
+            drawingRect.middle,
+            {
+                fontSize: this.mChannelLayoutNumberTextSize,
+                textAlign: 'right',
+                fillStyle: this.mChannelLayoutTextColor,
+                isBold: true,
+            }
+        );
 
         // channel name
-        let channelIconWidth = this.mChannelLayoutHeight * 1.3;
-        let channelNameWidth = this.mChannelLayoutWidth - channelIconWidth - 90;
-        this.canvasUtils.writeText(canvas, channel.getName(), drawingRect.left + 90, drawingRect.top + this.mChannelLayoutHeight * 0.33, {
-            fontSize: this.mChannelLayoutTextSize,
-            fillStyle: this.mChannelLayoutTextColor,
-            isBold: true,
-            maxWidth: channelNameWidth
-        });
+        const channelIconWidth = this.mChannelLayoutHeight * 1.3;
+        const channelNameWidth = this.mChannelLayoutWidth - channelIconWidth - 90;
+        this.canvasUtils.writeText(
+            canvas,
+            channel.getName(),
+            drawingRect.left + 90,
+            drawingRect.top + this.mChannelLayoutHeight * 0.33,
+            {
+                fontSize: this.mChannelLayoutTextSize,
+                fillStyle: this.mChannelLayoutTextColor,
+                isBold: true,
+                maxWidth: channelNameWidth,
+            }
+        );
 
         // channel event
-        for (let event of channel.getEvents()) {
+        channel.getEvents().forEach((event) => {
             if (event.isCurrent()) {
                 // channel event progress bar
-                let channelEventProgressRect = new Rect();
+                const channelEventProgressRect = new Rect();
                 channelEventProgressRect.left = drawingRect.left + 90;
                 channelEventProgressRect.right = channelEventProgressRect.left + 80;
                 channelEventProgressRect.top = drawingRect.top + this.mChannelLayoutHeight * 0.66;
                 channelEventProgressRect.bottom = channelEventProgressRect.top + this.mChannelLayoutEventTextSize * 0.5;
                 canvas.strokeStyle = this.mChannelLayoutTextColor;
-                canvas.strokeRect(channelEventProgressRect.left, channelEventProgressRect.top, channelEventProgressRect.width, channelEventProgressRect.height);
+                canvas.strokeRect(
+                    channelEventProgressRect.left,
+                    channelEventProgressRect.top,
+                    channelEventProgressRect.width,
+                    channelEventProgressRect.height
+                );
                 canvas.fillStyle = isSelectedChannel ? this.mChannelLayoutTextColor : this.mChannelLayoutTitleTextColor;
-                canvas.fillRect(channelEventProgressRect.left + 2, channelEventProgressRect.top + 2, (channelEventProgressRect.width - 4) * event.getDoneFactor(), channelEventProgressRect.height - 4);
+                canvas.fillRect(
+                    channelEventProgressRect.left + 2,
+                    channelEventProgressRect.top + 2,
+                    (channelEventProgressRect.width - 4) * event.getDoneFactor(),
+                    channelEventProgressRect.height - 4
+                );
 
                 // channel event text
-                let channelEventWidth = this.mChannelLayoutWidth - channelIconWidth - 90 - channelEventProgressRect.width;
-                this.canvasUtils.writeText(canvas, event.getTitle(), channelEventProgressRect.right + this.mChannelLayoutPadding, channelEventProgressRect.middle, {
-                    fontSize: this.mChannelLayoutEventTextSize,
-                    fillStyle: canvas.fillStyle,
-                    maxWidth: channelEventWidth
-                });
-
-                break;
+                const channelEventWidth =
+                    this.mChannelLayoutWidth - channelIconWidth - 90 - channelEventProgressRect.width;
+                this.canvasUtils.writeText(
+                    canvas,
+                    event.getTitle(),
+                    channelEventProgressRect.right + this.mChannelLayoutPadding,
+                    channelEventProgressRect.middle,
+                    {
+                        fontSize: this.mChannelLayoutEventTextSize,
+                        fillStyle: canvas.fillStyle,
+                        maxWidth: channelEventWidth,
+                    }
+                );
             }
-        };
+        });
 
         // channel logo
-        let imageURL = channel.getImageURL();
-        let image = this.imageCache.get(imageURL);
+        const imageURL = channel.getImageURL();
+        const image = this.imageCache.get(imageURL);
         if (image !== undefined) {
-            let channelImageRect = this.getDrawingRectForChannelImage(position, image);
-            canvas.drawImage(image, channelImageRect.left, channelImageRect.top, channelImageRect.width, channelImageRect.height);
+            const channelImageRect = this.getDrawingRectForChannelImage(position, image);
+            canvas.drawImage(
+                image,
+                channelImageRect.left,
+                channelImageRect.top,
+                channelImageRect.width,
+                channelImageRect.height
+            );
             this.drawDebugRect(canvas, channelImageRect);
         }
     }
@@ -248,26 +286,26 @@ export default class ChannelList extends Component {
     }
 
     getDrawingRectForChannelImage(position: number, image: any) {
-        let drawingRect = new Rect();
+        const drawingRect = new Rect();
         drawingRect.right = this.mChannelLayoutWidth - this.mChannelLayoutMargin;
         drawingRect.left = drawingRect.right - this.mChannelLayoutHeight * 1.3;
         drawingRect.top = this.getTopFrom(position);
         drawingRect.bottom = drawingRect.top + this.mChannelLayoutHeight;
-        
-        let imageWidth = image.width;
-        let imageHeight = image.height;
-        let imageRatio = imageHeight / parseFloat(imageWidth);
 
-        let rectWidth = drawingRect.right - drawingRect.left;
-        let rectHeight = drawingRect.bottom - drawingRect.top;
+        const imageWidth = image.width;
+        const imageHeight = image.height;
+        const imageRatio = imageHeight / parseFloat(imageWidth);
+
+        const rectWidth = drawingRect.right - drawingRect.left;
+        const rectHeight = drawingRect.bottom - drawingRect.top;
 
         // Keep aspect ratio.
         if (imageWidth > imageHeight) {
-            let padding = (rectHeight - (rectWidth * imageRatio)) / 2;
+            const padding = (rectHeight - rectWidth * imageRatio) / 2;
             drawingRect.top += padding;
             drawingRect.bottom -= padding;
         } else if (imageWidth <= imageHeight) {
-            let padding = (rectWidth - (rectHeight / imageRatio)) / 2;
+            const padding = (rectWidth - rectHeight / imageRatio) / 2;
             drawingRect.left += padding;
             drawingRect.right -= padding;
         }
@@ -279,7 +317,7 @@ export default class ChannelList extends Component {
      * get first visible channel position
      */
     getFirstVisibleChannelPosition() {
-        let y = this.scrollY;
+        const y = this.scrollY;
         let position = Math.floor(y / this.mChannelLayoutHeight);
 
         if (position < 0) {
@@ -290,11 +328,11 @@ export default class ChannelList extends Component {
     }
 
     getLastVisibleChannelPosition() {
-        let y = this.scrollY;
-        let screenHeight = this.getHeight();
+        const y = this.scrollY;
+        const screenHeight = this.getHeight();
         let position = Math.floor((y + screenHeight) / this.mChannelLayoutHeight);
 
-        let channelCount = this.epgData.getChannelCount();
+        const channelCount = this.epgData.getChannelCount();
         // this will fade the bottom channel in while scrolling
         if (position < channelCount) {
             position += 1;
@@ -343,13 +381,13 @@ export default class ChannelList extends Component {
     }
 
     keyPressHandler = (event: React.KeyboardEvent<HTMLDivElement>) => {
-        let keyCode = event.keyCode;
+        const keyCode = event.keyCode;
         let channelPosition = this.channelPosition;
 
         event.stopPropagation();
         switch (keyCode) {
-            case 33:    // programm up
-            case 38:    // arrow up
+            case 33: // programm up
+            case 38: // arrow up
                 // channel down
                 channelPosition -= 1;
                 // if we reached < 0 we scroll to end of list
@@ -373,14 +411,14 @@ export default class ChannelList extends Component {
             case 67: // keyboard 'c'
             case 461: // back button
                 this.stateUpdateHandler({
-                    isChannelListState: false
+                    isChannelListState: false,
                 });
                 break;
             case 13: // ok button -> switch to focused channel
                 this.stateUpdateHandler({
                     isChannelListState: false,
                     isInfoState: true,
-                    channelPosition: channelPosition
+                    channelPosition: channelPosition,
                 });
                 break;
             case 403: // red button trigger recording
@@ -414,7 +452,7 @@ export default class ChannelList extends Component {
 
     updateCanvas() {
         if (this.canvas.current) {
-            let ctx = this.canvas.current.getContext('2d');
+            const ctx = this.canvas.current.getContext('2d');
             // clear
             ctx && ctx.clearRect(0, 0, this.getWidth(), this.getHeight());
 
@@ -431,11 +469,19 @@ export default class ChannelList extends Component {
 
     render() {
         return (
-            <div id="channellist-wrapper" ref={this.listWrapper} tabIndex={-1} onKeyDown={this.keyPressHandler} className="channelList">
-                <canvas ref={this.canvas}
+            <div
+                id="channellist-wrapper"
+                ref={this.listWrapper}
+                tabIndex={-1}
+                onKeyDown={this.keyPressHandler}
+                className="channelList"
+            >
+                <canvas
+                    ref={this.canvas}
                     width={this.getWidth()}
                     height={this.getHeight()}
-                    style={{ display: "block" }} />
+                    style={{ display: 'block' }}
+                />
             </div>
         );
     }

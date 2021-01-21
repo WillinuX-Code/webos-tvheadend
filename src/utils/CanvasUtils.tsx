@@ -9,9 +9,8 @@ interface WriteTextOptions {
 }
 
 export default class CanvasUtils {
-    
     static MEASURE_STRING = 'One interesting Measure String';
-    
+
     /**
      * Return character width approximation of current font
      */
@@ -25,53 +24,60 @@ export default class CanvasUtils {
     getShortenedText(canvas: CanvasRenderingContext2D, text: string, maxWidth: number) {
         let result = text;
         // use test character to measure width per character
-        var widthPerCharacter = this.getWidthPerCharacter(canvas);
-        var textLength = canvas.measureText(result).width;
+        const widthPerCharacter = this.getWidthPerCharacter(canvas);
+        const textLength = canvas.measureText(result).width;
         if (textLength > maxWidth) {
-            var overLength = textLength - maxWidth;
+            const overLength = textLength - maxWidth;
             // if(text.startsWith('Hitler und Luden')) {
             //     console.log('text: "%s" maxWidth: %d, textWidth: %d, deltaWidth: %d, widthPerCharacter: %d, textLength: %d, textOverLength: %d', text, maxWidth, textLength, overLength, widthPerCharacter, result.length, overLength/widthPerCharacter);
             // }
-            result = result.substring(0, result.length - 1 - (overLength / widthPerCharacter));
+            result = result.substring(0, result.length - 1 - overLength / widthPerCharacter);
             if (result.length <= 3) {
                 return '...'.substring(0, result.length);
             }
             result = result.substring(0, result.length - 3) + '...';
-        } 
+        }
         return result;
     }
 
     /**
      * Wraps a text inside a given area
      */
-    wrapText(canvas: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number) {
-        var line = ''; 
-        var widthPerCharacter = this.getWidthPerCharacter(canvas);
-        var maxCharactersPerLine = maxWidth / widthPerCharacter - 1;
-        var index = 0;
-        var newIndex = 0;
-        while(index < text.length -1) {
+    wrapText(
+        canvas: CanvasRenderingContext2D,
+        text: string,
+        x: number,
+        y: number,
+        maxWidth: number,
+        lineHeight: number
+    ) {
+        let line = '';
+        const widthPerCharacter = this.getWidthPerCharacter(canvas);
+        const maxCharactersPerLine = maxWidth / widthPerCharacter - 1;
+        let index = 0;
+        let newIndex = 0;
+        while (index < text.length - 1) {
             newIndex = index + maxCharactersPerLine > text.length ? text.length : index + maxCharactersPerLine;
             line = text.substring(index, newIndex);
             index = newIndex;
             // cutoff leading space
-            if(line.startsWith(' ')) {
-                line = line.substring(1,line.length-1);
+            if (line.startsWith(' ')) {
+                line = line.substring(1, line.length - 1);
             }
-            // if we reached the end print out the line 
-            if(index === text.length) {
+            // if we reached the end print out the line
+            if (index === text.length) {
                 canvas.fillText(line, x, y);
                 break;
             }
             // lucky we sliced at a space
-            if(line.endsWith(' ')) {
+            if (line.endsWith(' ')) {
                 canvas.fillText(line, x, y);
                 y += lineHeight;
                 continue;
-            } 
+            }
             // go back to find space first space
-            for(var i=line.length-1; i>=0; i--) {
-                if(line[i] === ' ') {
+            for (let i = line.length - 1; i >= 0; i--) {
+                if (line[i] === ' ') {
                     canvas.fillText(line.substring(0, i), x, y);
                     y += lineHeight;
                     break;
@@ -95,18 +101,20 @@ export default class CanvasUtils {
         options.maxWidth = options.maxWidth || undefined;
 
         // remember old text style
-        let oldFont = canvas.font;
-        let oldFillStyle = canvas.fillStyle;
-        let oldTextAlign = canvas.textAlign;
-        let oldTextBaseline = canvas.textBaseline;
+        const oldFont = canvas.font;
+        const oldFillStyle = canvas.fillStyle;
+        const oldTextAlign = canvas.textAlign;
+        const oldTextBaseline = canvas.textBaseline;
 
         // set new text style
         canvas.font = options.fontSize + 'px ' + options.fontFace;
-        if (options.isBold) {canvas.font = 'bold ' + canvas.font}
+        if (options.isBold) {
+            canvas.font = 'bold ' + canvas.font;
+        }
         canvas.fillStyle = options.fillStyle;
         canvas.textAlign = options.textAlign;
         canvas.textBaseline = options.textBaseline;
-        
+
         if (options.maxWidth) {
             // fix negative width
             if (options.maxWidth <= 0) {

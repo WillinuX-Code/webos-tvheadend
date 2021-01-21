@@ -7,7 +7,6 @@ import { StateUpdateHandler } from './TV';
 import '../styles/app.css';
 
 export default class ChannelInfo extends Component {
-
     private canvas: React.RefObject<HTMLCanvasElement>;
     private infoWrapper: React.RefObject<HTMLDivElement>;
     private stateUpdateHandler: StateUpdateHandler;
@@ -36,7 +35,7 @@ export default class ChannelInfo extends Component {
         this.infoWrapper = React.createRef();
         this.stateUpdateHandler = this.props.stateUpdateHandler;
         this.epgData = this.props.epgData;
-        this.imageCache =this.props.imageCache;
+        this.imageCache = this.props.imageCache;
         this.channelPosition = this.props.channelPosition;
         this.epgUtils = new EPGUtils();
         this.canvasUtils = new CanvasUtils();
@@ -46,7 +45,7 @@ export default class ChannelInfo extends Component {
     }
 
     keyPressHandler = (event: React.KeyboardEvent<HTMLDivElement>) => {
-        let keyCode = event.keyCode;
+        const keyCode = event.keyCode;
 
         switch (keyCode) {
             case 461: // back button
@@ -55,11 +54,10 @@ export default class ChannelInfo extends Component {
                 event.stopPropagation();
                 this.stateUpdateHandler({
                     isInfoState: false,
-                    channelNumberText: ''
+                    channelNumberText: '',
                 });
                 break;
         }
-
     };
 
     drawChannelInfo(canvas: CanvasRenderingContext2D) {
@@ -71,14 +69,19 @@ export default class ChannelInfo extends Component {
         drawingRect.bottom = this.getHeight();
         canvas.globalAlpha = 1.0;
         // put stroke color to transparent
-        canvas.strokeStyle = "gradient";
+        canvas.strokeStyle = 'gradient';
         //mPaint.setColor(mChannelLayoutBackground);
         // canvas.fillStyle = this.mChannelLayoutBackground;
         // Create gradient
-        var grd = canvas.createLinearGradient(drawingRect.left, drawingRect.left, drawingRect.right, drawingRect.left);
+        const grd = canvas.createLinearGradient(
+            drawingRect.left,
+            drawingRect.left,
+            drawingRect.right,
+            drawingRect.left
+        );
         // Important bit here is to use rgba()
-        grd.addColorStop(0, "rgba(11, 39, 58, 0.9)");
-        grd.addColorStop(0.5, "rgba(35, 64, 84, 0.9)");
+        grd.addColorStop(0, 'rgba(11, 39, 58, 0.9)');
+        grd.addColorStop(0.5, 'rgba(35, 64, 84, 0.9)');
         grd.addColorStop(1, 'rgba(11, 39, 58, 0.9)');
 
         // Fill with gradient
@@ -92,10 +95,10 @@ export default class ChannelInfo extends Component {
         drawingRect.right -= this.mChannelLayoutMargin;
         drawingRect.bottom -= this.mChannelLayoutMargin;
 
-        let channel = this.epgData.getChannel(this.channelPosition);
+        const channel = this.epgData.getChannel(this.channelPosition);
 
         // should not happen, but better check it
-        if(!channel) return;
+        if (!channel) return;
 
         // channel number
         //canvas.strokeStyle = ;
@@ -121,8 +124,8 @@ export default class ChannelInfo extends Component {
         drawingRect.right = drawingRect.left + drawingRect.height + 50;
         //drawingRect.bottom = this.getHeight();
         canvas.textAlign = 'left';
-        let imageURL = channel.getImageURL();
-        let image = this.imageCache.get(imageURL);
+        const imageURL = channel.getImageURL();
+        const image = this.imageCache.get(imageURL);
         if (image !== undefined) {
             drawingRect = this.getDrawingRectForChannelImage(drawingRect, image);
             canvas.drawImage(image, drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
@@ -131,13 +134,17 @@ export default class ChannelInfo extends Component {
         // channel event
         drawingRect.left += drawingRect.right + 20;
         drawingRect.right = this.getWidth();
-        drawingRect.top = this.getHeight() / 2 - this.mChannelInfoTitleSize + (this.mChannelInfoTitleSize / 2) + this.mChannelLayoutPadding;
-        canvas.font = this.mChannelInfoTitleSize + "px Arial";
+        drawingRect.top =
+            this.getHeight() / 2 -
+            this.mChannelInfoTitleSize +
+            this.mChannelInfoTitleSize / 2 +
+            this.mChannelLayoutPadding;
+        canvas.font = this.mChannelInfoTitleSize + 'px Arial';
         canvas.fillStyle = this.mChannelLayoutTextColor;
         canvas.textAlign = 'left';
         let currentEvent, nextEvent;
 
-        for (let event of channel.getEvents()) {
+        for (const event of channel.getEvents()) {
             if (event.isCurrent()) {
                 currentEvent = event;
                 continue;
@@ -146,25 +153,30 @@ export default class ChannelInfo extends Component {
                 nextEvent = event;
                 break;
             }
-        };
+        }
 
         if (currentEvent !== undefined) {
-            let left = drawingRect.left;
+            const left = drawingRect.left;
             drawingRect.right -= this.mChannelInfoTimeBoxWidth;
 
             // draw current event
-            canvas.fillText(this.canvasUtils.getShortenedText(canvas, currentEvent.getTitle(), drawingRect.width),
-                drawingRect.left, drawingRect.top);
+            canvas.fillText(
+                this.canvasUtils.getShortenedText(canvas, currentEvent.getTitle(), drawingRect.width),
+                drawingRect.left,
+                drawingRect.top
+            );
 
             // draw title timeframe
             drawingRect.right += this.mChannelInfoTimeBoxWidth;
             drawingRect.left = drawingRect.right - this.mChannelLayoutPadding - 20;
             canvas.textAlign = 'right';
-            canvas.fillText(this.epgUtils.toTimeFrameString(currentEvent.getStart(), currentEvent.getEnd(), this.context.locale),
-                drawingRect.left, drawingRect.top);
+            canvas.fillText(
+                this.epgUtils.toTimeFrameString(currentEvent.getStart(), currentEvent.getEnd(), this.context.locale),
+                drawingRect.left,
+                drawingRect.top
+            );
             canvas.textAlign = 'left';
 
-            
             // draw subtitle event
             canvas.font = 'bold ' + (this.mChannelInfoTitleSize - 8) + 'px Arial';
             drawingRect.top += this.mChannelInfoTitleSize + this.mChannelLayoutPadding;
@@ -172,48 +184,76 @@ export default class ChannelInfo extends Component {
                 drawingRect.left = left;
                 drawingRect.right -= this.mChannelInfoTimeBoxWidth;
                 canvas.fillStyle = this.mChannelLayoutTitleTextColor;
-                canvas.fillText(this.canvasUtils.getShortenedText(canvas, currentEvent.getSubTitle(), drawingRect.width),
-                    drawingRect.left, drawingRect.top);
+                canvas.fillText(
+                    this.canvasUtils.getShortenedText(canvas, currentEvent.getSubTitle(), drawingRect.width),
+                    drawingRect.left,
+                    drawingRect.top
+                );
                 drawingRect.right += this.mChannelInfoTimeBoxWidth;
             }
 
             // draw current time in programm as well as overall durations
-            let runningTime = this.epgUtils.toDuration(currentEvent.getStart(), this.epgUtils.getNow());
-            let remainingTime = Math.ceil((currentEvent.getEnd() - this.epgUtils.getNow()) / 1000 / 60);
+            const runningTime = this.epgUtils.toDuration(currentEvent.getStart(), this.epgUtils.getNow());
+            const remainingTime = Math.ceil((currentEvent.getEnd() - this.epgUtils.getNow()) / 1000 / 60);
             drawingRect.left = drawingRect.right - this.mChannelLayoutPadding - 20;
             canvas.textAlign = 'right';
-            canvas.font = (this.mChannelInfoTitleSize - 8) + 'px Arial';
+            canvas.font = this.mChannelInfoTitleSize - 8 + 'px Arial';
             canvas.fillStyle = this.mChannelLayoutTitleTextColor;
             canvas.fillText(runningTime + ' (+' + remainingTime + ')', drawingRect.left, drawingRect.top);
 
             // draw next event
-            if(nextEvent !== undefined){
-                drawingRect.top += (this.mChannelInfoTitleSize - 15) + this.mChannelLayoutPadding;
-                canvas.font = (this.mChannelInfoTitleSize - 15) + 'px Arial';
+            if (nextEvent !== undefined) {
+                drawingRect.top += this.mChannelInfoTitleSize - 15 + this.mChannelLayoutPadding;
+                canvas.font = this.mChannelInfoTitleSize - 15 + 'px Arial';
                 canvas.fillStyle = 'rgb(65, 182, 230)';
-                canvas.fillText(this.epgUtils.toTimeFrameString(nextEvent.getStart(), nextEvent.getEnd(), this.context.locale)+ ":   "+nextEvent.getTitle() , drawingRect.left, drawingRect.top);
+                canvas.fillText(
+                    this.epgUtils.toTimeFrameString(nextEvent.getStart(), nextEvent.getEnd(), this.context.locale) +
+                        ':   ' +
+                        nextEvent.getTitle(),
+                    drawingRect.left,
+                    drawingRect.top
+                );
             }
 
             // draw upcoming progress
-            let channelEventProgressRect = new Rect(0, 0, 6, this.getWidth());
-            let grd = canvas.createLinearGradient(channelEventProgressRect.left, channelEventProgressRect.left, channelEventProgressRect.right, channelEventProgressRect.left);
+            const channelEventProgressRect = new Rect(0, 0, 6, this.getWidth());
+            const grd = canvas.createLinearGradient(
+                channelEventProgressRect.left,
+                channelEventProgressRect.left,
+                channelEventProgressRect.right,
+                channelEventProgressRect.left
+            );
             grd.addColorStop(0, 'rgba(80, 80, 80, 0.75)');
             grd.addColorStop(0.5, 'rgba(200, 200, 200, 0.75)');
             grd.addColorStop(1, 'rgba(80, 80, 80, 0.75)');
-            let grd2 = canvas.createLinearGradient(channelEventProgressRect.left, channelEventProgressRect.left, channelEventProgressRect.right, channelEventProgressRect.left);
+            const grd2 = canvas.createLinearGradient(
+                channelEventProgressRect.left,
+                channelEventProgressRect.left,
+                channelEventProgressRect.right,
+                channelEventProgressRect.left
+            );
             grd2.addColorStop(0, 'rgba(19, 126, 169, 0.75)');
             grd2.addColorStop(0.5, 'rgba(65, 182, 230, 0.75)');
             grd2.addColorStop(1, 'rgba(19, 126, 169, 0.75)');
 
             // draw base progress line
             canvas.fillStyle = grd;
-            canvas.fillRect(channelEventProgressRect.left, channelEventProgressRect.top, channelEventProgressRect.width, channelEventProgressRect.height);
-            
+            canvas.fillRect(
+                channelEventProgressRect.left,
+                channelEventProgressRect.top,
+                channelEventProgressRect.width,
+                channelEventProgressRect.height
+            );
+
             // draw past progress
             canvas.fillStyle = grd2;
-            canvas.fillRect(channelEventProgressRect.left, channelEventProgressRect.top, channelEventProgressRect.width * currentEvent.getDoneFactor(), channelEventProgressRect.height)     
+            canvas.fillRect(
+                channelEventProgressRect.left,
+                channelEventProgressRect.top,
+                channelEventProgressRect.width * currentEvent.getDoneFactor(),
+                channelEventProgressRect.height
+            );
         }
-
     }
 
     getDrawingRectForChannelImage(drawingRect: Rect, image: any) {
@@ -222,20 +262,20 @@ export default class ChannelInfo extends Component {
         drawingRect.right -= this.mChannelLayoutPadding;
         drawingRect.bottom -= this.mChannelLayoutPadding;
 
-        let imageWidth = image.width;
-        let imageHeight = image.height;
-        let imageRatio = imageHeight / parseFloat(imageWidth);
+        const imageWidth = image.width;
+        const imageHeight = image.height;
+        const imageRatio = imageHeight / parseFloat(imageWidth);
 
-        let rectWidth = drawingRect.right - drawingRect.left;
-        let rectHeight = drawingRect.bottom - drawingRect.top;
+        const rectWidth = drawingRect.right - drawingRect.left;
+        const rectHeight = drawingRect.bottom - drawingRect.top;
 
         // Keep aspect ratio.
         if (imageWidth > imageHeight) {
-            let padding = (rectHeight - (rectWidth * imageRatio)) / 2;
+            const padding = (rectHeight - rectWidth * imageRatio) / 2;
             drawingRect.top += padding;
             drawingRect.bottom -= padding;
         } else if (imageWidth <= imageHeight) {
-            let padding = (rectWidth - (rectHeight / imageRatio)) / 2;
+            const padding = (rectWidth - rectHeight / imageRatio) / 2;
             drawingRect.left += padding;
             drawingRect.right -= padding;
         }
@@ -254,10 +294,14 @@ export default class ChannelInfo extends Component {
     /** set timeout to automatically unmount */
     resetUnmountTimeout() {
         this.timeoutReference && clearTimeout(this.timeoutReference);
-        this.timeoutReference = setTimeout(() => this.stateUpdateHandler({
-            isInfoState: false,
-            channelNumberText: ''
-        }), 8000);
+        this.timeoutReference = setTimeout(
+            () =>
+                this.stateUpdateHandler({
+                    isInfoState: false,
+                    channelNumberText: '',
+                }),
+            8000
+        );
     }
 
     componentDidMount() {
@@ -268,9 +312,9 @@ export default class ChannelInfo extends Component {
             this.updateCanvas();
         }, 500);
 
-        let channel = this.epgData.getChannel(this.channelPosition);
-        this.stateUpdateHandler({ 
-            channelNumberText: channel?.getChannelID() || ''
+        const channel = this.epgData.getChannel(this.channelPosition);
+        this.stateUpdateHandler({
+            channelNumberText: channel?.getChannelID() || '',
         });
 
         this.channelPosition = this.props.channelPosition;
@@ -295,7 +339,7 @@ export default class ChannelInfo extends Component {
 
     updateCanvas() {
         if (this.canvas.current) {
-            let ctx = this.canvas.current.getContext('2d');
+            const ctx = this.canvas.current.getContext('2d');
             // clear
             ctx && ctx.clearRect(0, 0, this.getWidth(), this.getHeight());
 
@@ -312,8 +356,19 @@ export default class ChannelInfo extends Component {
 
     render() {
         return (
-            <div id="channelinfo-wrapper" ref={this.infoWrapper} tabIndex={-1} onKeyDown={this.keyPressHandler} className="channelInfo">
-                <canvas ref={this.canvas} width={this.getWidth()} height={this.getHeight()} style={{ display: "block" }} />
+            <div
+                id="channelinfo-wrapper"
+                ref={this.infoWrapper}
+                tabIndex={-1}
+                onKeyDown={this.keyPressHandler}
+                className="channelInfo"
+            >
+                <canvas
+                    ref={this.canvas}
+                    width={this.getWidth()}
+                    height={this.getHeight()}
+                    style={{ display: 'block' }}
+                />
             </div>
         );
     }

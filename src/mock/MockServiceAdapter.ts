@@ -18,18 +18,18 @@ interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
             clock: string;
             keyboards: string[];
             locales: {
-                UI: string,
-                TV: string,
-                FMT: string,
-                NLP: string,
-                STT: string,
-                AUD: string,
-                AUD2: string
+                UI: string;
+                TV: string;
+                FMT: string;
+                NLP: string;
+                STT: string;
+                AUD: string;
+                AUD2: string;
             };
             timezone: string;
         };
     };
-    subscribed: boolean
+    subscribed: boolean;
 }
 
 /**
@@ -39,98 +39,91 @@ interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
  * - local + webos emulator => luna service bus
  */
 export default class MockServiceAdapter {
-
-
     async call<TResult = any>(method: string, params: any) {
         console.log('lsa:%s start', method);
         let url = params.url;
         if (url.includes('api/channel/grid')) {
             return channelMock as ProxySuccessResponse<any>;
-        }
-        else if (url.includes('api/epg/events/grid')) {
-            let value = JSON.stringify(epgMock)
+        } else if (url.includes('api/epg/events/grid')) {
+            let value = JSON.stringify(epgMock);
             return {
                 returnValue: true,
-                result: value
-            }
+                result: value,
+            };
             //return epgMock;
-        }
-        else if (url.includes('api/dvr/entry/grid_upcoming')) {
-            let value = JSON.stringify(recordingMock)
+        } else if (url.includes('api/dvr/entry/grid_upcoming')) {
+            let value = JSON.stringify(recordingMock);
             return {
                 returnValue: true,
-                result: value
-            }
-        }
-        else if (url.includes('api/channeltag/list')) {
+                result: value,
+            };
+        } else if (url.includes('api/channeltag/list')) {
             return channelTagsMock as ProxySuccessResponse<any>;
-        }
-        else if (url.includes('playlist/auth/channels') || url.includes('playlist/channels')) {
+        } else if (url.includes('playlist/auth/channels') || url.includes('playlist/channels')) {
             return channelM3UMock as ProxySuccessResponse<any>;
-        }
-        else if (url.includes('api/dvr/config/grid')) {
+        } else if (url.includes('api/dvr/config/grid')) {
             return {
                 returnValue: true,
                 result: JSON.stringify({
                     total: 2,
                     entries: [
                         {
-                            uuid: "somefakeUuid",
+                            uuid: 'somefakeUuid',
                             enabled: true,
-                            name: ""
+                            name: '',
                         },
                         {
-                            uuid: "anotherDisabledOne",
+                            uuid: 'anotherDisabledOne',
                             enabled: false,
-                            name: "aName",
-                        }
-                    ]
-                })
+                            name: 'aName',
+                        },
+                    ],
+                }),
             } as ProxySuccessResponse<any>;
-        }
-        else if (url.includes('/api/serverinfo')) {
+        } else if (url.includes('/api/serverinfo')) {
             return {
                 returnValue: true,
                 result: JSON.stringify({
-                    "sw_version": "4.3-1919~g52b255940",
-                    "api_version": 19,
-                    "name": "Tvheadend",
-                    "capabilities": [
-                        "caclient",
-                        "tvadapters",
-                        "satip_client",
-                        "satip_server",
-                        "timeshift",
-                        "trace",
-                        "libav",
-                        "caclient_advanced"
-                    ]
-                })
+                    sw_version: '4.3-1919~g52b255940',
+                    api_version: 19,
+                    name: 'Tvheadend',
+                    capabilities: [
+                        'caclient',
+                        'tvadapters',
+                        'satip_client',
+                        'satip_server',
+                        'timeshift',
+                        'trace',
+                        'libav',
+                        'caclient_advanced',
+                    ],
+                }),
             } as ProxySuccessResponse<any>;
-        }
-        else if (url.includes('/api/profile/list')) {
+        } else if (url.includes('/api/profile/list')) {
             return {
                 returnValue: true,
                 result: JSON.stringify({
-                    "entries": [
+                    entries: [
                         {
-                            "key": "37e63ea3fcda682086adaab175dde991",
-                            "val": "pass"
+                            key: '37e63ea3fcda682086adaab175dde991',
+                            val: 'pass',
                         },
                         {
-                            "val": "matroska",
-                            "key": "03663b00383b34a6ce2a621733388bf5"
+                            val: 'matroska',
+                            key: '03663b00383b34a6ce2a621733388bf5',
                         },
                         {
-                            "val": "webtv-h264-aac-mpegts",
-                            "key": "b90da9e0bc0633515b261714a966910d"
-                        }
-                    ]
-                })
+                            val: 'webtv-h264-aac-mpegts',
+                            key: 'b90da9e0bc0633515b261714a966910d',
+                        },
+                    ],
+                }),
             } as ProxySuccessResponse<any>;
-        }
-        else {
-            throw { "returnValue": false, "errorText": "Unknown url " + url } as ProxyErrorResponse;
+        } else {
+            throw {
+                returnValue: false,
+                errorText: 'Unknown url ' + url,
+            } as ProxyErrorResponse;
         }
         console.log('lsa:%s end', method);
     }
@@ -145,11 +138,10 @@ export default class MockServiceAdapter {
             settings: {
                 localeInfo: {
                     locales: {
-                        UI: "de-DE"
-                    }
-                }
-            }
+                        UI: 'de-DE',
+                    },
+                },
+            },
         } as LocaleInfoSuccessResponse;
     }
-
 }

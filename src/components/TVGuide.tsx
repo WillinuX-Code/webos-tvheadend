@@ -4,25 +4,24 @@
 import React, { Component } from 'react';
 
 import Rect from '../models/Rect';
-import EPGUtils from '../utils/EPGUtils'
+import EPGUtils from '../utils/EPGUtils';
 import TVHDataService from '../services/TVHDataService';
 import CanvasUtils from '../utils/CanvasUtils';
 import TVHSettings from './TVHSettings';
 import EPGData from '../models/EPGData';
 import EPGEvent from '../models/EPGEvent';
-import '../styles/app.css'
+import '../styles/app.css';
 import { StateUpdateHandler } from './TV';
 
 export default class TVGuide extends Component {
-
     static DAYS_BACK_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
     static DAYS_FORWARD_MILLIS = 1 * 24 * 60 * 60 * 1000; // 1 days
     static HOURS_IN_VIEWPORT_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
     static TIME_LABEL_SPACING_MILLIS = 30 * 60 * 1000; // 30 minutes
 
     static VISIBLE_CHANNEL_COUNT = 8; // No of channel to show at a time
-    static VERTICAL_SCROLL_BOTTOM_PADDING_ITEM = (TVGuide.VISIBLE_CHANNEL_COUNT / 2) - 1;
-    static VERTICAL_SCROLL_TOP_PADDING_ITEM = (TVGuide.VISIBLE_CHANNEL_COUNT / 2) - 1;
+    static VERTICAL_SCROLL_BOTTOM_PADDING_ITEM = TVGuide.VISIBLE_CHANNEL_COUNT / 2 - 1;
+    static VERTICAL_SCROLL_TOP_PADDING_ITEM = TVGuide.VISIBLE_CHANNEL_COUNT / 2 - 1;
 
     private canvas: React.RefObject<HTMLCanvasElement>;
     private epgWrapper: React.RefObject<HTMLDivElement>;
@@ -97,7 +96,7 @@ export default class TVGuide extends Component {
         this.epgUtils = new EPGUtils();
         this.canvasUtils = new CanvasUtils();
         // read settings from storage
-        let tvhSettings = JSON.parse(localStorage.getItem(TVHSettings.STORAGE_TVH_SETTING_KEY) || '');
+        const tvhSettings = JSON.parse(localStorage.getItem(TVHSettings.STORAGE_TVH_SETTING_KEY) || '');
         this.tvhDataService = new TVHDataService(tvhSettings);
         this.scrollX = 0;
         this.scrollY = 0;
@@ -116,16 +115,22 @@ export default class TVGuide extends Component {
     }
 
     calculateMaxHorizontalScroll() {
-        this.mMaxHorizontalScroll = Math.floor((TVGuide.DAYS_BACK_MILLIS + TVGuide.DAYS_FORWARD_MILLIS - TVGuide.HOURS_IN_VIEWPORT_MILLIS) / this.mMillisPerPixel);
+        this.mMaxHorizontalScroll = Math.floor(
+            (TVGuide.DAYS_BACK_MILLIS + TVGuide.DAYS_FORWARD_MILLIS - TVGuide.HOURS_IN_VIEWPORT_MILLIS) /
+                this.mMillisPerPixel
+        );
     }
 
     calculateMaxVerticalScroll() {
-        let maxVerticalScroll = this.getTopFrom(this.epgData.getChannelCount() - 1) + this.mChannelLayoutHeight;
-        this.mMaxVerticalScroll = maxVerticalScroll < this.getChannelListHeight() ? 0 : maxVerticalScroll - this.getChannelListHeight();
+        const maxVerticalScroll = this.getTopFrom(this.epgData.getChannelCount() - 1) + this.mChannelLayoutHeight;
+        this.mMaxVerticalScroll =
+            maxVerticalScroll < this.getChannelListHeight() ? 0 : maxVerticalScroll - this.getChannelListHeight();
     }
 
     calculateMillisPerPixel() {
-        return TVGuide.HOURS_IN_VIEWPORT_MILLIS / (this.getWidth() - this.mChannelLayoutWidth - this.mChannelLayoutMargin);
+        return (
+            TVGuide.HOURS_IN_VIEWPORT_MILLIS / (this.getWidth() - this.mChannelLayoutWidth - this.mChannelLayoutMargin)
+        );
     }
 
     calculatedBaseLine() {
@@ -134,10 +139,10 @@ export default class TVGuide extends Component {
     }
 
     getProgramPosition(channelPosition: number, time: number) {
-        let events = this.epgData.getEvents(channelPosition);
+        const events = this.epgData.getEvents(channelPosition);
         if (events !== null) {
             for (let eventPos = 0; eventPos < events.length; eventPos++) {
-                let event = events[eventPos];
+                const event = events[eventPos];
                 if (event.getStart() <= time && event.getEnd() >= time) {
                     return eventPos;
                 }
@@ -147,10 +152,13 @@ export default class TVGuide extends Component {
     }
 
     getFirstVisibleChannelPosition() {
-        let y = this.getScrollY(false);
+        const y = this.getScrollY(false);
 
-        let position = Math.round((y - this.mChannelLayoutMargin - this.mTimeBarHeight) /
-            (this.mChannelLayoutHeight + this.mChannelLayoutMargin)) + 1;
+        let position =
+            Math.round(
+                (y - this.mChannelLayoutMargin - this.mTimeBarHeight) /
+                    (this.mChannelLayoutHeight + this.mChannelLayoutMargin)
+            ) + 1;
 
         if (position < 0) {
             position = 0;
@@ -160,31 +168,39 @@ export default class TVGuide extends Component {
     }
 
     getLastVisibleChannelPosition() {
-        let y = this.getScrollY(false);
-        let screenHeight = this.getChannelListHeight();
-        let position = Math.floor((y + screenHeight - this.mTimeBarHeight - this.mChannelLayoutMargin) /
-            (this.mChannelLayoutHeight + this.mChannelLayoutMargin));
+        const y = this.getScrollY(false);
+        const screenHeight = this.getChannelListHeight();
+        const position = Math.floor(
+            (y + screenHeight - this.mTimeBarHeight - this.mChannelLayoutMargin) /
+                (this.mChannelLayoutHeight + this.mChannelLayoutMargin)
+        );
 
         return position + 1;
     }
 
     getXFrom(time: number) {
-        return Math.floor(((time - this.mTimeLowerBoundary) / this.mMillisPerPixel) + this.mChannelLayoutMargin + this.mChannelLayoutWidth + this.mChannelLayoutMargin);
+        return Math.floor(
+            (time - this.mTimeLowerBoundary) / this.mMillisPerPixel +
+                this.mChannelLayoutMargin +
+                this.mChannelLayoutWidth +
+                this.mChannelLayoutMargin
+        );
     }
 
     getTopFrom(position: number) {
-        let y = position * (this.mChannelLayoutHeight + this.mChannelLayoutMargin) +
-            this.mChannelLayoutMargin + this.mTimeBarHeight;
+        const y =
+            position * (this.mChannelLayoutHeight + this.mChannelLayoutMargin) +
+            this.mChannelLayoutMargin +
+            this.mTimeBarHeight;
         return y - this.getScrollY(false);
     }
 
     getXPositionStart() {
-        return this.getXFrom(this.epgUtils.getNow() - (TVGuide.HOURS_IN_VIEWPORT_MILLIS / 2));
+        return this.getXFrom(this.epgUtils.getNow() - TVGuide.HOURS_IN_VIEWPORT_MILLIS / 2);
     }
 
-
     getTimeFrom(x: number) {
-        return (x * this.mMillisPerPixel) + this.mTimeOffset;
+        return x * this.mMillisPerPixel + this.mTimeOffset;
     }
 
     shouldDrawTimeLine(now: number) {
@@ -196,9 +212,11 @@ export default class TVGuide extends Component {
     }
 
     isEventVisible(start: number, end: number) {
-        return (start >= this.mTimeLowerBoundary && start <= this.mTimeUpperBoundary) ||
+        return (
+            (start >= this.mTimeLowerBoundary && start <= this.mTimeUpperBoundary) ||
             (end >= this.mTimeLowerBoundary && end <= this.mTimeUpperBoundary) ||
-            (start <= this.mTimeLowerBoundary && end >= this.mTimeUpperBoundary);
+            (start <= this.mTimeLowerBoundary && end >= this.mTimeUpperBoundary)
+        );
     }
 
     getFocusedChannelPosition() {
@@ -238,14 +256,17 @@ export default class TVGuide extends Component {
     }
 
     getChannelListHeight() {
-        return this.mTimeBarHeight + (this.mChannelLayoutMargin + this.mChannelLayoutHeight) * TVGuide.VISIBLE_CHANNEL_COUNT;
+        return (
+            this.mTimeBarHeight +
+            (this.mChannelLayoutMargin + this.mChannelLayoutHeight) * TVGuide.VISIBLE_CHANNEL_COUNT
+        );
     }
 
     onDraw(canvas: CanvasRenderingContext2D) {
         if (this.epgData?.hasData()) {
             this.mTimeLowerBoundary = this.getTimeFrom(this.getScrollX(false));
             this.mTimeUpperBoundary = this.getTimeFrom(this.getScrollX(false) + this.getWidth());
-            let drawingRect = this.mDrawingRect;
+            const drawingRect = this.mDrawingRect;
             //console.log("X:" + this.getScrollX());
             drawingRect.left = this.getScrollX();
             drawingRect.top = this.getScrollY();
@@ -261,19 +282,18 @@ export default class TVGuide extends Component {
             this.drawEvents(canvas, drawingRect);
             this.drawTimebar(canvas, drawingRect);
             //drawResetButton(canvas, drawingRect);
-            this.drawFocusEvent(canvas, drawingRect);
             this.drawTimeLine(canvas, drawingRect);
             // draw details pane
             this.drawDetails(canvas, drawingRect);
         }
     }
 
-     /**
-      * draw background and usee cache for future
-      * 
-      * @param canvas 
-      * @param drawingRect 
-      */
+    /**
+     * draw background and usee cache for future
+     *
+     * @param canvas
+     * @param drawingRect
+     */
     async drawBackground(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
         drawingRect.left = this.getScrollX();
         drawingRect.top = this.getScrollY();
@@ -290,7 +310,12 @@ export default class TVGuide extends Component {
 
         //mPaint.setColor(mChannelLayoutBackground);
         canvas.fillStyle = this.mChannelLayoutBackground;
-        canvas.fillRect(this.mMeasuringRect.left, this.mMeasuringRect.top, this.mMeasuringRect.width, this.mMeasuringRect.height);
+        canvas.fillRect(
+            this.mMeasuringRect.left,
+            this.mMeasuringRect.top,
+            this.mMeasuringRect.width,
+            this.mMeasuringRect.height
+        );
 
         // events Background
         drawingRect.left = this.mChannelLayoutWidth + this.mChannelLayoutMargin;
@@ -300,15 +325,20 @@ export default class TVGuide extends Component {
         canvas.globalAlpha = 1.0;
         // put stroke color to transparent
         //canvas.strokeStyle = "transparent";
-        canvas.strokeStyle = "gradient";
+        canvas.strokeStyle = 'gradient';
         //mPaint.setColor(mChannelLayoutBackground);
         // canvas.fillStyle = this.mChannelLayoutBackground;
         // Create gradient
-        var grd = canvas.createLinearGradient(drawingRect.left, drawingRect.left, drawingRect.right, drawingRect.left);
+        const grd = canvas.createLinearGradient(
+            drawingRect.left,
+            drawingRect.left,
+            drawingRect.right,
+            drawingRect.left
+        );
         // Important bit here is to use rgba()
-        grd.addColorStop(0, "rgba(35, 64, 84, 0.4)");
-        grd.addColorStop(0.3, "rgba(35, 64, 84, 0.9)");
-        grd.addColorStop(0.7, "rgba(35, 64, 84, 0.9)");
+        grd.addColorStop(0, 'rgba(35, 64, 84, 0.4)');
+        grd.addColorStop(0.3, 'rgba(35, 64, 84, 0.9)');
+        grd.addColorStop(0.7, 'rgba(35, 64, 84, 0.9)');
         grd.addColorStop(1, 'rgba(35, 64, 84, 0.4)');
 
         // Fill with gradient
@@ -323,7 +353,6 @@ export default class TVGuide extends Component {
         canvas.lineTo(drawingRect.left, drawingRect.bottom);
         canvas.stroke();
 
-
         // timebar
         drawingRect.left = this.getScrollX() + this.mChannelLayoutWidth + this.mChannelLayoutMargin;
         drawingRect.top = this.getScrollY();
@@ -331,10 +360,10 @@ export default class TVGuide extends Component {
         drawingRect.bottom = drawingRect.top + this.mTimeBarHeight;
 
         // Background
-        canvas.fillStyle = this.mChannelLayoutBackground
+        canvas.fillStyle = this.mChannelLayoutBackground;
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
     }
-    
+
     drawDetails(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
         // Background
         drawingRect.left = this.getScrollX();
@@ -342,7 +371,7 @@ export default class TVGuide extends Component {
         drawingRect.right = this.getWidth();
         drawingRect.bottom = this.getHeight();
 
-        canvas.fillStyle = '#000000'//this.mChannelLayoutBackground'';
+        canvas.fillStyle = '#000000'; //this.mChannelLayoutBackground'';
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
 
         // rect for logo
@@ -351,13 +380,19 @@ export default class TVGuide extends Component {
         drawingRect.right = drawingRect.left + 300;
         drawingRect.bottom = this.getHeight();
 
-        let channel = this.epgData.getChannel(this.getFocusedChannelPosition());
-        let event = this.epgData.getEvent(this.getFocusedChannelPosition(), this.getFocusedEventPosition());
-        let imageURL = channel?.getImageURL();
-        let image = imageURL && this.mChannelImageCache.get(imageURL);
+        const channel = this.epgData.getChannel(this.getFocusedChannelPosition());
+        const event = this.epgData.getEvent(this.getFocusedChannelPosition(), this.getFocusedEventPosition());
+        const imageURL = channel?.getImageURL();
+        const image = imageURL && this.mChannelImageCache.get(imageURL);
         if (image) {
-            let imageDrawingRect = this.getDrawingRectForChannelImage(drawingRect, image);
-            canvas.drawImage(image, imageDrawingRect.left, imageDrawingRect.top, imageDrawingRect.width, drawingRect.height);
+            const imageDrawingRect = this.getDrawingRectForChannelImage(drawingRect, image);
+            canvas.drawImage(
+                image,
+                imageDrawingRect.left,
+                imageDrawingRect.top,
+                imageDrawingRect.width,
+                drawingRect.height
+            );
         }
 
         // rect for background
@@ -365,7 +400,6 @@ export default class TVGuide extends Component {
         drawingRect.top = this.getChannelListHeight();
         drawingRect.right = this.getWidth();
         drawingRect.bottom = this.getHeight();
-
 
         if (event !== undefined) {
             // rect event details
@@ -377,7 +411,7 @@ export default class TVGuide extends Component {
             this.canvasUtils.writeText(canvas, event.getTitle(), drawingRect.left, drawingRect.top, {
                 fontSize: this.mDetailsLayoutTitleTextSize,
                 isBold: true,
-                fillStyle: this.mDetailsLayoutTextColor
+                fillStyle: this.mDetailsLayoutTextColor,
             });
             if (event.getSubTitle() !== undefined) {
                 this.drawDetailsSubtitle(event.getSubTitle(), canvas, drawingRect);
@@ -390,39 +424,45 @@ export default class TVGuide extends Component {
     }
 
     drawDetailsDescription(description: string, canvas: CanvasRenderingContext2D, drawingRect: Rect) {
-        let drect = drawingRect.clone();
+        const drect = drawingRect.clone();
         drect.right = this.getWidth() - 10;
         drect.top += (this.mDetailsLayoutTitleTextSize + this.mDetailsLayoutPadding) * 2 + 3;
         // draw title, description etc
-        canvas.font = this.mDetailsLayoutDescriptionTextSize + "px Arial";
+        canvas.font = this.mDetailsLayoutDescriptionTextSize + 'px Arial';
         canvas.fillStyle = this.mDetailsLayoutTextColor;
-        this.canvasUtils.wrapText(canvas, description, drect.left, drect.top, drect.width, this.mDetailsLayoutTitleTextSize + 5);
+        this.canvasUtils.wrapText(
+            canvas,
+            description,
+            drect.left,
+            drect.top,
+            drect.width,
+            this.mDetailsLayoutTitleTextSize + 5
+        );
     }
 
     drawDetailsTimeInfo(event: EPGEvent, canvas: CanvasRenderingContext2D, drawingRect: Rect) {
-        let tDrawingRect = drawingRect.clone();
+        const tDrawingRect = drawingRect.clone();
         tDrawingRect.right = this.getWidth() - 10;
-        let timeFrameText = this.epgUtils.toTimeFrameString(event.getStart(), event.getEnd(), this.context.locale);
+        const timeFrameText = this.epgUtils.toTimeFrameString(event.getStart(), event.getEnd(), this.context.locale);
         this.canvasUtils.writeText(canvas, timeFrameText, tDrawingRect.right, tDrawingRect.top, {
             fontSize: this.mDetailsLayoutTitleTextSize,
-            textAlign: "right",
-            isBold: true
+            textAlign: 'right',
+            isBold: true,
         });
     }
 
     drawDetailsSubtitle(subtitle: string, canvas: CanvasRenderingContext2D, drawingRect: Rect) {
-        let drect = drawingRect.clone();
+        const drect = drawingRect.clone();
         drect.top += this.mDetailsLayoutTitleTextSize + this.mDetailsLayoutPadding;
         this.canvasUtils.writeText(canvas, subtitle, drect.left, drect.top, {
             fontSize: this.mDetailsLayoutSubTitleTextSize,
             fillStyle: this.mDetailsLayoutSubTitleTextColor,
             isBold: true,
-            maxWidth: drect.width
+            maxWidth: drect.width,
         });
     }
 
     drawTimebar(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
-
         drawingRect.left = this.getScrollX() + this.mChannelLayoutWidth + this.mChannelLayoutMargin;
         drawingRect.top = this.getScrollY();
         drawingRect.right = drawingRect.left + this.getWidth();
@@ -430,19 +470,22 @@ export default class TVGuide extends Component {
         // draw time stamps
         for (let i = 0; i < TVGuide.HOURS_IN_VIEWPORT_MILLIS / TVGuide.TIME_LABEL_SPACING_MILLIS; i++) {
             // Get time and round to nearest half hour
-            let time = TVGuide.TIME_LABEL_SPACING_MILLIS *
-                (((this.mTimeLowerBoundary + (TVGuide.TIME_LABEL_SPACING_MILLIS * i)) +
-                    (TVGuide.TIME_LABEL_SPACING_MILLIS / 2)) / TVGuide.TIME_LABEL_SPACING_MILLIS);
+            let time =
+                TVGuide.TIME_LABEL_SPACING_MILLIS *
+                ((this.mTimeLowerBoundary +
+                    TVGuide.TIME_LABEL_SPACING_MILLIS * i +
+                    TVGuide.TIME_LABEL_SPACING_MILLIS / 2) /
+                    TVGuide.TIME_LABEL_SPACING_MILLIS);
             time = this.epgUtils.getRoundedDate(30, new Date(time)).getTime();
-            
-            let timeText = this.epgUtils.toTimeString(time, this.context.locale);
-            let x = this.getXFrom(time);
-            let y = drawingRect.middle;  
+
+            const timeText = this.epgUtils.toTimeString(time, this.context.locale);
+            const x = this.getXFrom(time);
+            const y = drawingRect.middle;
             this.canvasUtils.writeText(canvas, timeText, x, y, {
                 fontSize: this.mEventLayoutTextSize,
                 fillStyle: this.mEventLayoutTextColor,
-                textAlign: "center",
-                isBold: true
+                textAlign: 'center',
+                isBold: true,
             });
         }
 
@@ -461,12 +504,12 @@ export default class TVGuide extends Component {
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
 
         // Text
-        let weekdayText = this.epgUtils.getWeekdayName(this.mTimeLowerBoundary, this.context.locale);
+        const weekdayText = this.epgUtils.getWeekdayName(this.mTimeLowerBoundary, this.context.locale);
         this.canvasUtils.writeText(canvas, weekdayText, drawingRect.center, drawingRect.middle, {
             fontSize: this.mTimeBarTextSize,
             fillStyle: this.mEventLayoutTextColor,
-            textAlign: "center",
-            isBold: true
+            textAlign: 'center',
+            isBold: true,
         });
     }
 
@@ -483,7 +526,7 @@ export default class TVGuide extends Component {
     }
 
     drawTimeLine(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
-        let now = this.epgUtils.getNow();
+        const now = this.epgUtils.getNow();
 
         if (this.shouldDrawPastTimeOverlay(now)) {
             // draw opaque overlay
@@ -493,7 +536,7 @@ export default class TVGuide extends Component {
             drawingRect.bottom = drawingRect.top + this.getChannelListHeight();
 
             canvas.fillStyle = this.mTimeBarLineColor;
-            let currentAlpha = canvas.globalAlpha;
+            const currentAlpha = canvas.globalAlpha;
             canvas.globalAlpha = 0.2;
             canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
             canvas.globalAlpha = currentAlpha;
@@ -523,11 +566,11 @@ export default class TVGuide extends Component {
         // draw now time text
         drawingRect.top += this.mTimeBarNowTextSize / 2;
         drawingRect.left = this.getXFrom(this.timePosition) + this.mChannelLayoutPadding;
-        let timeText = this.epgUtils.toTimeString(this.timePosition, this.context.locale);
+        const timeText = this.epgUtils.toTimeString(this.timePosition, this.context.locale);
         this.canvasUtils.writeText(canvas, timeText, drawingRect.left, drawingRect.top, {
             fontSize: this.mTimeBarNowTextSize,
             fillStyle: this.mTimeBarLinePositionColor,
-            isBold: true
+            isBold: true,
         });
     }
 
@@ -538,8 +581,8 @@ export default class TVGuide extends Component {
         drawingRect.right = this.getWidth();
         drawingRect.bottom = this.getChannelListHeight();
 
-        let firstPos = this.getFirstVisibleChannelPosition();
-        let lastPos = this.getLastVisibleChannelPosition();
+        const firstPos = this.getFirstVisibleChannelPosition();
+        const lastPos = this.getLastVisibleChannelPosition();
 
         //console.log("Channel: First: " + firstPos + " Last: " + lastPos);
         //let transparentTop = firstPos + 3;
@@ -561,11 +604,11 @@ export default class TVGuide extends Component {
             canvas.lineTo(this.getWidth(), this.getTopFrom(pos));
             canvas.stroke();
 
-            let epgEvents = this.epgData.getEvents(pos);
+            const epgEvents = this.epgData.getEvents(pos);
             let wasVisible = false;
-            //  the list is ordered by time so its only a few events processed 
-            for (let event of epgEvents) {
-                let isVisible = this.isEventVisible(event.getStart(), event.getEnd());
+            //  the list is ordered by time so its only a few events processed
+            for (const event of epgEvents) {
+                const isVisible = this.isEventVisible(event.getStart(), event.getEnd());
                 if (isVisible) {
                     wasVisible = true;
                     this.drawEvent(canvas, pos, event, drawingRect);
@@ -579,14 +622,13 @@ export default class TVGuide extends Component {
     }
 
     drawEvent(canvas: CanvasRenderingContext2D, channelPosition: number, event: EPGEvent, drawingRect: Rect) {
-
         this.setEventDrawingRectangle(channelPosition, event.getStart(), event.getEnd(), drawingRect);
 
         // Background
         //mPaint.setColor(event.isCurrent() ? mEventLayoutBackgroundCurrent : mEventLayoutBackground);
         canvas.fillStyle = event.isCurrent() ? this.mEventLayoutBackgroundCurrent : this.mEventLayoutBackground;
-        let focusedEventPosition = this.getFocusedEventPosition();
-        let focusedEvent = this.epgData.getEvent(channelPosition, focusedEventPosition);
+        const focusedEventPosition = this.getFocusedEventPosition();
+        const focusedEvent = this.epgData.getEvent(channelPosition, focusedEventPosition);
         if (channelPosition === this.getFocusedChannelPosition()) {
             if (focusedEventPosition !== -1) {
                 if (focusedEvent === event) {
@@ -594,7 +636,7 @@ export default class TVGuide extends Component {
                 }
             } else if (event.isCurrent()) {
                 this.focusedEventPosition = this.epgData.getEventPosition(channelPosition, event) || 0;
-                canvas.fillStyle = this.mEventLayoutBackgroundFocus
+                canvas.fillStyle = this.mEventLayoutBackgroundFocus;
             }
         }
         //canvas.drawRect(drawingRect, mPaint);
@@ -603,7 +645,10 @@ export default class TVGuide extends Component {
             drawingRect.left = this.getScrollX() + this.mChannelLayoutWidth + this.mChannelLayoutMargin;
         }
 
-        if (event.isCurrent() || event === this.epgData.getEvent(this.focusedChannelPosition, this.focusedEventPosition)) {
+        if (
+            event.isCurrent() ||
+            event === this.epgData.getEvent(this.focusedChannelPosition, this.focusedEventPosition)
+        ) {
             canvas.fillRect(drawingRect.left + 1, drawingRect.top + 1, drawingRect.width + 1, drawingRect.height + 1);
         }
         // draw vertical line
@@ -627,13 +672,12 @@ export default class TVGuide extends Component {
         this.canvasUtils.writeText(canvas, event.getTitle(), drawingRect.left, drawingRect.middle, {
             fontSize: this.mEventLayoutTextSize,
             fillStyle: this.mEventLayoutTextColor,
-            maxWidth: drawingRect.width
+            maxWidth: drawingRect.width,
         });
         // if (event.getSubTitle()) {
         //     canvas.font = this.mEventLayoutTextSize - 6 + "px Arial";
         //     canvas.fillText(this.canvasUtils.getShortenedText(canvas, event.getSubTitle(), drawingRect), drawingRect.left, drawingRect.top + 18);
         // }
-
     }
 
     setEventDrawingRectangle(channelPosition: number, start: number, end: number, drawingRect: Rect) {
@@ -644,7 +688,6 @@ export default class TVGuide extends Component {
         return drawingRect;
     }
 
-
     drawChannelListItems(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
         // Background
         this.mMeasuringRect.left = this.getScrollX();
@@ -652,8 +695,8 @@ export default class TVGuide extends Component {
         this.mMeasuringRect.right = drawingRect.left + this.mChannelLayoutWidth;
         this.mMeasuringRect.bottom = this.mMeasuringRect.top + this.getChannelListHeight();
 
-        let firstPos = this.getFirstVisibleChannelPosition();
-        let lastPos = this.getLastVisibleChannelPosition();
+        const firstPos = this.getFirstVisibleChannelPosition();
+        const lastPos = this.getLastVisibleChannelPosition();
 
         //console.log("Channel: First: " + firstPos + " Last: " + lastPos);
 
@@ -695,9 +738,9 @@ export default class TVGuide extends Component {
                      drawingRect.left, drawingRect.top + this.mChannelLayoutHeight/2 + this.mEventLayoutTextSize/2 );
                 */
         // Loading channel image into target for
-        let channel = this.epgData.getChannel(position);
-        let imageURL = channel?.getImageURL();
-        let image = imageURL && this.mChannelImageCache.get(imageURL);
+        const channel = this.epgData.getChannel(position);
+        const imageURL = channel?.getImageURL();
+        const image = imageURL && this.mChannelImageCache.get(imageURL);
         if (image) {
             drawingRect = this.getDrawingRectForChannelImage(drawingRect, image);
             canvas.drawImage(image, drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
@@ -705,7 +748,14 @@ export default class TVGuide extends Component {
             canvas.textAlign = 'center';
             canvas.font = 'bold 17px Arial';
             canvas.fillStyle = this.mEventLayoutTextColor;
-            this.canvasUtils.wrapText(canvas, channel?.getName() || '', drawingRect.left + (drawingRect.width / 2), drawingRect.top + (drawingRect.bottom - drawingRect.top) / 2, drawingRect.width, 20);
+            this.canvasUtils.wrapText(
+                canvas,
+                channel?.getName() || '',
+                drawingRect.left + drawingRect.width / 2,
+                drawingRect.top + (drawingRect.bottom - drawingRect.top) / 2,
+                drawingRect.width,
+                20
+            );
             //canvas.fillText(this.canvasUtils.getShortenedText(canvas, channel.getName(), drawingRect), drawingRect.left + (drawingRect.width /2), drawingRect.top + 9+  (drawingRect.bottom - drawingRect.top) / 2);
             canvas.textAlign = 'left';
         }
@@ -717,29 +767,25 @@ export default class TVGuide extends Component {
         drawingRect.right -= this.mChannelLayoutPadding;
         drawingRect.bottom -= this.mChannelLayoutPadding;
 
-        let imageWidth = image.width;
-        let imageHeight = image.height;
-        let imageRatio = imageHeight / imageWidth;
+        const imageWidth = image.width;
+        const imageHeight = image.height;
+        const imageRatio = imageHeight / imageWidth;
 
-        let rectWidth = drawingRect.right - drawingRect.left;
-        let rectHeight = drawingRect.bottom - drawingRect.top;
+        const rectWidth = drawingRect.right - drawingRect.left;
+        const rectHeight = drawingRect.bottom - drawingRect.top;
 
         // Keep aspect ratio.
         if (imageWidth > imageHeight) {
-            let padding = Math.floor((rectHeight - (rectWidth * imageRatio)) / 2);
+            const padding = Math.floor((rectHeight - rectWidth * imageRatio) / 2);
             drawingRect.top += padding;
             drawingRect.bottom -= padding;
         } else if (imageWidth <= imageHeight) {
-            let padding = Math.floor((rectWidth - (rectHeight / imageRatio)) / 2);
+            const padding = Math.floor((rectWidth - rectHeight / imageRatio) / 2);
             drawingRect.left += padding;
             drawingRect.right -= padding;
         }
 
         return drawingRect;
-    }
-
-    drawFocusEvent(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
-
     }
 
     handleClick = (event: any) => {
@@ -754,7 +800,7 @@ export default class TVGuide extends Component {
             this.onDraw(this.ctx);
             //this.updateCanvas();
         }
-    }
+    };
 
     clear() {
         this.mClipRect = new Rect();
@@ -775,7 +821,7 @@ export default class TVGuide extends Component {
     }
 
     handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
-        let keyCode = event.keyCode;
+        const keyCode = event.keyCode;
         let programPosition = this.getFocusedEventPosition();
         let channelPosition = this.getFocusedChannelPosition();
 
@@ -783,7 +829,7 @@ export default class TVGuide extends Component {
         switch (keyCode) {
             case 39: // right arrow
                 event.stopPropagation();
-                programPosition += 1
+                programPosition += 1;
                 this.scrollToProgramPosition(programPosition);
                 break;
             case 37: // left arrow
@@ -809,35 +855,15 @@ export default class TVGuide extends Component {
                 return;
             case 403:
                 event.stopPropagation();
-                // red button to trigger or cancel recording
-                // get current event
-                this.focusedEvent = this.epgData.getEvent(channelPosition, programPosition);
-                if (this.focusedEvent.isPastDated(this.epgUtils.getNow())) {
-                    // past dated do nothing
-                    return;
-                }
-                // check if event is already marked for recording
-                let recEvent = this.epgData.getRecording(this.focusedEvent);
-                if (recEvent) {
-                    // cancel recording
-                    this.tvhDataService.cancelRec(recEvent, (recordings: EPGEvent[]) => {
-                        this.epgData.updateRecordings(recordings);
-                        this.updateCanvas();
-                    });
-                } else { // creat new recording from event
-                    this.tvhDataService.createRec(this.focusedEvent, (recordings: EPGEvent[]) => {
-                        this.epgData.updateRecordings(recordings);
-                        this.updateCanvas();
-                    });
-                }
+                this.toggleRecording(channelPosition, programPosition);
                 break;
             case 461:
             case 406: // blue or back button hide epg/show tv
-            case 66: // keyboard 'b' 
+            case 66: // keyboard 'b'
                 event.stopPropagation();
                 this.cancelScrollAnimation();
                 this.stateUpdateHandler({
-                    isEpgState: false
+                    isEpgState: false,
                 });
                 break;
             case 13: // ok button -> switch to focused channel
@@ -846,11 +872,11 @@ export default class TVGuide extends Component {
                 this.stateUpdateHandler({
                     isEpgState: false,
                     isInfoState: true,
-                    channelPosition: channelPosition
+                    channelPosition: channelPosition,
                 });
                 break;
             default:
-                console.log("EPG-keyPressed:", keyCode);
+                console.log('EPG-keyPressed:', keyCode);
         }
 
         if (this.ctx) {
@@ -862,23 +888,48 @@ export default class TVGuide extends Component {
         }
     };
 
+    private toggleRecording(channelPosition: number, programPosition: number) {
+        // red button to trigger or cancel recording
+        // get current event
+        this.focusedEvent = this.epgData.getEvent(channelPosition, programPosition);
+        if (this.focusedEvent.isPastDated(this.epgUtils.getNow())) {
+            // past dated do nothing
+            return;
+        }
+        // check if event is already marked for recording
+        const recEvent = this.epgData.getRecording(this.focusedEvent);
+        if (recEvent) {
+            // cancel recording
+            this.tvhDataService.cancelRec(recEvent, (recordings: EPGEvent[]) => {
+                this.epgData.updateRecordings(recordings);
+                this.updateCanvas();
+            });
+        } else {
+            // creat new recording from event
+            this.tvhDataService.createRec(this.focusedEvent, (recordings: EPGEvent[]) => {
+                this.epgData.updateRecordings(recordings);
+                this.updateCanvas();
+            });
+        }
+    }
+
     scrollToProgramPosition(programPosition: number) {
         if (programPosition < 0) {
             programPosition = 0;
         }
-        let eventCount = this.epgData.getEventCount(this.getFocusedChannelPosition())
+        const eventCount = this.epgData.getEventCount(this.getFocusedChannelPosition());
         if (programPosition >= eventCount - 1) {
             programPosition = eventCount - 1;
         }
         this.focusedEventPosition = programPosition;
-        let targetEvent = this.epgData.getEvent(this.getFocusedChannelPosition(), programPosition);
-        if(targetEvent) {
+        const targetEvent = this.epgData.getEvent(this.getFocusedChannelPosition(), programPosition);
+        if (targetEvent) {
             this.scrollToTimePosition(targetEvent.getStart() + 1 - this.timePosition);
         }
     }
 
     scrollToTimePosition(timeDeltaInMillis: number) {
-        let targetTimePosition = this.timePosition += timeDeltaInMillis;
+        const targetTimePosition = (this.timePosition += timeDeltaInMillis);
         // if (targetTimePosition < this.mTimeLowerBoundary) {
         //     this.timePosition = this.mTimeLowerBoundary;
         //     return;
@@ -893,7 +944,7 @@ export default class TVGuide extends Component {
         this.focusedEvent = this.epgData.getEvent(this.focusedChannelPosition, this.focusedEventPosition);
         if (this.focusedEvent) {
             this.resetBoundaries();
-            this.scrollX = this.getXFrom(this.timePosition - (TVGuide.HOURS_IN_VIEWPORT_MILLIS / 2));
+            this.scrollX = this.getXFrom(this.timePosition - TVGuide.HOURS_IN_VIEWPORT_MILLIS / 2);
         }
         this.updateCanvas();
     }
@@ -909,26 +960,31 @@ export default class TVGuide extends Component {
         }
 
         // stop scrolling before padding position bottom
-        let maxPosition = this.epgData.getChannelCount() - 1 - TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM;
+        const maxPosition = this.epgData.getChannelCount() - 1 - TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM;
         if (channelPosition >= maxPosition) {
             // fix scroll to channel in case it is within bottom padding
             if (this.scrollY === 0) {
-                this.scrollY = (this.mChannelLayoutMargin * TVGuide.VISIBLE_CHANNEL_COUNT - 1) + this.mChannelLayoutHeight * (maxPosition - TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM);
+                this.scrollY =
+                    this.mChannelLayoutMargin * TVGuide.VISIBLE_CHANNEL_COUNT -
+                    1 +
+                    this.mChannelLayoutHeight * (maxPosition - TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM);
             }
             this.updateCanvas();
             return;
         }
 
         // scroll to channel position
-        let scrollTarget = (this.mChannelLayoutMargin + this.mChannelLayoutHeight) * (channelPosition - TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM);
+        const scrollTarget =
+            (this.mChannelLayoutMargin + this.mChannelLayoutHeight) *
+            (channelPosition - TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM);
         if (!withAnimation) {
             this.scrollY = scrollTarget;
             this.updateCanvas();
             return;
         }
 
-        let scrollDistance = scrollTarget - this.scrollY;
-        let scrollDelta = scrollDistance / (this.mChannelLayoutHeight / 5);
+        const scrollDistance = scrollTarget - this.scrollY;
+        const scrollDelta = scrollDistance / (this.mChannelLayoutHeight / 5);
         this.cancelScrollAnimation();
         this.scrollAnimationId = requestAnimationFrame(() => {
             this.animateScroll(scrollDelta, scrollTarget);
@@ -985,8 +1041,6 @@ export default class TVGuide extends Component {
     }
 
     render() {
-        window.addEventListener("scroll", function (event) {
-        }, false);
         return (
             <div id="epg-wrapper" ref={this.epgWrapper} tabIndex={-1} onKeyDown={this.handleKeyPress} className="epg">
                 <div className="programguide-contents">
@@ -994,7 +1048,8 @@ export default class TVGuide extends Component {
                         ref={this.canvas}
                         width={this.getWidth()}
                         height={this.getHeight()}
-                        style={{ display: "block" }} />
+                        style={{ display: 'block' }}
+                    />
                 </div>
             </div>
         );

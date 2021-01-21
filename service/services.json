@@ -1,13 +1,15 @@
 {
     "id": "com.willinux.tvh.app.proxy",
     "description": "TVHeadend Service Proxy",
-    "services": [{
-        "name": "com.willinux.tvh.app.proxy",
-        "commands":[
-            {
-               "name":"proxy",
-               "public":true
-            }                                                            
-         ]
-    }]
+    "services": [
+        {
+            "name": "com.willinux.tvh.app.proxy",
+            "commands": [
+                {
+                    "name": "proxy",
+                    "public": true
+                }
+            ]
+        }
+    ]
 }

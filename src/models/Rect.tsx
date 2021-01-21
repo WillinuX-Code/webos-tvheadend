@@ -2,10 +2,7 @@
  * Created by satadru on 3/30/17.
  */
 export default class Rect {
-
-    constructor(private _top = 0, private _left = 0, private _bottom = 0, private _right = 0) {
-
-    }
+    constructor(private _top = 0, private _left = 0, private _bottom = 0, private _right = 0) {}
 
     get top() {
         return this._top;

@@ -1,19 +1,20 @@
-import EPGUtils from "../utils/EPGUtils";
+import EPGUtils from '../utils/EPGUtils';
 
 /**
  * Created by satadru on 3/30/17.
  */
 export default class EPGEvent {
-
     private epgUtils: EPGUtils;
 
-    constructor(private id: number, 
-                private start: number, 
-                private end: number, 
-                private title: string, 
-                private description: string, 
-                private subTitle: string, 
-                private channelUuid: string) {
+    constructor(
+        private id: number,
+        private start: number,
+        private end: number,
+        private title: string,
+        private description: string,
+        private subTitle: string,
+        private channelUuid: string
+    ) {
         this.epgUtils = new EPGUtils();
     }
 
@@ -34,19 +35,19 @@ export default class EPGEvent {
     }
 
     getDoneFactor() {
-        let now = this.epgUtils.getNow();
+        const now = this.epgUtils.getNow();
         if (now > this.end) {
             return 1;
         } else if (now < this.start) {
             return 0;
         } else {
-            let duration = this.end - this.start;
+            const duration = this.end - this.start;
             return (now - this.start) / duration;
         }
     }
 
     isCurrent() {
-        let now = this.epgUtils.getNow();
+        const now = this.epgUtils.getNow();
         return now >= this.start && now <= this.end;
     }
 
@@ -63,7 +64,11 @@ export default class EPGEvent {
     }
 
     isMatchingRecording(epgEvent: EPGEvent) {
-        return epgEvent.getStart() === this.getStart() && epgEvent.getEnd() === this.getEnd() && epgEvent.getChannelUuid() === this.getChannelUuid();
+        return (
+            epgEvent.getStart() === this.getStart() &&
+            epgEvent.getEnd() === this.getEnd() &&
+            epgEvent.getChannelUuid() === this.getChannelUuid()
+        );
     }
 
     isPastDated(now: number) {

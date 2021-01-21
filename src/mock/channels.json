@@ -16,12 +16,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "45c97ad7aef84fead00455e2ec7de7ed"
-                ],
-                "tags": [
-                    "2d54c363d362fc517d88f66048a0ae44"
-                ],
+                "services": ["45c97ad7aef84fead00455e2ec7de7ed"],
+                "tags": ["2d54c363d362fc517d88f66048a0ae44"],
                 "bouquet": ""
             },
             {
@@ -38,12 +34,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "fab1347f0f1f70320014c522f3885b73"
-                ],
-                "tags": [
-                    "2d54c363d362fc517d88f66048a0ae44"
-                ],
+                "services": ["fab1347f0f1f70320014c522f3885b73"],
+                "tags": ["2d54c363d362fc517d88f66048a0ae44"],
                 "bouquet": ""
             },
             {
@@ -60,12 +52,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "7c1bb5b79d4ca9bf365f6cf5e43ad12a"
-                ],
-                "tags": [
-                    "2d54c363d362fc517d88f66048a0ae44"
-                ],
+                "services": ["7c1bb5b79d4ca9bf365f6cf5e43ad12a"],
+                "tags": ["2d54c363d362fc517d88f66048a0ae44"],
                 "bouquet": ""
             },
             {
@@ -82,12 +70,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "20297a0805e88a4af37bbed05a4d44dd"
-                ],
-                "tags": [
-                    "2d54c363d362fc517d88f66048a0ae44"
-                ],
+                "services": ["20297a0805e88a4af37bbed05a4d44dd"],
+                "tags": ["2d54c363d362fc517d88f66048a0ae44"],
                 "bouquet": ""
             },
             {
@@ -104,12 +88,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "3b620d88ed3a49a6519ac0071e485a11"
-                ],
-                "tags": [
-                    "2d54c363d362fc517d88f66048a0ae44"
-                ],
+                "services": ["3b620d88ed3a49a6519ac0071e485a11"],
+                "tags": ["2d54c363d362fc517d88f66048a0ae44"],
                 "bouquet": ""
             },
             {
@@ -126,12 +106,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "8c534f73591c63079392721a2d921983"
-                ],
-                "tags": [
-                    "2d54c363d362fc517d88f66048a0ae44"
-                ],
+                "services": ["8c534f73591c63079392721a2d921983"],
+                "tags": ["2d54c363d362fc517d88f66048a0ae44"],
                 "bouquet": ""
             },
             {
@@ -148,12 +124,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "0606c1b6f342611172e190422e161d92"
-                ],
-                "tags": [
-                    "2d54c363d362fc517d88f66048a0ae44"
-                ],
+                "services": ["0606c1b6f342611172e190422e161d92"],
+                "tags": ["2d54c363d362fc517d88f66048a0ae44"],
                 "bouquet": ""
             },
             {
@@ -170,12 +142,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "529b82bd9e6c52f86577311f502e2bf2"
-                ],
-                "tags": [
-                    "2d54c363d362fc517d88f66048a0ae44"
-                ],
+                "services": ["529b82bd9e6c52f86577311f502e2bf2"],
+                "tags": ["2d54c363d362fc517d88f66048a0ae44"],
                 "bouquet": ""
             },
             {
@@ -192,12 +160,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "49fc95b9212663971baf0b541dc880b4"
-                ],
-                "tags": [
-                    "2d54c363d362fc517d88f66048a0ae44"
-                ],
+                "services": ["49fc95b9212663971baf0b541dc880b4"],
+                "tags": ["2d54c363d362fc517d88f66048a0ae44"],
                 "bouquet": ""
             },
             {
@@ -214,12 +178,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "e53fc41806dc8a516a0a5c0ce7c038d8"
-                ],
-                "tags": [
-                    "2d54c363d362fc517d88f66048a0ae44"
-                ],
+                "services": ["e53fc41806dc8a516a0a5c0ce7c038d8"],
+                "tags": ["2d54c363d362fc517d88f66048a0ae44"],
                 "bouquet": ""
             },
             {
@@ -236,13 +196,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "45135161e1a7f9813df5cb14386419e8"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["45135161e1a7f9813df5cb14386419e8"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -259,13 +214,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "77d1b21ca6fa2658a667fef5420ccfad"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["77d1b21ca6fa2658a667fef5420ccfad"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -282,13 +232,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "673805c7341352f7b116af19470482a3"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["673805c7341352f7b116af19470482a3"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -305,13 +250,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "f538e2ecf73aab85673badad3cb18d5e"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["f538e2ecf73aab85673badad3cb18d5e"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -328,13 +268,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "f37f040f471e2949724ce8a673d66ca4"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["f37f040f471e2949724ce8a673d66ca4"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -351,13 +286,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "67bc3647a6e20e93f2c209ec05beb4fd"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["67bc3647a6e20e93f2c209ec05beb4fd"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -374,13 +304,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "cdd8701d039ee0722f3080ade0ffb0df"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["cdd8701d039ee0722f3080ade0ffb0df"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -397,13 +322,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "dc7397403b56d6786eef009733455f63"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["dc7397403b56d6786eef009733455f63"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -420,13 +340,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "898a4ec0ed47a2da115de06edbba8344"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["898a4ec0ed47a2da115de06edbba8344"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -443,13 +358,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "46f516cb2db566fc4b2dbef023276826"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["46f516cb2db566fc4b2dbef023276826"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -466,13 +376,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "1815519109141a269f8ffc2b11576fc7"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["1815519109141a269f8ffc2b11576fc7"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -489,13 +394,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "4ef1ba20c55bc22d7178bccb8015c250"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["4ef1ba20c55bc22d7178bccb8015c250"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -512,13 +412,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "3983f466dcc3f5932e63f040ca2ca66b"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["3983f466dcc3f5932e63f040ca2ca66b"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -535,13 +430,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "38a08919473780ca1aa77a49b1f72a5f"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["38a08919473780ca1aa77a49b1f72a5f"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -558,13 +448,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "b8e2af4f01a64adb864b994a7c61d86a"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["b8e2af4f01a64adb864b994a7c61d86a"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -581,13 +466,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "aa5ab614a42fe49a16d8c1edcb7a886c"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["aa5ab614a42fe49a16d8c1edcb7a886c"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -604,13 +484,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "ccac98f99cf0cdf2604c0cecf6d8b332"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["ccac98f99cf0cdf2604c0cecf6d8b332"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -627,13 +502,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "5004d7f6af5ef67279b7387e225fe23d"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["5004d7f6af5ef67279b7387e225fe23d"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -650,13 +520,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "a72e8011b1723e701747dacac0371305"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["a72e8011b1723e701747dacac0371305"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -673,13 +538,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "a571df26b292edb574f5ef7577e5face"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["a571df26b292edb574f5ef7577e5face"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -696,13 +556,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "fd88d3aa32d928cf1f73503803892bb9"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "a51d37f97a47ffb2208bc3f0e9fa3010"
-                ],
+                "services": ["fd88d3aa32d928cf1f73503803892bb9"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "a51d37f97a47ffb2208bc3f0e9fa3010"],
                 "bouquet": ""
             },
             {
@@ -719,13 +574,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "6d0a5e58dc1cd9aded6ab537d5e97226"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["6d0a5e58dc1cd9aded6ab537d5e97226"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -742,13 +592,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "e0da3cf0c482a3bf3f3f309f86c35387"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["e0da3cf0c482a3bf3f3f309f86c35387"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -765,13 +610,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "71d63b0cf505ebdbadfc3f3e45e0a82f"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["71d63b0cf505ebdbadfc3f3e45e0a82f"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -788,13 +628,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "aca71dbad6487081fb065072e2d63644"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["aca71dbad6487081fb065072e2d63644"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -811,13 +646,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "be1e2df6ab903d8aa89914b3c07a436d"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["be1e2df6ab903d8aa89914b3c07a436d"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -834,13 +664,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "4fb9803eae90d087cefe841eb43eac10"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["4fb9803eae90d087cefe841eb43eac10"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -857,13 +682,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "443a1ab05b6afb72bcb09424229ae82c"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["443a1ab05b6afb72bcb09424229ae82c"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -880,13 +700,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "3c01f50252319f2ff5f9850d9e0ea930"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["3c01f50252319f2ff5f9850d9e0ea930"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -903,13 +718,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "f85d808c9fddca5db748b6cc456c52be"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "a51d37f97a47ffb2208bc3f0e9fa3010"
-                ],
+                "services": ["f85d808c9fddca5db748b6cc456c52be"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "a51d37f97a47ffb2208bc3f0e9fa3010"],
                 "bouquet": ""
             },
             {
@@ -926,13 +736,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "f4cab78a9836edd5c88530da21de0afb"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["f4cab78a9836edd5c88530da21de0afb"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -949,13 +754,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "6b1774a20c932c92ac75818ba2c71be3"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["6b1774a20c932c92ac75818ba2c71be3"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -972,13 +772,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "fe8b568a3421109996afefebb849f1fd"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["fe8b568a3421109996afefebb849f1fd"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -995,13 +790,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "d4be4c2b42399a5efb2fa8752f2ed628"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["d4be4c2b42399a5efb2fa8752f2ed628"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -1018,13 +808,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "108c8f35bb66618b9d872fcdff759ffc"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["108c8f35bb66618b9d872fcdff759ffc"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -1041,13 +826,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "9f753877a1b577674be0c4dfa3bb44e4"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["9f753877a1b577674be0c4dfa3bb44e4"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -1064,13 +844,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "fcb2ef5bf72059323c91bd23c509c5a4"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["fcb2ef5bf72059323c91bd23c509c5a4"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -1087,13 +862,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "1e63b558bf5d7192c732de0f1356a10c"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "a51d37f97a47ffb2208bc3f0e9fa3010"
-                ],
+                "services": ["1e63b558bf5d7192c732de0f1356a10c"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "a51d37f97a47ffb2208bc3f0e9fa3010"],
                 "bouquet": ""
             },
             {
@@ -1110,13 +880,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "9bba642c64d9189b1e72edcd92a24684"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["9bba642c64d9189b1e72edcd92a24684"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             },
             {
@@ -1133,13 +898,8 @@
                 "dvr_pre_time": 0,
                 "dvr_pst_time": 0,
                 "epg_running": -1,
-                "services": [
-                    "b2aef321e9a6626413674d2de4b64752"
-                ],
-                "tags": [
-                    "9457a9fa922a3f4b3a5e2affcaa6c091",
-                    "ac291c2414188cb42d712138060f30d8"
-                ],
+                "services": ["b2aef321e9a6626413674d2de4b64752"],
+                "tags": ["9457a9fa922a3f4b3a5e2affcaa6c091", "ac291c2414188cb42d712138060f30d8"],
                 "bouquet": ""
             }
         ],

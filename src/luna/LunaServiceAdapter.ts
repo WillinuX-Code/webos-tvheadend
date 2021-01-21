@@ -11,18 +11,18 @@ interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
             clock: string;
             keyboards: string[];
             locales: {
-                UI: string,
-                TV: string,
-                FMT: string,
-                NLP: string,
-                STT: string,
-                AUD: string,
-                AUD2: string
+                UI: string;
+                TV: string;
+                FMT: string;
+                NLP: string;
+                STT: string;
+                AUD: string;
+                AUD2: string;
             };
             timezone: string;
         };
     };
-    subscribed: boolean
+    subscribed: boolean;
 }
 
 /**
@@ -32,7 +32,7 @@ interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
  * - local + webos emulator => luna service bus
  */
 export default class LunaServiceAdapter {
-        call<TResult = any>(method: string, params: any) {
+    call<TResult = any>(method: string, params: any) {
         return new Promise<ProxySuccessResponse<TResult>>((resolve, reject) => {
             console.log('lsa:%s start', method);
             global.webOS.service.request('luna://com.willinux.tvh.app.proxy', {
@@ -42,7 +42,7 @@ export default class LunaServiceAdapter {
                 onFailure: (res) => reject(res),
                 onComplete: () => {
                     console.log('lsa:%s end', method);
-                }
+                },
             });
         });
     }
@@ -52,7 +52,7 @@ export default class LunaServiceAdapter {
         global.webOS.service.request('luna://com.webos.notification', {
             method: 'createToast',
             parameters: {
-                message: message
+                message: message,
             },
             onSuccess: (res) => {
                 console.log('succesfully created toast');
@@ -62,19 +62,19 @@ export default class LunaServiceAdapter {
             },
             onComplete: () => {
                 console.log('lsa:toast end');
-            }
+            },
         });
     }
 
     getLocaleInfo() {
-        return new Promise<LocaleInfoSuccessResponse>(function(resolve, reject) {
+        return new Promise<LocaleInfoSuccessResponse>(function (resolve, reject) {
             global.webOS.service.request('luna://com.webos.settingsservice', {
                 method: 'getSystemSettings',
                 parameters: {
-                    'keys': ['localeInfo']
+                    keys: ['localeInfo'],
                 },
                 onSuccess: (res: LocaleInfoSuccessResponse) => resolve(res),
-                onFailure: (res) => reject(res)
+                onFailure: (res) => reject(res),
             });
         });
     }

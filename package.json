@@ -1,45 +1,53 @@
 {
-  "name": "webos-tvheadend",
-  "version": "1.0.0",
-  "private": true,
-  "homepage": "./",
-  "dependencies": {
-    "@enact/moonstone": "^3.3.1",
-    "@procot/webostv": "^1.2.2",
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0",
-    "react-scripts": "3.4.4"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "webos:emu": "npm run build && ares-package build service && ares-install com.willinux.tvh.app_1.0.0_all.ipk -d emulator && ares-launch com.willinux.tvh.app -d emulator",
-    "webos:emu-rm": "ares-install -d emulator --remove com.willinux.tvh.app",
-    "webos:tv": "npm run build && ares-package build service && ares-install com.willinux.tvh.app_1.0.0_all.ipk -d webOS_TV && ares-launch com.willinux.tvh.app -d webOS_TV",
-    "webos:tv-rm": "ares-install -d tv --remove com.willinux.tvh.app"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0"
-  }
+    "name": "webos-tvheadend",
+    "version": "1.0.0",
+    "private": true,
+    "homepage": "./",
+    "dependencies": {
+        "@enact/moonstone": "^3.3.1",
+        "@procot/webostv": "^1.2.2",
+        "ilib": "^14.6.2",
+        "react": "^16.14.0",
+        "react-dom": "^16.14.0",
+        "react-scripts": "^4.0.1"
+    },
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "test": "react-scripts test",
+        "eject": "react-scripts eject",
+        "webos:emu": "npm run build && ares-package build service && ares-install com.willinux.tvh.app_1.0.0_all.ipk -d emulator && ares-launch com.willinux.tvh.app -d emulator",
+        "webos:emu-rm": "ares-install -d emulator --remove com.willinux.tvh.app",
+        "webos:tv": "npm run build && ares-package build service && ares-install com.willinux.tvh.app_1.0.0_all.ipk -d tv && ares-launch com.willinux.tvh.app -d tv",
+        "webos:tv-rm": "ares-install -d tv --remove com.willinux.tvh.app"
+    },
+    "eslintConfig": {
+        "extends": [
+            "react-app"
+        ]
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "devDependencies": {
+        "@types/react": "^17.0.0",
+        "@types/react-dom": "^17.0.0",
+        "@typescript-eslint/eslint-plugin": "^4.14.0",
+        "@typescript-eslint/parser": "^4.14.0",
+        "eslint": "^7.18.0",
+        "eslint-config-prettier": "^7.2.0",
+        "eslint-config-react-app": "^6.0.0",
+        "eslint-plugin-prettier": "^3.3.1",
+        "eslint-plugin-react": "^7.22.0",
+        "prettier": "^2.2.1"
+    }
 }

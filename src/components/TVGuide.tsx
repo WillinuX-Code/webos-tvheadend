@@ -69,7 +69,7 @@ export default class TVGuide extends Component {
     private mDetailsLayoutBackground = '#2d71ac';
 
     private mTimeBarHeight = 70;
-    private mTimeBarTextSize = 24;
+    private mTimeBarTextSize = 32;
     private mTimeBarNowTextSize = 22;
     private mTimeBarLineWidth = 3;
     private mTimeBarLineColor = '#c57120';
@@ -94,7 +94,7 @@ export default class TVGuide extends Component {
         this.epgWrapper = React.createRef();
         this.stateUpdateHandler = this.props.stateUpdateHandler;
         this.epgData = this.props.epgData;
-        this.epgUtils = new EPGUtils(this.epgData.getLocale());
+        this.epgUtils = new EPGUtils();
         this.canvasUtils = new CanvasUtils();
         // read settings from storage
         let tvhSettings = JSON.parse(localStorage.getItem(TVHSettings.STORAGE_TVH_SETTING_KEY) || '');
@@ -402,7 +402,7 @@ export default class TVGuide extends Component {
     drawDetailsTimeInfo(event: EPGEvent, canvas: CanvasRenderingContext2D, drawingRect: Rect) {
         let tDrawingRect = drawingRect.clone();
         tDrawingRect.right = this.getWidth() - 10;
-        let timeFrameText = this.epgUtils.toTimeFrameString(event.getStart(), event.getEnd());
+        let timeFrameText = this.epgUtils.toTimeFrameString(event.getStart(), event.getEnd(), this.context.locale);
         this.canvasUtils.writeText(canvas, timeFrameText, tDrawingRect.right, tDrawingRect.top, {
             fontSize: this.mDetailsLayoutTitleTextSize,
             textAlign: "right",
@@ -435,7 +435,7 @@ export default class TVGuide extends Component {
                     (TVGuide.TIME_LABEL_SPACING_MILLIS / 2)) / TVGuide.TIME_LABEL_SPACING_MILLIS);
             time = this.epgUtils.getRoundedDate(30, new Date(time)).getTime();
             
-            let timeText = this.epgUtils.toTimeString(time);
+            let timeText = this.epgUtils.toTimeString(time, this.context.locale);
             let x = this.getXFrom(time);
             let y = drawingRect.middle;  
             this.canvasUtils.writeText(canvas, timeText, x, y, {
@@ -461,7 +461,7 @@ export default class TVGuide extends Component {
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
 
         // Text
-        let weekdayText = this.epgUtils.getWeekdayName(this.mTimeLowerBoundary);
+        let weekdayText = this.epgUtils.getWeekdayName(this.mTimeLowerBoundary, this.context.locale);
         this.canvasUtils.writeText(canvas, weekdayText, drawingRect.center, drawingRect.middle, {
             fontSize: this.mTimeBarTextSize,
             fillStyle: this.mEventLayoutTextColor,
@@ -513,7 +513,7 @@ export default class TVGuide extends Component {
 
         // draw current position
         drawingRect.left = this.getXFrom(this.timePosition);
-        drawingRect.top = this.getScrollY() + this.mTimeBarHeight - this.mTimeBarTextSize + 2;
+        drawingRect.top = this.getScrollY() + this.mTimeBarHeight - this.mTimeBarTextSize + 10;
         drawingRect.right = drawingRect.left + this.mTimeBarLineWidth;
         drawingRect.bottom = drawingRect.top + this.getChannelListHeight();
 
@@ -523,7 +523,7 @@ export default class TVGuide extends Component {
         // draw now time text
         drawingRect.top += this.mTimeBarNowTextSize / 2;
         drawingRect.left = this.getXFrom(this.timePosition) + this.mChannelLayoutPadding;
-        let timeText = this.epgUtils.toTimeString(this.timePosition);
+        let timeText = this.epgUtils.toTimeString(this.timePosition, this.context.locale);
         this.canvasUtils.writeText(canvas, timeText, drawingRect.left, drawingRect.top, {
             fontSize: this.mTimeBarNowTextSize,
             fillStyle: this.mTimeBarLinePositionColor,

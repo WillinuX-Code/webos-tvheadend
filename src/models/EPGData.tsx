@@ -7,7 +7,6 @@ import EPGEvent from "./EPGEvent";
 export default class EPGData {  
     private channels: EPGChannel[] = [];
     private recordings: EPGEvent[] = [];
-    private language: string = 'en-US';
     
     //constructor() {
         //new MockDataService().getChannels(this.channels);
@@ -98,14 +97,5 @@ export default class EPGData {
     updateRecordings(recordings: EPGEvent[]) {
         console.log("updated recordings data");
         this.recordings = recordings;
-    }
-
-    updateLanguage(language: string) {
-        console.log("updated language data", language);
-        this.language = language;
-    }
-
-    getLocale() {
-        return this.language;
     }
 }

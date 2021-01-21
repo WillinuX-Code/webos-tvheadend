@@ -6,8 +6,11 @@ import TV from './components/TV';
 import TVHSettings from './components/TVHSettings';
 import './styles/app.css';
 
+export const AppContext = React.createContext({
+  locale: 'en-US'
+});
 export default class App extends Component {
-
+ 
   private epgData: EPGData = new EPGData();
   private imageCache: Map<URL, HTMLImageElement> = new Map();
   private tvhDataService?: TVHDataService;
@@ -15,6 +18,9 @@ export default class App extends Component {
   state: {
     isSettingsState: boolean;
     lastEpgUpdate: number;
+    context: {
+      locale: string
+    };
   }
 
   constructor(public props: Readonly<any>) {
@@ -22,7 +28,10 @@ export default class App extends Component {
 
     this.state = {
       isSettingsState: true,
-      lastEpgUpdate: 0
+      lastEpgUpdate: 0,
+      context: {
+        locale: 'en-US'
+      } 
     };
 
     this.handleKeyPress = this.handleKeyPress.bind(this);
@@ -76,8 +85,11 @@ export default class App extends Component {
       let localInfoResult = await tvhDataService.getLocaleInfo();
       let locale = localInfoResult.settings.localeInfo.locales.UI;
 
-      // udpate epg
-      this.epgData.updateLanguage(locale);
+      this.setState((state, props) => ({
+        context: {
+          locale: locale
+        }
+      }));
       console.log("Retrieved locale info:", locale);
     } catch (error) {
       console.log("Failed to retrieve locale info: ", error);
@@ -181,13 +193,15 @@ function handleVisibilityChange() {
 
   render() {
     return (
-      <div className="app" onKeyDown={this.handleKeyPress}>
-        {this.state.isSettingsState &&
-          <TVHSettings handleUnmountSettings={this.handleUnmountSettings} tvhService={this.tvhDataService} />}
+      <AppContext.Provider value={this.state.context}>
+        <div className="app" onKeyDown={this.handleKeyPress}>
+          {this.state.isSettingsState &&
+            <TVHSettings handleUnmountSettings={this.handleUnmountSettings} tvhService={this.tvhDataService} />}
 
-        {!this.state.isSettingsState &&
-          <TV tvhService={this.tvhDataService} epgData={this.epgData} imageCache={this.imageCache} />}
-      </div>
+          {!this.state.isSettingsState &&
+            <TV tvhService={this.tvhDataService} epgData={this.epgData} imageCache={this.imageCache} />}
+        </div>
+      </AppContext.Provider>
     );
   }
 }

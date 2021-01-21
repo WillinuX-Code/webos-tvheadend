@@ -38,7 +38,7 @@ export default class ChannelInfo extends Component {
         this.epgData = this.props.epgData;
         this.imageCache =this.props.imageCache;
         this.channelPosition = this.props.channelPosition;
-        this.epgUtils = new EPGUtils(this.epgData.getLocale());
+        this.epgUtils = new EPGUtils();
         this.canvasUtils = new CanvasUtils();
 
         this.timeoutReference = null;
@@ -160,7 +160,7 @@ export default class ChannelInfo extends Component {
             drawingRect.right += this.mChannelInfoTimeBoxWidth;
             drawingRect.left = drawingRect.right - this.mChannelLayoutPadding - 20;
             canvas.textAlign = 'right';
-            canvas.fillText(this.epgUtils.toTimeFrameString(currentEvent.getStart(), currentEvent.getEnd()),
+            canvas.fillText(this.epgUtils.toTimeFrameString(currentEvent.getStart(), currentEvent.getEnd(), this.context.locale),
                 drawingRect.left, drawingRect.top);
             canvas.textAlign = 'left';
 
@@ -191,7 +191,7 @@ export default class ChannelInfo extends Component {
                 drawingRect.top += (this.mChannelInfoTitleSize - 15) + this.mChannelLayoutPadding;
                 canvas.font = (this.mChannelInfoTitleSize - 15) + 'px Arial';
                 canvas.fillStyle = 'rgb(65, 182, 230)';
-                canvas.fillText(this.epgUtils.toTimeFrameString(nextEvent.getStart(), nextEvent.getEnd())+ ":   "+nextEvent.getTitle() , drawingRect.left, drawingRect.top);
+                canvas.fillText(this.epgUtils.toTimeFrameString(nextEvent.getStart(), nextEvent.getEnd(), this.context.locale)+ ":   "+nextEvent.getTitle() , drawingRect.left, drawingRect.top);
             }
 
             // draw upcoming progress

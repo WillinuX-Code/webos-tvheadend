@@ -5,112 +5,109 @@ import EPGData from './models/EPGData';
 import TV from './components/TV';
 import TVHSettings from './components/TVHSettings';
 import './styles/app.css';
-
-export const AppContext = React.createContext({
-    locale: 'en-US',
-});
+import { AppContext } from './AppContext';
 export default class App extends Component {
-    private epgData: EPGData = new EPGData();
-    private imageCache: Map<URL, HTMLImageElement> = new Map();
-    private tvhDataService?: TVHDataService;
+  private epgData: EPGData = new EPGData();
+  private imageCache: Map<URL, HTMLImageElement> = new Map();
+  private tvhDataService?: TVHDataService;
 
-    state: {
-        isSettingsState: boolean;
-        lastEpgUpdate: number;
-        context: {
+  state: {
+    isSettingsState: boolean;
+    lastEpgUpdate: number;
+    context: {
             locale: string;
         };
     };
 
-    constructor(public props: Readonly<any>) {
-        super(props);
+  constructor(public props: Readonly<any>) {
+    super(props);
 
-        this.state = {
-            isSettingsState: true,
-            lastEpgUpdate: 0,
-            context: {
+    this.state = {
+      isSettingsState: true,
+      lastEpgUpdate: 0,
+      context: {
                 locale: 'en-US',
             },
-        };
+    };
 
-        this.handleKeyPress = this.handleKeyPress.bind(this);
-        this.handleUnmountSettings = this.handleUnmountSettings.bind(this);
-        this.epgData = new EPGData();
-        this.imageCache = new Map();
-    }
+    this.handleKeyPress = this.handleKeyPress.bind(this);
+    this.handleUnmountSettings = this.handleUnmountSettings.bind(this);
+    this.epgData = new EPGData();
+    this.imageCache = new Map();
+  }
 
-    async reloadData(tvhDataService: TVHDataService) {
-        // load locale
-        this.loadLocale(tvhDataService);
+  async reloadData(tvhDataService: TVHDataService) {   
+    // load locale
+    this.loadLocale(tvhDataService);
 
-        // retrieve channel infos etc
+    // retrieve channel infos etc
         const channels = await tvhDataService.retrieveM3UChannels();
-        this.epgData.updateChannels(channels);
+    this.epgData.updateChannels(channels); 
 
-        // preload images
-        this.preloadImages();
+    // preload images
+    this.preloadImages();
 
-        // force update to load/preload video already
-        this.forceUpdate();
+    // force update to load/preload video already
+    this.forceUpdate();
 
-        // reetrievee epg and update channels
+    // reetrievee epg and update channels
         tvhDataService.retrieveTVHEPG(0, (channels) => {
-            this.epgData.updateChannels(channels);
-        });
+      this.epgData.updateChannels(channels);
+    });
 
         tvhDataService.retrieveUpcomingRecordings((recordings) => {
-            this.epgData.updateRecordings(recordings);
-        });
-    }
+      this.epgData.updateRecordings(recordings);
+    });
+  }
 
-    handleUnmountSettings() {
+  handleUnmountSettings() {
         const settingsString = localStorage.getItem(TVHSettings.STORAGE_TVH_SETTING_KEY);
-        if (settingsString) {
-            this.tvhDataService = new TVHDataService(JSON.parse(settingsString));
-            this.setState((state, props) => ({
+    if (settingsString) {
+      this.tvhDataService = new TVHDataService(JSON.parse(settingsString));
+      this.setState((state, props) => ({
                 isSettingsState: false,
-            }));
-            this.reloadData(this.tvhDataService);
-        } else {
-            this.setState((state, props) => ({
+      }));
+      this.reloadData(this.tvhDataService);
+    } else {
+      this.setState((state, props) => ({
                 isSettingsState: true,
-            }));
-        }
+      }));
     }
+  }
 
-    async loadLocale(tvhDataService: TVHDataService) {
-        try {
-            // retrieve local info
+  async loadLocale(tvhDataService: TVHDataService) {
+    try {
+      // retrieve local info
             const localInfoResult = await tvhDataService.getLocaleInfo();
             const locale = localInfoResult.settings.localeInfo.locales.UI;
 
-            this.setState((state, props) => ({
-                context: {
+      this.setState((state, props) => ({
+        context: {
                     locale: locale,
                 },
-            }));
+      }));
             console.log('Retrieved locale info:', locale);
-        } catch (error) {
+    } catch (error) {
             console.log('Failed to retrieve locale info: ', error);
         }
-    }
+  }
 
-    /**
-     * preload all images and set placeholders
-     * if images cannot be loaded
-     */
-    preloadImages() {
+  /**
+   * preload all images and set placeholders
+   * if images cannot be loaded
+   */
+  preloadImages() {
         this.epgData.getChannels().forEach((channel) => {
             const imageURL = channel.getImageURL();
             const img = new Image();
-            img.src = imageURL.toString();
-            img.onload = () => {
-                this.imageCache.set(imageURL, img);
+      img.src = imageURL.toString();
+      img.onload = () => {
+        this.imageCache.set(imageURL, img);
             };
         });
-    }
+  }
 
-    /* SAMPLE CODE FOR background and visibility events
+  /* SAMPLE CODE FOR background and visibility events
   // Set the name of the "hidden" property and the change event for visibility
 var hidden, visibilityChange;
 if (typeof document.hidden !== "undefined") {   // To support the standard web browser engine
@@ -153,46 +150,46 @@ function handleVisibilityChange() {
 }
 */
 
-    handleKeyPress(event: React.KeyboardEvent<HTMLDivElement>) {
+  handleKeyPress(event: React.KeyboardEvent<HTMLDivElement>) {
         const keyCode = event.keyCode;
 
-        switch (keyCode) {
-            case 404: // green button
-            case 71: //'g'
-                event.stopPropagation();
-                this.setState((state, props) => ({
+    switch (keyCode) {
+      case 404: // green button
+      case 71: //'g'
+        event.stopPropagation();
+        this.setState((state, props) => ({
                     isSettingsState: true,
                 }));
-                break;
-            default:
-                console.log('App-keyPressed:', keyCode);
-        }
+        break;
+      default:
+        console.log('App-keyPressed:', keyCode);
+    }
     }
 
-    // Test if commenting this will make it faster to load
-    // shouldComponentUpdate(nextProps, nextState) {
-    //   return nextProps.lastEPGUpdate !== this.state.lastEPGUpdate || this.state.isSettingsState !== nextState.isSettingsState;
-    // }
+  // Test if commenting this will make it faster to load
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   return nextProps.lastEPGUpdate !== this.state.lastEPGUpdate || this.state.isSettingsState !== nextState.isSettingsState;
+  // }
 
-    componentDidMount() {
-        // update state in case setttings exist
+  componentDidMount() {
+    // update state in case setttings exist
         const settingsString = localStorage.getItem(TVHSettings.STORAGE_TVH_SETTING_KEY);
-        if (settingsString) {
-            this.tvhDataService = new TVHDataService(JSON.parse(settingsString));
-            this.setState((state, props) => ({
+    if (settingsString) {
+      this.tvhDataService = new TVHDataService(JSON.parse(settingsString));
+      this.setState((state, props) => ({
                 isSettingsState: false,
-            }));
-            this.reloadData(this.tvhDataService);
-        } else {
-            this.setState((state, props) => ({
+      }));
+      this.reloadData(this.tvhDataService);
+    } else {
+      this.setState((state, props) => ({
                 isSettingsState: true,
-            }));
-        }
+      }));
     }
+  }
 
-    render() {
-        return (
-            <AppContext.Provider value={this.state.context}>
+  render() {
+    return (
+      <AppContext.Provider value={this.state.context}>
                 <div className="app" onKeyDown={this.handleKeyPress}>
                     {this.state.isSettingsState && (
                         <TVHSettings
@@ -204,8 +201,8 @@ function handleVisibilityChange() {
                     {!this.state.isSettingsState && (
                         <TV tvhService={this.tvhDataService} epgData={this.epgData} imageCache={this.imageCache} />
                     )}
-                </div>
-            </AppContext.Provider>
-        );
-    }
+        </div>
+      </AppContext.Provider>
+    );
+  }
 }

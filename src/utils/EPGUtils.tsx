@@ -30,7 +30,7 @@ export default class EPGUtils {
     toTimeString(time: number, locale: string) {
         const options = {
             hour: '2-digit',
-            minute: '2-digit',
+            minute: '2-digit'
         };
         return new Intl.DateTimeFormat(locale, options).format(new Date(time));
     }

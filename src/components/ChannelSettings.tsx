@@ -40,7 +40,7 @@ export default class ChannelSettings extends Component {
         this.state = {
             channelName: props.channelName,
             selectedAudioTrack: selectedAudioTrack,
-            selectedTextTrack: selectedTextTrack,
+            selectedTextTrack: selectedTextTrack
         };
     }
 
@@ -53,7 +53,7 @@ export default class ChannelSettings extends Component {
         this.textTracks[object.value].enabled = true;
         // enable current selected audio
         this.setState((state, props) => ({
-            selectedTextTrack: object.value,
+            selectedTextTrack: object.value
         }));
         // do not pass this event further
         return false;
@@ -67,7 +67,7 @@ export default class ChannelSettings extends Component {
         this.audioTracks[object.value].enabled = true;
         // enable current selected audio
         this.setState((state, props) => ({
-            selectedAudioTrack: object.value,
+            selectedAudioTrack: object.value
         }));
         // save selected audio track index for channel
         localStorage.setItem(this.state.channelName, object.value);
@@ -85,7 +85,7 @@ export default class ChannelSettings extends Component {
         this.timeoutId && clearTimeout(this.timeoutId);
 
         this.props.stateUpdateHandler({
-            isChannelSettingsState: false,
+            isChannelSettingsState: false
         });
     };
 

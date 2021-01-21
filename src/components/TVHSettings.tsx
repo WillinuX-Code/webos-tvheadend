@@ -27,7 +27,7 @@ export default class TVHSettings extends Component {
             connectButtonEnabled: false,
             isValid: false,
             isUserValid: false,
-            isLoading: false,
+            isLoading: false
         };
     }
 
@@ -47,7 +47,7 @@ export default class TVHSettings extends Component {
                 // profiles: this.state.profiles,
                 //tvChannelTagUuid: this.state.tvChannelTagUuid,
                 dvrConfigUuid: this.state.dvrConfigUuid,
-                isValid: this.state.isValid,
+                isValid: this.state.isValid
             })
         );
 
@@ -62,7 +62,7 @@ export default class TVHSettings extends Component {
             // selectedProfile: '',
             user: object.value,
             isValid: false,
-            connectButtonEnabled: object.value.length > 0,
+            connectButtonEnabled: object.value.length > 0
         }));
 
         // do not pass this event further
@@ -76,7 +76,7 @@ export default class TVHSettings extends Component {
             // selectedProfile: '',
             password: object.value,
             isValid: false,
-            connectButtonEnabled: object.value.length > 0,
+            connectButtonEnabled: object.value.length > 0
         }));
 
         // do not pass this event further
@@ -86,7 +86,7 @@ export default class TVHSettings extends Component {
     private handleProfileChange = (object: any) => {
         // update state
         this.setState((state, props) => ({
-            selectedProfile: object.value,
+            selectedProfile: object.value
         }));
 
         // do not pass this event further
@@ -101,7 +101,7 @@ export default class TVHSettings extends Component {
             connectionStatus: '',
             tvhUrl: object.value,
             isValid: false,
-            connectButtonEnabled: object.value.length > 0,
+            connectButtonEnabled: object.value.length > 0
         }));
 
         // do not pass this event further
@@ -111,7 +111,7 @@ export default class TVHSettings extends Component {
     private handleConnectionTest = async (event: any) => {
         event.preventDefault();
         this.setState((state, props) => ({
-            isLoading: true,
+            isLoading: true
         }));
 
         //test url verify if it works
@@ -146,13 +146,13 @@ export default class TVHSettings extends Component {
                 // selectedProfile: profiles[0],
                 connectButtonEnabled: false,
                 isValid: true,
-                isLoading: false,
+                isLoading: false
             }));
         } catch (error) {
             // this.testResult = 'Failed to connect: ' + (error.errorText ? error.errorText : error);
             this.setState((state, props) => ({
                 isLoading: false,
-                isValid: false,
+                isValid: false
             }));
         }
     };
@@ -164,13 +164,13 @@ export default class TVHSettings extends Component {
                 connectionStatus:
                     'Version: ' + serverInfoResult.sw_version + ' - API Version: ' + serverInfoResult.api_version,
                 isLoading: false,
-                isValid: true,
+                isValid: true
             }));
         } catch (error) {
             this.setState((state, props) => ({
                 connectionStatus: 'Failed to connect: ' + (error.errorText ? error.errorText : error),
                 isLoading: false,
-                isValid: false,
+                isValid: false
             }));
         }
     }

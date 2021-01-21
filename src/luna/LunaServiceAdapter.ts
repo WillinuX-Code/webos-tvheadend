@@ -32,7 +32,7 @@ interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
  * - local + webos emulator => luna service bus
  */
 export default class LunaServiceAdapter {
-    call<TResult = any>(method: string, params: any) {
+    call<TResult = any>(method: string, params: Record<string, unknown>) {
         return new Promise<ProxySuccessResponse<TResult>>((resolve, reject) => {
             console.log('lsa:%s start', method);
             global.webOS.service.request('luna://com.willinux.tvh.app.proxy', {
@@ -42,7 +42,7 @@ export default class LunaServiceAdapter {
                 onFailure: (res) => reject(res),
                 onComplete: () => {
                     console.log('lsa:%s end', method);
-                },
+                }
             });
         });
     }
@@ -52,17 +52,17 @@ export default class LunaServiceAdapter {
         global.webOS.service.request('luna://com.webos.notification', {
             method: 'createToast',
             parameters: {
-                message: message,
+                message: message
             },
-            onSuccess: (res) => {
+            onSuccess: () => {
                 console.log('succesfully created toast');
             },
-            onFailure: (res) => {
+            onFailure: () => {
                 console.log('failed to create toast');
             },
             onComplete: () => {
                 console.log('lsa:toast end');
-            },
+            }
         });
     }
 
@@ -71,10 +71,10 @@ export default class LunaServiceAdapter {
             global.webOS.service.request('luna://com.webos.settingsservice', {
                 method: 'getSystemSettings',
                 parameters: {
-                    keys: ['localeInfo'],
+                    keys: ['localeInfo']
                 },
                 onSuccess: (res: LocaleInfoSuccessResponse) => resolve(res),
-                onFailure: (res) => reject(res),
+                onFailure: (res) => reject(res)
             });
         });
     }

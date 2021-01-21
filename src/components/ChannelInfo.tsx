@@ -9,7 +9,7 @@ import { AppContext } from '../AppContext';
 
 export default class ChannelInfo extends Component {
     static contextType = AppContext;
-    
+
     private canvas: React.RefObject<HTMLCanvasElement>;
     private infoWrapper: React.RefObject<HTMLDivElement>;
     private stateUpdateHandler: StateUpdateHandler;
@@ -38,7 +38,7 @@ export default class ChannelInfo extends Component {
         this.infoWrapper = React.createRef();
         this.stateUpdateHandler = this.props.stateUpdateHandler;
         this.epgData = this.props.epgData;
-        this.imageCache =this.props.imageCache;
+        this.imageCache = this.props.imageCache;
         this.channelPosition = this.props.channelPosition;
         this.epgUtils = new EPGUtils();
         this.canvasUtils = new CanvasUtils();
@@ -57,7 +57,7 @@ export default class ChannelInfo extends Component {
                 event.stopPropagation();
                 this.stateUpdateHandler({
                     isInfoState: false,
-                    channelNumberText: '',
+                    channelNumberText: ''
                 });
                 break;
         }
@@ -101,7 +101,7 @@ export default class ChannelInfo extends Component {
         const channel = this.epgData.getChannel(this.channelPosition);
 
         // should not happen, but better check it
-        if(!channel) return;
+        if (!channel) return;
 
         // channel number
         //canvas.strokeStyle = ;
@@ -205,7 +205,7 @@ export default class ChannelInfo extends Component {
             canvas.fillText(runningTime + ' (+' + remainingTime + ')', drawingRect.left, drawingRect.top);
 
             // draw next event
-            if(nextEvent !== undefined){
+            if (nextEvent !== undefined) {
                 drawingRect.top += this.mChannelInfoTitleSize - 15 + this.mChannelLayoutPadding;
                 canvas.font = this.mChannelInfoTitleSize - 15 + 'px Arial';
                 canvas.fillStyle = 'rgb(65, 182, 230)';
@@ -247,7 +247,7 @@ export default class ChannelInfo extends Component {
                 channelEventProgressRect.width,
                 channelEventProgressRect.height
             );
-            
+
             // draw past progress
             canvas.fillStyle = grd2;
             canvas.fillRect(
@@ -300,8 +300,8 @@ export default class ChannelInfo extends Component {
         this.timeoutReference = setTimeout(
             () =>
                 this.stateUpdateHandler({
-            isInfoState: false,
-                    channelNumberText: '',
+                    isInfoState: false,
+                    channelNumberText: ''
                 }),
             8000
         );
@@ -316,8 +316,8 @@ export default class ChannelInfo extends Component {
         }, 500);
 
         const channel = this.epgData.getChannel(this.channelPosition);
-        this.stateUpdateHandler({ 
-            channelNumberText: channel?.getChannelID() || '',
+        this.stateUpdateHandler({
+            channelNumberText: channel?.getChannelID() || ''
         });
 
         this.channelPosition = this.props.channelPosition;

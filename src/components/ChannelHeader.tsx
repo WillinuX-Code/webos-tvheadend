@@ -38,7 +38,7 @@ export default class ChannelHeader extends Component {
             {
                 fontSize: this.mChannelHeaderTextSize,
                 fillStyle: gradient,
-                textAlign: 'right',
+                textAlign: 'right'
             }
         );
     }
@@ -54,13 +54,7 @@ export default class ChannelHeader extends Component {
     /** set timeout to automatically unmount */
     resetUnmountTimeout() {
         this.timeoutReference && clearTimeout(this.timeoutReference);
-        this.timeoutReference = setTimeout(
-            () =>
-                this.stateUpdateHandler({
-                    channelNumberText: '',
-                }),
-            5000
-        );
+        this.timeoutReference = setTimeout(() => this.stateUpdateHandler({ channelNumberText: '' }), 5000);
     }
 
     componentDidMount() {
@@ -79,7 +73,7 @@ export default class ChannelHeader extends Component {
         this.timeoutReference && clearTimeout(this.timeoutReference);
     }
 
-    updateCanvas() {
+    updateCanvas(): void {
         if (this.canvas.current) {
             const ctx = this.canvas.current.getContext('2d');
             // clear

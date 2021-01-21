@@ -6,9 +6,7 @@ import MoonstoneDecorator from '@enact/moonstone/MoonstoneDecorator';
 
 const AppBase = kind({
     name: 'App',
-    render: (props) => {
-        return <AppContent />;
-    },
+    render: () => <AppContent />
 });
 
 const App = MoonstoneDecorator(AppBase);

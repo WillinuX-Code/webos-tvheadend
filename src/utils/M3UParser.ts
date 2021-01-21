@@ -20,7 +20,7 @@ export default class M3UParser {
 
     parse(): ParserResult {
         const result = {
-            items: [],
+            items: []
         } as ParserResult;
 
         const manifest = this.m3uContent.split(/(?=#EXTINF)/).map((l) => l.trim());
@@ -35,7 +35,7 @@ export default class M3UParser {
                 channelId: this.getAttribute(entry, 'tvg-id'),
                 channelNumber: this.getAttribute(entry, 'tvg-chno'),
                 logoUrl: this.getAttribute(entry, 'tvg-logo') || this.getAttribute(entry, 'logo'),
-                streamUrl: this.getAttribute(entry, 'tvg-url') || this.getURL(entry),
+                streamUrl: this.getAttribute(entry, 'tvg-url') || this.getURL(entry)
             } as Item;
             result.items.push(item);
         }

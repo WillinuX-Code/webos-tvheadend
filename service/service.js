@@ -42,6 +42,7 @@ function unq(quotedString) {
         return quotedString.replace(/(?:(?:\r\n)?[ \t])+/g, ' ');
     }
 }
+
 /**
  * backend proxy for requests to tvheadend as they are
  * not possible from browser due to cors restrictions
@@ -68,7 +69,7 @@ service.register('proxy', function (message) {
         host: parsedURL.hostname,
         port: parsedURL.port,
         path: parsedURL.path,
-        method: message.payload.method || 'GET',
+        method: message.payload.method || 'GET'
     };
 
     request(options, user, password, message);
@@ -87,7 +88,7 @@ function request(options, user, password, message) {
             var data = '';
             // handle http status unauthorized only if did not already tried to authorize
             if (
-                resp.statusCode == 401 &&
+                resp.statusCode === 401 &&
                 (options.headers === undefined || options.headers.Authorization === undefined)
             ) {
                 var authHeader = resp.headers['www-authenticate'];
@@ -97,7 +98,7 @@ function request(options, user, password, message) {
                 message.respond({
                     returnValue: false,
                     errorText: 'Server answered with StatusCode ' + resp.statusCode,
-                    errorCode: 1,
+                    errorCode: 1
                 });
                 //console.log(resp.statusCode, resp);
             } else {
@@ -109,7 +110,7 @@ function request(options, user, password, message) {
                 resp.on('end', function () {
                     message.respond({
                         returnValue: true,
-                        result: data,
+                        result: data
                     });
                 });
             }
@@ -119,7 +120,7 @@ function request(options, user, password, message) {
             message.respond({
                 returnValue: false,
                 errorText: err.message,
-                errorCode: 1,
+                errorCode: 1
             });
         })
         .on('socket', function (socket) {
@@ -141,15 +142,15 @@ function handleAuthentication(options, user, password, authHeader, message) {
     var type = tokens[0];
     var authorizationHeader = null;
     //'Digest realm="tvheadend", qop="auth", nonce="b8/cJWAebqXycYezwKvNRZL/gi9NL1jUeCHjTiphh30=", opaque="wpjG3XYw4UxxNM9lSbjaJqfDTkvCAAJLd4k5Nt6HH4E="'
-    if (type == 'Digest') {
+    if (type === 'Digest') {
         authorizationHeader = digestAuth(options, user, password, tokens);
-    } else if (type == 'Basic') {
+    } else if (type === 'Basic') {
         authorizationHeader = basicAuth(user, password);
     } else {
         message.respond({
             returnValue: false,
             errorText: 'Unsupported authentication type ' + type,
-            errorCode: 1,
+            errorCode: 1
         });
         return;
     }
@@ -160,6 +161,7 @@ function handleAuthentication(options, user, password, authHeader, message) {
     // request again with authorization header
     request(options, user, password, message);
 }
+
 /**
  * create basic authentication header
  *
@@ -213,24 +215,5 @@ function digestAuth(options, user, password, tokens) {
                     cnonce="MDAwODM0", nc=00000001, qop="auth", 
                     response="77f88f3f6b4623eedf17af206098ebf8"
     */
-    var header =
-        'Digest username="' +
-        user +
-        '", realm="' +
-        realm +
-        '", nonce="' +
-        nonce +
-        '", uri="' +
-        options.path +
-        '", cnonce="' +
-        cnonce +
-        '", nc="' +
-        nc +
-        '", qop="' +
-        qop +
-        '", response="' +
-        res +
-        '"';
-
-    return header;
+    return `Digest username="${user}", realm="${realm}", nonce="${nonce}", uri="${options.path}", cnonce="${cnonce}", nc="${nc}", qop="${qop}", response="${res}"`;
 }

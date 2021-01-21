@@ -16,7 +16,7 @@ import { AppContext } from '../AppContext';
 
 export default class TVGuide extends Component {
     static contextType = AppContext;
-    
+
     static DAYS_BACK_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
     static DAYS_FORWARD_MILLIS = 1 * 24 * 60 * 60 * 1000; // 1 days
     static HOURS_IN_VIEWPORT_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
@@ -291,12 +291,12 @@ export default class TVGuide extends Component {
         }
     }
 
-     /**
-      * draw background and usee cache for future
-      * 
-      * @param canvas 
-      * @param drawingRect 
-      */
+    /**
+     * draw background and usee cache for future
+     *
+     * @param canvas
+     * @param drawingRect
+     */
     async drawBackground(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
         drawingRect.left = this.getScrollX();
         drawingRect.top = this.getScrollY();
@@ -366,7 +366,7 @@ export default class TVGuide extends Component {
         canvas.fillStyle = this.mChannelLayoutBackground;
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
     }
-    
+
     drawDetails(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
         // Background
         drawingRect.left = this.getScrollX();
@@ -414,7 +414,7 @@ export default class TVGuide extends Component {
             this.canvasUtils.writeText(canvas, event.getTitle(), drawingRect.left, drawingRect.top, {
                 fontSize: this.mDetailsLayoutTitleTextSize,
                 isBold: true,
-                fillStyle: this.mDetailsLayoutTextColor,
+                fillStyle: this.mDetailsLayoutTextColor
             });
             if (event.getSubTitle() !== undefined) {
                 this.drawDetailsSubtitle(event.getSubTitle(), canvas, drawingRect);
@@ -450,7 +450,7 @@ export default class TVGuide extends Component {
         this.canvasUtils.writeText(canvas, timeFrameText, tDrawingRect.right, tDrawingRect.top, {
             fontSize: this.mDetailsLayoutTitleTextSize,
             textAlign: 'right',
-            isBold: true,
+            isBold: true
         });
     }
 
@@ -461,7 +461,7 @@ export default class TVGuide extends Component {
             fontSize: this.mDetailsLayoutSubTitleTextSize,
             fillStyle: this.mDetailsLayoutSubTitleTextColor,
             isBold: true,
-            maxWidth: drect.width,
+            maxWidth: drect.width
         });
     }
 
@@ -480,7 +480,7 @@ export default class TVGuide extends Component {
                     TVGuide.TIME_LABEL_SPACING_MILLIS / 2) /
                     TVGuide.TIME_LABEL_SPACING_MILLIS);
             time = this.epgUtils.getRoundedDate(30, new Date(time)).getTime();
-            
+
             const timeText = this.epgUtils.toTimeString(time, this.context.locale);
             const x = this.getXFrom(time);
             const y = drawingRect.middle;
@@ -488,7 +488,7 @@ export default class TVGuide extends Component {
                 fontSize: this.mEventLayoutTextSize,
                 fillStyle: this.mEventLayoutTextColor,
                 textAlign: 'center',
-                isBold: true,
+                isBold: true
             });
         }
 
@@ -512,7 +512,7 @@ export default class TVGuide extends Component {
             fontSize: this.mTimeBarTextSize,
             fillStyle: this.mEventLayoutTextColor,
             textAlign: 'center',
-            isBold: true,
+            isBold: true
         });
     }
 
@@ -573,7 +573,7 @@ export default class TVGuide extends Component {
         this.canvasUtils.writeText(canvas, timeText, drawingRect.left, drawingRect.top, {
             fontSize: this.mTimeBarNowTextSize,
             fillStyle: this.mTimeBarLinePositionColor,
-            isBold: true,
+            isBold: true
         });
     }
 
@@ -609,7 +609,7 @@ export default class TVGuide extends Component {
 
             const epgEvents = this.epgData.getEvents(pos);
             let wasVisible = false;
-            //  the list is ordered by time so its only a few events processed 
+            //  the list is ordered by time so its only a few events processed
             for (const event of epgEvents) {
                 const isVisible = this.isEventVisible(event.getStart(), event.getEnd());
                 if (isVisible) {
@@ -675,7 +675,7 @@ export default class TVGuide extends Component {
         this.canvasUtils.writeText(canvas, event.getTitle(), drawingRect.left, drawingRect.middle, {
             fontSize: this.mEventLayoutTextSize,
             fillStyle: this.mEventLayoutTextColor,
-            maxWidth: drawingRect.width,
+            maxWidth: drawingRect.width
         });
         // if (event.getSubTitle()) {
         //     canvas.font = this.mEventLayoutTextSize - 6 + "px Arial";
@@ -866,7 +866,7 @@ export default class TVGuide extends Component {
                 event.stopPropagation();
                 this.cancelScrollAnimation();
                 this.stateUpdateHandler({
-                    isEpgState: false,
+                    isEpgState: false
                 });
                 break;
             case 13: // ok button -> switch to focused channel
@@ -875,7 +875,7 @@ export default class TVGuide extends Component {
                 this.stateUpdateHandler({
                     isEpgState: false,
                     isInfoState: true,
-                    channelPosition: channelPosition,
+                    channelPosition: channelPosition
                 });
                 break;
             default:
@@ -892,27 +892,27 @@ export default class TVGuide extends Component {
     };
 
     private toggleRecording(channelPosition: number, programPosition: number) {
-                // red button to trigger or cancel recording
-                // get current event
-                this.focusedEvent = this.epgData.getEvent(channelPosition, programPosition);
-                if (this.focusedEvent.isPastDated(this.epgUtils.getNow())) {
-                    // past dated do nothing
-                    return;
-                }
-                // check if event is already marked for recording
+        // red button to trigger or cancel recording
+        // get current event
+        this.focusedEvent = this.epgData.getEvent(channelPosition, programPosition);
+        if (this.focusedEvent.isPastDated(this.epgUtils.getNow())) {
+            // past dated do nothing
+            return;
+        }
+        // check if event is already marked for recording
         const recEvent = this.epgData.getRecording(this.focusedEvent);
-                if (recEvent) {
-                    // cancel recording
-                    this.tvhDataService.cancelRec(recEvent, (recordings: EPGEvent[]) => {
-                        this.epgData.updateRecordings(recordings);
-                        this.updateCanvas();
-                    });
+        if (recEvent) {
+            // cancel recording
+            this.tvhDataService.cancelRec(recEvent, (recordings: EPGEvent[]) => {
+                this.epgData.updateRecordings(recordings);
+                this.updateCanvas();
+            });
         } else {
             // creat new recording from event
-                    this.tvhDataService.createRec(this.focusedEvent, (recordings: EPGEvent[]) => {
-                        this.epgData.updateRecordings(recordings);
-                        this.updateCanvas();
-                });
+            this.tvhDataService.createRec(this.focusedEvent, (recordings: EPGEvent[]) => {
+                this.epgData.updateRecordings(recordings);
+                this.updateCanvas();
+            });
         }
     }
 
@@ -926,7 +926,7 @@ export default class TVGuide extends Component {
         }
         this.focusedEventPosition = programPosition;
         const targetEvent = this.epgData.getEvent(this.getFocusedChannelPosition(), programPosition);
-        if(targetEvent) {
+        if (targetEvent) {
             this.scrollToTimePosition(targetEvent.getStart() + 1 - this.timePosition);
         }
     }
@@ -1058,4 +1058,3 @@ export default class TVGuide extends Component {
         );
     }
 }
-

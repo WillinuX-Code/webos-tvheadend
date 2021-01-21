@@ -60,7 +60,7 @@ export default class TV extends Component {
             //     {enabled:false,id:4,language:"en"},
             // ],
             audioTracks: [],
-            textTracks: [],
+            textTracks: []
         };
 
         this.tvhService = props.tvhService;
@@ -171,7 +171,7 @@ export default class TV extends Component {
                 this.stateUpdateHandler({
                     isChannelListState: true,
                     isInfoState: false,
-                    channelPosition: channelPosition,
+                    channelPosition: channelPosition
                 });
                 break;
             case 33: // programm up
@@ -189,7 +189,7 @@ export default class TV extends Component {
                 this.stateUpdateHandler({
                     isChannelListState: true,
                     isInfoState: false,
-                    channelPosition: channelPosition,
+                    channelPosition: channelPosition
                 });
                 break;
             case 406: // blue button show epg
@@ -197,7 +197,7 @@ export default class TV extends Component {
                 event.stopPropagation();
                 this.stateUpdateHandler({
                     isEpgState: true,
-                    channelPosition: channelPosition,
+                    channelPosition: channelPosition
                 });
                 break;
             case 13: // ok button ->show/disable channel info
@@ -207,14 +207,14 @@ export default class TV extends Component {
                     break;
                 }
                 this.stateUpdateHandler({
-                    isInfoState: !this.state.isInfoState,
+                    isInfoState: !this.state.isInfoState
                 });
                 break;
             case 405: // yellow button
             case 89: //'y'
                 event.stopPropagation();
                 this.stateUpdateHandler({
-                    isChannelSettingsState: !this.state.isChannelSettingsState,
+                    isChannelSettingsState: !this.state.isChannelSettingsState
                 });
                 break;
             case 403: // red button to trigger or cancel recording
@@ -267,7 +267,7 @@ export default class TV extends Component {
         if (this.state.channelNumberText.length < 3) {
             const newChannelNumberText = this.state.channelNumberText + digit;
             this.stateUpdateHandler({
-                channelNumberText: newChannelNumberText,
+                channelNumberText: newChannelNumberText
             });
 
             // automatically switch to new channel after 3 seconds
@@ -294,7 +294,7 @@ export default class TV extends Component {
         this.stateUpdateHandler({
             isInfoState: true,
             channelPosition: channelPosition,
-            channelNumberText: channel?.getChannelID() || '',
+            channelNumberText: channel?.getChannelID() || ''
         });
 
         // store last used channel
@@ -335,7 +335,7 @@ export default class TV extends Component {
 
             this.stateUpdateHandler({
                 audioTracks: videoElement.audioTracks,
-                textTracks: videoElement.textTracks,
+                textTracks: videoElement.textTracks
             });
         });
     }

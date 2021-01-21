@@ -201,7 +201,7 @@ export default class ChannelList extends Component {
                 fontSize: this.mChannelLayoutNumberTextSize,
                 textAlign: 'right',
                 fillStyle: this.mChannelLayoutTextColor,
-                isBold: true,
+                isBold: true
             }
         );
 
@@ -217,7 +217,7 @@ export default class ChannelList extends Component {
                 fontSize: this.mChannelLayoutTextSize,
                 fillStyle: this.mChannelLayoutTextColor,
                 isBold: true,
-                maxWidth: channelNameWidth,
+                maxWidth: channelNameWidth
             }
         );
 
@@ -256,7 +256,7 @@ export default class ChannelList extends Component {
                     {
                         fontSize: this.mChannelLayoutEventTextSize,
                         fillStyle: canvas.fillStyle,
-                        maxWidth: channelEventWidth,
+                        maxWidth: channelEventWidth
                     }
                 );
             }
@@ -411,14 +411,14 @@ export default class ChannelList extends Component {
             case 67: // keyboard 'c'
             case 461: // back button
                 this.stateUpdateHandler({
-                    isChannelListState: false,
+                    isChannelListState: false
                 });
                 break;
             case 13: // ok button -> switch to focused channel
                 this.stateUpdateHandler({
                     isChannelListState: false,
                     isInfoState: true,
-                    channelPosition: channelPosition,
+                    channelPosition: channelPosition
                 });
                 break;
             case 403: // red button trigger recording

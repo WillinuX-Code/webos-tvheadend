@@ -99,7 +99,7 @@ export default class TVHDataService {
         const success = await this.serviceAdapter.call('proxy', {
             url: this.url + TVHDataService.API_SERVER_INFO,
             user: this.user,
-            password: this.password,
+            password: this.password
         });
         return JSON.parse(success.result);
     }
@@ -111,7 +111,7 @@ export default class TVHDataService {
         const success = await this.serviceAdapter.call('proxy', {
             url: this.url + TVHDataService.API_PROFILE_LIST,
             user: this.user,
-            password: this.password,
+            password: this.password
         });
         return JSON.parse(success.result);
     }
@@ -129,7 +129,7 @@ export default class TVHDataService {
                     this.dvrUuid +
                     '&comment=webos-tvheadend',
                 user: this.user,
-                password: this.password,
+                password: this.password
             })
             .then((success) => {
                 const response = JSON.parse(success.result);
@@ -150,7 +150,7 @@ export default class TVHDataService {
             .call('proxy', {
                 url: this.url + TVHDataService.API_DVR_CANCEL + event.getId(),
                 user: this.user,
-                password: this.password,
+                password: this.password
             })
             .then((success) => {
                 const response = JSON.parse(success.result);
@@ -171,7 +171,7 @@ export default class TVHDataService {
             .call('proxy', {
                 url: this.url + TVHDataService.API_DVR_UPCOMING,
                 user: this.user,
-                password: this.password,
+                password: this.password
             })
             .then((success) => {
                 const response = JSON.parse(success.result);
@@ -238,7 +238,7 @@ export default class TVHDataService {
             .call('proxy', {
                 url: this.url + TVHDataService.API_DVR_CONFIG,
                 user: this.user,
-                password: this.password,
+                password: this.password
             })
             .then((success) => {
                 const response = JSON.parse(success.result);
@@ -319,7 +319,7 @@ export default class TVHDataService {
             const success = await this.serviceAdapter.call('proxy', {
                 url: this.url + playlistPath,
                 user: this.user,
-                password: this.password,
+                password: this.password
             });
 
             if (success.result) {
@@ -352,9 +352,10 @@ export default class TVHDataService {
             .call('proxy', {
                 url: this.url + TVHDataService.API_EPG + start,
                 user: this.user,
-                password: this.password,
+                password: this.password
             })
             .then((success) => {
+                console.log(success);
                 const response = JSON.parse(success.result);
                 console.log('epg events received: %d of %d', start + response.entries.length, response.totalCount);
                 if (response.entries.length > 0) {

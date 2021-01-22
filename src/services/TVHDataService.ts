@@ -51,8 +51,8 @@ interface TVHEventEntry {
 }
 
 interface TVHRecordings {
-    entries: TVHRecordingEntry[],
-    total: number
+    entries: TVHRecordingEntry[];
+    total: number;
 }
 
 interface TVHRecordingEntry {
@@ -221,7 +221,7 @@ export default class TVHDataService {
                 const recordings: EPGEvent[] = [];
 
                 // update upcoming recordings
-                response.entries.forEach((recordingEntry: TVHRecordingEntry) => {
+                response.entries.forEach((recordingEntry) => {
                     recordings.push(this.toEpgEventRec(recordingEntry));
                 });
                 callback(recordings);
@@ -322,7 +322,7 @@ export default class TVHDataService {
     //         console.log('channels received: %d of %d', start + response.entries.length, response.total)
     //         if (response.entries.length > 0) {
     //             totalCount = response.total;
-    //             success.result.entries.forEach((tvhChannel: any) => {
+    //             success.result.entries.forEach((tvhChannel) => {
     //                 start++;
     //                 // check if channel contains is a tvchannel
     //                 // if (!tvhChannel.tags.includes(this.tvChannelUuid)) {

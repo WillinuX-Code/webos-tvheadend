@@ -19,7 +19,28 @@ export interface TVHSettingsOptions {
     isLoading: boolean;
 }
 
-interface TVHEvent {
+interface TVHServerInfo {
+    sw_version: string;
+    api_version: number;
+    name: string;
+    capabilities: string[];
+}
+
+interface TVHProfiles {
+    entries: TVHProfileEntry[];
+}
+
+interface TVHProfileEntry {
+    key: string;
+    val: string;
+}
+
+interface TVHEvents {
+    entries: TVHEventEntry[];
+    totalCount: number;
+}
+
+interface TVHEventEntry {
     eventId: number;
     start: number;
     stop: number;
@@ -29,17 +50,36 @@ interface TVHEvent {
     channelUuid: string;
 }
 
-interface RecordEntry {
+interface TVHRecordings {
+    entries: TVHRecordingEntry[],
+    total: number
+}
+
+interface TVHRecordingEntry {
     uuid: number;
+    enabled: boolean;
     start: number;
     stop: number;
     disp_title: string;
     disp_description: string;
     disp_subtitle: string;
     channel: string;
+    // and many more
 }
 
-interface RecordingCallback {
+interface TVHRecordingsConfig {
+    entries: TVHRecordingConfigEntry[];
+    total: number;
+}
+
+interface TVHRecordingConfigEntry {
+    uuid: number;
+    enabled: boolean;
+    name: string;
+    // and many more
+}
+
+interface DVRCallback {
     (recordings: EPGEvent[]): void;
 }
 
@@ -96,30 +136,30 @@ export default class TVHDataService {
      */
     async retrieveServerInfo() {
         // now create rec by event
-        const success = await this.serviceAdapter.call('proxy', {
+        const success = await this.serviceAdapter.call({
             url: this.url + TVHDataService.API_SERVER_INFO,
             user: this.user,
             password: this.password
         });
-        return JSON.parse(success.result);
+        return JSON.parse(success.result) as TVHServerInfo;
     }
 
     /**
      * retrieve the stream profile list
      */
     async retrieveProfileList() {
-        const success = await this.serviceAdapter.call('proxy', {
+        const success = await this.serviceAdapter.call({
             url: this.url + TVHDataService.API_PROFILE_LIST,
             user: this.user,
             password: this.password
         });
-        return JSON.parse(success.result);
+        return JSON.parse(success.result) as TVHProfiles;
     }
 
-    createRec(event: EPGEvent, callback: RecordingCallback) {
+    createRec(event: EPGEvent, callback: DVRCallback) {
         // now create rec by event
         this.serviceAdapter
-            .call('proxy', {
+            .call({
                 url:
                     this.url +
                     TVHDataService.API_DVR_CREATE_BY_EVENT +
@@ -131,11 +171,12 @@ export default class TVHDataService {
                 user: this.user,
                 password: this.password
             })
-            .then((success) => {
-                const response = JSON.parse(success.result);
-                console.log('created record: %s', response.total);
+            .then(() => {
+                console.log('created record: %s', event.getTitle());
+
                 // toast information
                 this.showToastMessage('Added DVR entry: ' + event.getTitle());
+
                 // update upcoming recordings
                 this.retrieveUpcomingRecordings(callback);
             })
@@ -144,19 +185,20 @@ export default class TVHDataService {
             });
     }
 
-    cancelRec(event: EPGEvent, callback: RecordingCallback) {
+    cancelRec(event: EPGEvent, callback: DVRCallback) {
         // now create rec by event
         this.serviceAdapter
-            .call('proxy', {
+            .call({
                 url: this.url + TVHDataService.API_DVR_CANCEL + event.getId(),
                 user: this.user,
                 password: this.password
             })
-            .then((success) => {
-                const response = JSON.parse(success.result);
-                console.log('created record: %s', response.total);
+            .then(() => {
+                console.log('cancelled record: %s', event.getTitle());
+
                 // toast information
                 this.showToastMessage('Cancelled DVR entry: ' + event.getTitle());
+
                 // update upcoming recordings
                 this.retrieveUpcomingRecordings(callback);
             })
@@ -165,21 +207,22 @@ export default class TVHDataService {
             });
     }
 
-    retrieveUpcomingRecordings(callback: RecordingCallback) {
+    retrieveUpcomingRecordings(callback: DVRCallback) {
         // now create rec by event
         this.serviceAdapter
-            .call('proxy', {
+            .call({
                 url: this.url + TVHDataService.API_DVR_UPCOMING,
                 user: this.user,
                 password: this.password
             })
             .then((success) => {
-                const response = JSON.parse(success.result);
+                const response = JSON.parse(success.result) as TVHRecordings;
                 console.log('retrieved upcoming records: %s', response.total);
                 const recordings: EPGEvent[] = [];
+
                 // update upcoming recordings
-                response.entries.forEach((tvhEvent: any) => {
-                    recordings.push(this.toEpgEventRec(tvhEvent));
+                response.entries.forEach((recordingEntry: TVHRecordingEntry) => {
+                    recordings.push(this.toEpgEventRec(recordingEntry));
                 });
                 callback(recordings);
             })
@@ -188,7 +231,7 @@ export default class TVHDataService {
             });
     }
 
-    toEpgEvent(tvhEvent: TVHEvent) {
+    toEpgEvent(tvhEvent: TVHEventEntry) {
         return new EPGEvent(
             tvhEvent.eventId,
             tvhEvent.start * 1000,
@@ -200,15 +243,15 @@ export default class TVHDataService {
         );
     }
 
-    toEpgEventRec(recordEntry: RecordEntry) {
+    toEpgEventRec(recordingEntry: TVHRecordingEntry) {
         return new EPGEvent(
-            recordEntry.uuid,
-            recordEntry.start * 1000,
-            recordEntry.stop * 1000,
-            recordEntry.disp_title,
-            recordEntry.disp_description,
-            recordEntry.disp_subtitle,
-            recordEntry.channel
+            recordingEntry.uuid,
+            recordingEntry.start * 1000,
+            recordingEntry.stop * 1000,
+            recordingEntry.disp_title,
+            recordingEntry.disp_description,
+            recordingEntry.disp_subtitle,
+            recordingEntry.channel
         );
     }
 
@@ -217,7 +260,7 @@ export default class TVHDataService {
      */
     // async retrieveTvChannelTag() {
     //     // retrieve the default dvr config
-    //     let success = await this.serviceAdapter.call('proxy', {
+    //     let success = await this.serviceAdapter.call({
     //         'url': this.url + TVHDataService.API_CHANNEL_TAGS,
     //         'user': this.user,
     //         'password': this.password
@@ -235,26 +278,29 @@ export default class TVHDataService {
     async retrieveDVRConfig() {
         // retrieve the default dvr config
         this.serviceAdapter
-            .call('proxy', {
+            .call({
                 url: this.url + TVHDataService.API_DVR_CONFIG,
                 user: this.user,
                 password: this.password
             })
             .then((success) => {
-                const response = JSON.parse(success.result);
+                const response = JSON.parse(success.result) as TVHRecordingsConfig;
                 console.log('dvr configs received: %d', response.total);
+
                 // try first enabled
                 for (let i = 0; i < response.entries.length; i++) {
                     if (response.entries[i].enabled) {
                         return response.entries[i].uuid;
                     }
                 }
+
                 // try default config -> name = ''
                 for (let i = 0; i < response.entries.length; i++) {
                     if (response.entries[i].name === '') {
                         return response.entries[i].uuid;
                     }
                 }
+
                 // if no default config we use the first entry
                 return response.entries[0].uuid;
             })
@@ -267,7 +313,7 @@ export default class TVHDataService {
     //     // after we set the base url we retrieve channels async
     //     let totalCount = 0;
     //     try {
-    //         let success = await this.serviceAdapter.call('proxy', {
+    //         let success = await this.serviceAdapter.call({
     //             'url': this.url + TVHDataService.API_INITIAL_CHANNELS + start,
     //             'user': this.user,
     //             'password': this.password
@@ -315,8 +361,9 @@ export default class TVHDataService {
         } else {
             playlistPath = TVHDataService.M3U_PLAYLIST.replace('%s', '');
         }
+
         try {
-            const success = await this.serviceAdapter.call('proxy', {
+            const success = await this.serviceAdapter.call({
                 url: this.url + playlistPath,
                 user: this.user,
                 password: this.password
@@ -349,18 +396,17 @@ export default class TVHDataService {
         let totalCount = 0;
 
         this.serviceAdapter
-            .call('proxy', {
+            .call({
                 url: this.url + TVHDataService.API_EPG + start,
                 user: this.user,
                 password: this.password
             })
             .then((success) => {
-                console.log(success);
-                const response = JSON.parse(success.result);
+                const response = JSON.parse(success.result) as TVHEvents;
                 console.log('epg events received: %d of %d', start + response.entries.length, response.totalCount);
                 if (response.entries.length > 0) {
-                    totalCount = success.result.totalCount;
-                    response.entries.forEach((tvhEvent: any) => {
+                    totalCount = response.totalCount;
+                    response.entries.forEach((tvhEvent) => {
                         start++;
                         const channel = this.channelMap.get(tvhEvent.channelUuid);
                         if (channel) {

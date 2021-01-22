@@ -1,7 +1,13 @@
 import '@procot/webostv/webOSTV';
 
-interface ProxySuccessResponse<TResult> extends WebOSTV.OnCompleteSuccessResponse {
-    result: TResult;
+interface ProxyRequestParams {
+    url: string;
+    user?: string;
+    password?: string;
+}
+
+interface ProxySuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
+    result: string;
 }
 
 interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
@@ -32,16 +38,20 @@ interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
  * - local + webos emulator => luna service bus
  */
 export default class LunaServiceAdapter {
-    call<TResult = any>(method: string, params: Record<string, unknown>) {
-        return new Promise<ProxySuccessResponse<TResult>>((resolve, reject) => {
-            console.log('lsa:%s start', method);
+    call(params: ProxyRequestParams) {
+        return new Promise<ProxySuccessResponse>((resolve, reject) => {
+            console.log('lsa:%s start', params.url);
             global.webOS.service.request('luna://com.willinux.tvh.app.proxy', {
-                method: method,
+                method: 'proxy',
                 parameters: params,
-                onSuccess: (res: ProxySuccessResponse<TResult>) => resolve(res),
+                onSuccess: (res: ProxySuccessResponse) => {
+                    console.log('lsa:%s success', params.url);
+                    console.log(res);
+                    resolve(res);
+                },
                 onFailure: (res) => reject(res),
                 onComplete: () => {
-                    console.log('lsa:%s end', method);
+                    console.log('lsa:%s end', params.url);
                 }
             });
         });

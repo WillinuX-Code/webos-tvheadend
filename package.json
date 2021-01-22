@@ -19,7 +19,9 @@
         "webos:emu": "npm run build && ares-package build service && ares-install com.willinux.tvh.app_1.0.0_all.ipk -d emulator && ares-launch com.willinux.tvh.app -d emulator",
         "webos:emu-rm": "ares-install -d emulator --remove com.willinux.tvh.app",
         "webos:tv": "npm run build && ares-package build service && ares-install com.willinux.tvh.app_1.0.0_all.ipk -d tv && ares-launch com.willinux.tvh.app -d tv",
-        "webos:tv-rm": "ares-install -d tv --remove com.willinux.tvh.app"
+        "webos:tv-rm": "ares-install -d tv --remove com.willinux.tvh.app",
+        "inspect:emu": "ares-inspect -d emulator com.willinux.tvh.app --open",
+        "inspect:tv": "ares-inspect -d tv com.willinux.tvh.app --open"
     },
     "eslintConfig": {
         "extends": [

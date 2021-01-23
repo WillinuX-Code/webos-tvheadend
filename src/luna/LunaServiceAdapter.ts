@@ -4,10 +4,17 @@ interface ProxyRequestParams {
     url: string;
     user?: string;
     password?: string;
+    method?: string;
 }
 
-interface ProxySuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
-    result: string;
+interface ProxySuccessResponse<TResult> extends WebOSTV.OnCompleteSuccessResponse {
+    result: TResult;
+    statusCode: number;
+}
+
+interface ProxyErrorResponse extends WebOSTV.OnCompleteFailureResponse {
+    errorText: string;
+    statusCode?: number;
 }
 
 interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
@@ -39,17 +46,13 @@ interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
  */
 export default class LunaServiceAdapter {
     call(params: ProxyRequestParams) {
-        return new Promise<ProxySuccessResponse>((resolve, reject) => {
+        return new Promise<ProxySuccessResponse<any>>((resolve, reject) => {
             console.log('lsa:%s start', params.url);
             global.webOS.service.request('luna://com.willinux.tvh.app.proxy', {
                 method: 'proxy',
                 parameters: params,
-                onSuccess: (res: ProxySuccessResponse) => {
-                    console.log('lsa:%s success', params.url);
-                    console.log(res);
-                    resolve(res);
-                },
-                onFailure: (res) => reject(res),
+                onSuccess: (res: ProxySuccessResponse<any>) => resolve(res),
+                onFailure: (res: ProxyErrorResponse) => reject(res),
                 onComplete: () => {
                     console.log('lsa:%s end', params.url);
                 }

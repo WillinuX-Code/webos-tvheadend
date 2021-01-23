@@ -5,10 +5,12 @@ import channelTagsMock from './channelTags.json';
 import channelM3UMock from './channels.m3u.json';
 interface ProxySuccessResponse<TResult> extends WebOSTV.OnCompleteSuccessResponse {
     result: TResult;
+    statusCode: number;
 }
 
 interface ProxyErrorResponse extends WebOSTV.OnCompleteFailureResponse {
-    errorText: String;
+    errorText: string;
+    statusCode?: number;
 }
 
 interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
@@ -41,21 +43,21 @@ interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
 export default class MockServiceAdapter {
     async call<TResult = any>(method: string, params: any) {
         console.log('lsa:%s start', method);
-        let url = params.url;
+        const url = params.url;
         if (url.includes('api/channel/grid')) {
             return channelMock as ProxySuccessResponse<any>;
         } else if (url.includes('api/epg/events/grid')) {
-            let value = JSON.stringify(epgMock);
+            const value = JSON.stringify(epgMock);
             return {
                 returnValue: true,
-                result: value,
+                result: value
             };
             //return epgMock;
         } else if (url.includes('api/dvr/entry/grid_upcoming')) {
-            let value = JSON.stringify(recordingMock);
+            const value = JSON.stringify(recordingMock);
             return {
                 returnValue: true,
-                result: value,
+                result: value
             };
         } else if (url.includes('api/channeltag/list')) {
             return channelTagsMock as ProxySuccessResponse<any>;
@@ -70,15 +72,15 @@ export default class MockServiceAdapter {
                         {
                             uuid: 'somefakeUuid',
                             enabled: true,
-                            name: '',
+                            name: ''
                         },
                         {
                             uuid: 'anotherDisabledOne',
                             enabled: false,
-                            name: 'aName',
-                        },
-                    ],
-                }),
+                            name: 'aName'
+                        }
+                    ]
+                })
             } as ProxySuccessResponse<any>;
         } else if (url.includes('/api/serverinfo')) {
             return {
@@ -95,9 +97,9 @@ export default class MockServiceAdapter {
                         'timeshift',
                         'trace',
                         'libav',
-                        'caclient_advanced',
-                    ],
-                }),
+                        'caclient_advanced'
+                    ]
+                })
             } as ProxySuccessResponse<any>;
         } else if (url.includes('/api/profile/list')) {
             return {
@@ -106,23 +108,23 @@ export default class MockServiceAdapter {
                     entries: [
                         {
                             key: '37e63ea3fcda682086adaab175dde991',
-                            val: 'pass',
+                            val: 'pass'
                         },
                         {
                             val: 'matroska',
-                            key: '03663b00383b34a6ce2a621733388bf5',
+                            key: '03663b00383b34a6ce2a621733388bf5'
                         },
                         {
                             val: 'webtv-h264-aac-mpegts',
-                            key: 'b90da9e0bc0633515b261714a966910d',
-                        },
-                    ],
-                }),
+                            key: 'b90da9e0bc0633515b261714a966910d'
+                        }
+                    ]
+                })
             } as ProxySuccessResponse<any>;
         } else {
             throw {
                 returnValue: false,
-                errorText: 'Unknown url ' + url,
+                errorText: 'Unknown url ' + url
             } as ProxyErrorResponse;
         }
         console.log('lsa:%s end', method);
@@ -138,10 +140,10 @@ export default class MockServiceAdapter {
             settings: {
                 localeInfo: {
                     locales: {
-                        UI: 'de-DE',
-                    },
-                },
-            },
+                        UI: 'de-DE'
+                    }
+                }
+            }
         } as LocaleInfoSuccessResponse;
     }
 }

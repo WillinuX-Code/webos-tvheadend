@@ -1,3 +1,4 @@
+import { TestResults } from '../components/TVHSettingsTest';
 import LunaServiceAdapter from '../luna/LunaServiceAdapter';
 //import MockServiceAdapter from '../mock/MockServiceAdapter';
 import EPGChannel from '../models/EPGChannel';
@@ -8,15 +9,10 @@ export interface TVHSettingsOptions {
     tvhUrl: string;
     user?: string;
     password?: string;
-    connectionStatus: string;
-    // selectedProfile: string;
-    // profiles: Array<any>;
-    // tvChannelTagUuid: string;
-    dvrConfigUuid: string;
-    connectButtonEnabled: boolean;
+    dvrUuid: string;
     isValid: boolean;
-    isUserValid: boolean;
     isLoading: boolean;
+    testResults?: TestResults;
 }
 
 interface TVHServerInfo {
@@ -25,16 +21,6 @@ interface TVHServerInfo {
     name: string;
     capabilities: string[];
 }
-
-interface TVHProfiles {
-    entries: TVHProfileEntry[];
-}
-
-interface TVHProfileEntry {
-    key: string;
-    val: string;
-}
-
 interface TVHEvents {
     entries: TVHEventEntry[];
     totalCount: number;
@@ -89,9 +75,7 @@ interface EPGCallback {
 
 export default class TVHDataService {
     static API_SERVER_INFO = 'api/serverinfo';
-    static API_PROFILE_LIST = 'api/profile/list';
-    // static API_CHANNEL_TAGS = 'api/channeltag/list';
-    // static API_INITIAL_CHANNELS = 'api/channel/grid?dir=ASC&sort=number&start=';
+    static API_EPG_TEST = 'api/epg/events/grid?dir=ASC&sort=start&limit=1&start=0';
     static API_EPG = 'api/epg/events/grid?dir=ASC&sort=start&limit=500&start=';
     static API_DVR_CONFIG = 'api/dvr/config/grid';
     static API_DVR_CREATE_BY_EVENT = 'api/dvr/entry/create_by_event?';
@@ -116,8 +100,7 @@ export default class TVHDataService {
         if (!this.url.endsWith('/')) {
             this.url += '/';
         }
-        // this.profile = settings.selectedProfile;
-        this.dvrUuid = settings.dvrConfigUuid;
+        this.dvrUuid = settings.dvrUuid;
         this.user = settings.user;
         this.password = settings.password;
     }
@@ -142,18 +125,6 @@ export default class TVHDataService {
             password: this.password
         });
         return JSON.parse(success.result) as TVHServerInfo;
-    }
-
-    /**
-     * retrieve the stream profile list
-     */
-    async retrieveProfileList() {
-        const success = await this.serviceAdapter.call({
-            url: this.url + TVHDataService.API_PROFILE_LIST,
-            user: this.user,
-            password: this.password
-        });
-        return JSON.parse(success.result) as TVHProfiles;
     }
 
     createRec(event: EPGEvent, callback: DVRCallback) {
@@ -255,29 +226,9 @@ export default class TVHDataService {
         );
     }
 
-    /**
-     * return the channel tag reference for "TV Channels"
-     */
-    // async retrieveTvChannelTag() {
-    //     // retrieve the default dvr config
-    //     let success = await this.serviceAdapter.call({
-    //         'url': this.url + TVHDataService.API_CHANNEL_TAGS,
-    //         'user': this.user,
-    //         'password': this.password
-    //     });
-    //     let response = JSON.parse(success.result);
-    //     // return tv channels tag
-    //     for (var i = 0; i < response.entries.length; i++) {
-    //         if (response.entries[i].val === 'TV channels') {
-    //             console.log('TV Channel Tag:', response.entries[i].key);
-    //             return response.entries[i].key;
-    //         }
-    //     };
-    // }
-
     async retrieveDVRConfig() {
         // retrieve the default dvr config
-        this.serviceAdapter
+        await this.serviceAdapter
             .call({
                 url: this.url + TVHDataService.API_DVR_CONFIG,
                 user: this.user,
@@ -306,63 +257,29 @@ export default class TVHDataService {
             })
             .catch((error) => {
                 console.log('Failed to retrieve dvr config: ', JSON.stringify(error));
+                throw error;
             });
     }
 
-    // async retrieveTVHChannels(start: number) {
-    //     // after we set the base url we retrieve channels async
-    //     let totalCount = 0;
-    //     try {
-    //         let success = await this.serviceAdapter.call({
-    //             'url': this.url + TVHDataService.API_INITIAL_CHANNELS + start,
-    //             'user': this.user,
-    //             'password': this.password
-    //         });
-    //         let response = JSON.parse(success.result);
-    //         console.log('channels received: %d of %d', start + response.entries.length, response.total)
-    //         if (response.entries.length > 0) {
-    //             totalCount = response.total;
-    //             success.result.entries.forEach((tvhChannel) => {
-    //                 start++;
-    //                 // check if channel contains is a tvchannel
-    //                 // if (!tvhChannel.tags.includes(this.tvChannelUuid)) {
-    //                 //     return;
-    //                 // }
-    //                 let channel = new EPGChannel(
-    //                     // complete icon url
-    //                     new URL(this.url + tvhChannel.icon_public_url),
-    //                     tvhChannel.name,
-    //                     this.channels.length + 1,   // use our own numbers tvhChannel.number,
-    //                     tvhChannel.uuid,
-    //                     new URL(this.url + 'stream/channel/' + tvhChannel.uuid + (this.profile ? '?profile=' + this.profile : ''))
-    //                 );
-    //                 this.channelMap.set(tvhChannel.uuid, channel);
-    //                 this.channels.push(channel);
-    //             });
-    //         }
-    //         // retrieve next increment
-    //         if (totalCount > start) {
-    //             await this.retrieveTVHChannels(start);
-    //             return this.channels;
-    //         }
-    //         console.log('processed all channels %d', this.channels.length);
-    //         return this.channels;
-    //     } catch (error) {
-    //         console.log('Failed to retrieve channel data: ', JSON.stringify(error))
-    //         return [];
-    //     };
-    // }
-
-    async retrieveM3UChannels() {
-        // after we set the base url we retrieve channels async
-        let playlistPath = null;
-        if ((this.user || '').length > 0 && (this.password || '').length > 0) {
-            playlistPath = TVHDataService.M3U_PLAYLIST.replace('%s', 'auth/');
-        } else {
-            playlistPath = TVHDataService.M3U_PLAYLIST.replace('%s', '');
-        }
-
+    async retrieveM3UChannels(): Promise<EPGChannel[]> {
         try {
+            return await this._retrieveM3UChannels((this.user || '').length > 0 && (this.password || '').length > 0);
+        } catch (error) {
+            return await this._retrieveM3UChannels(false);
+        }
+    }
+
+    private async _retrieveM3UChannels(withAuth: boolean): Promise<EPGChannel[]> {
+        try {
+            // after we set the base url we retrieve channels async
+            let playlistPath = null;
+            // persistence token is only available for authentication on >= 4.3
+            if (withAuth) {
+                playlistPath = TVHDataService.M3U_PLAYLIST.replace('%s', 'auth/');
+            } else {
+                playlistPath = TVHDataService.M3U_PLAYLIST.replace('%s', '');
+            }
+
             const success = await this.serviceAdapter.call({
                 url: this.url + playlistPath,
                 user: this.user,
@@ -388,8 +305,23 @@ export default class TVHDataService {
             return this.channels;
         } catch (error) {
             console.log('Failed to retrieve channel data: ', JSON.stringify(error));
-            return [];
+            throw error;
         }
+    }
+
+    /** request 1 epg entry with HEAD mode */
+    async retrieveTVEPGTest() {
+        return await this.retrieveTest(this.url + TVHDataService.API_EPG_TEST, true);
+    }
+
+    /** request an url in head mode */
+    async retrieveTest(url: URL | string, withCredentials?: boolean) {
+        return await this.serviceAdapter.call({
+            url: url.toString(),
+            user: withCredentials ? this.user : '',
+            password: withCredentials ? this.password : '',
+            method: 'HEAD'
+        });
     }
 
     retrieveTVHEPG(start: number, callback: EPGCallback) {

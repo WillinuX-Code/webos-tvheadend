@@ -98,7 +98,8 @@ function request(options, user, password, message) {
                 message.respond({
                     returnValue: false,
                     errorText: 'Server answered with StatusCode ' + resp.statusCode,
-                    errorCode: 1
+                    errorCode: 1,
+                    statusCode: resp.statusCode
                 });
                 //console.log(resp.statusCode, resp);
             } else {
@@ -110,7 +111,8 @@ function request(options, user, password, message) {
                 resp.on('end', function () {
                     message.respond({
                         returnValue: true,
-                        result: data
+                        result: data,
+                        statusCode: resp.statusCode
                     });
                 });
             }

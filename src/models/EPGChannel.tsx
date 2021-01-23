@@ -43,4 +43,8 @@ export default class EPGChannel {
     getStreamUrl() {
         return this.streamUrl;
     }
+
+    setStreamUrl(streamUrl: URL) {
+        this.streamUrl = streamUrl;
+    }
 }

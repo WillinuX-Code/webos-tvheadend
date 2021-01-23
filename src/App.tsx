@@ -11,6 +11,7 @@ export default class App extends Component {
     private epgData: EPGData = new EPGData();
     private imageCache: Map<URL, HTMLImageElement> = new Map();
     private tvhDataService?: TVHDataService;
+    private intervalHandle: number;
 
     state: {
         isSettingsState: boolean;
@@ -24,7 +25,7 @@ export default class App extends Component {
         super(props);
 
         this.state = {
-            isSettingsState: true,
+            isSettingsState: false,
             lastEpgUpdate: 0,
             context: {
                 locale: 'en-US'
@@ -35,6 +36,7 @@ export default class App extends Component {
         this.handleUnmountSettings = this.handleUnmountSettings.bind(this);
         this.epgData = new EPGData();
         this.imageCache = new Map();
+        this.intervalHandle = -1;
     }
 
     async reloadData(tvhDataService: TVHDataService) {
@@ -45,6 +47,18 @@ export default class App extends Component {
         const channels = await tvhDataService.retrieveM3UChannels();
         this.epgData.updateChannels(channels);
 
+        /**
+         * tvheadend 4.2 with user authentication put a ticket in the stream
+         * url which authenticates the stream. This ticket invalidates every 5 minutes
+         * so we need to update the stream url of every channel every 4 minutes
+         */
+        if (channels.length > 0 && channels[0].getStreamUrl().toString().includes('ticket=')) {
+            clearInterval(this.intervalHandle);
+            setInterval(async () => {
+                const channels = await tvhDataService.retrieveM3UChannels();
+                this.epgData.updateStreamUrl(channels);
+            }, 4 * 60 * 1000);
+        }
         // preload images
         this.preloadImages();
 
@@ -62,6 +76,7 @@ export default class App extends Component {
     }
 
     handleUnmountSettings() {
+        // read settings
         const settingsString = localStorage.getItem(TVHSettings.STORAGE_TVH_SETTING_KEY);
         if (settingsString) {
             this.tvhDataService = new TVHDataService(JSON.parse(settingsString));

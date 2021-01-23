@@ -90,12 +90,21 @@ export default class EPGData {
     }
 
     updateChannels(channels: EPGChannel[]): void {
-        console.log('updated epg data');
         this.channels = channels;
     }
 
+    updateStreamUrl(channels: EPGChannel[]): void {
+        for (let i = 0; i < channels.length; i++) {
+            for (let k = 0; k < this.channels.length; k++) {
+                if (channels[i].getUUID() == this.channels[k].getUUID()) {
+                    this.channels[k].setStreamUrl(channels[i].getStreamUrl());
+                    break;
+                }
+            }
+        }
+    }
+
     updateRecordings(recordings: EPGEvent[]): void {
-        console.log('updated recordings data');
         this.recordings = recordings;
     }
 }

@@ -41,8 +41,8 @@ interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
  * - local + webos emulator => luna service bus
  */
 export default class MockServiceAdapter {
-    async call<TResult = any>(method: string, params: any) {
-        console.log('lsa:%s start', method);
+    async call<TResult = any>(params: any) {
+        console.log('lsa:%s start');
         const url = params.url;
         if (url.includes('api/channel/grid')) {
             return channelMock as ProxySuccessResponse<any>;
@@ -121,13 +121,18 @@ export default class MockServiceAdapter {
                     ]
                 })
             } as ProxySuccessResponse<any>;
+        } else if (url.includes('/stream/channelid')) {
+            return {
+                returnValue: true,
+                statusCode: 200
+            };
         } else {
             throw {
                 returnValue: false,
                 errorText: 'Unknown url ' + url
             } as ProxyErrorResponse;
         }
-        console.log('lsa:%s end', method);
+        console.log('lsa:%s end');
     }
 
     toast(message: string) {

@@ -11,7 +11,7 @@ export default class App extends Component {
     private epgData: EPGData = new EPGData();
     private imageCache: Map<URL, HTMLImageElement> = new Map();
     private tvhDataService?: TVHDataService;
-    private intervalHandle: number;
+    private intervalHandle?: NodeJS.Timeout;
 
     state: {
         isSettingsState: boolean;
@@ -36,7 +36,6 @@ export default class App extends Component {
         this.handleUnmountSettings = this.handleUnmountSettings.bind(this);
         this.epgData = new EPGData();
         this.imageCache = new Map();
-        this.intervalHandle = -1;
     }
 
     async reloadData(tvhDataService: TVHDataService) {
@@ -53,11 +52,12 @@ export default class App extends Component {
          * so we need to update the stream url of every channel every 4 minutes
          */
         if (channels.length > 0 && channels[0].getStreamUrl().toString().includes('ticket=')) {
-            clearInterval(this.intervalHandle);
-            setInterval(async () => {
+            this.intervalHandle && clearInterval(this.intervalHandle);
+            this.intervalHandle = setInterval(async () => {
                 const channels = await tvhDataService.retrieveM3UChannels();
                 this.epgData.updateStreamUrl(channels);
             }, 4 * 60 * 1000);
+            this.intervalHandle.unref();
         }
         // preload images
         this.preloadImages();

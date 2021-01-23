@@ -48,7 +48,7 @@ function unq(quotedString) {
  * not possible from browser due to cors restrictions
  */
 service.register('proxy', function (message) {
-    /** local node js mock setup 
+    /** local node js mock setup
     function MockMessage() { };
     MockMessage.prototype.respond = function (object) {
         console.log("MockMessage: ", object);
@@ -217,5 +217,5 @@ function digestAuth(options, user, password, tokens) {
                     cnonce="MDAwODM0", nc=00000001, qop="auth", 
                     response="77f88f3f6b4623eedf17af206098ebf8"
     */
-    return `Digest username="${user}", realm="${realm}", nonce="${nonce}", uri="${options.path}", cnonce="${cnonce}", nc="${nc}", qop="${qop}", response="${res}"`;
+    return 'Digest username="' + user + '", realm="' + realm + '", nonce="' + nonce + '", uri="' + options.path + '", cnonce="' + cnonce + '", nc="' + nc + '", qop="' + qop + '", response="' + res + '"';
 }

@@ -2,6 +2,12 @@ import '@procot/webostv/webOSTV';
 
 interface ProxySuccessResponse<TResult> extends WebOSTV.OnCompleteSuccessResponse {
     result: TResult;
+    statusCode: number;
+}
+
+interface ProxyErrorResponse extends WebOSTV.OnCompleteFailureResponse {
+    errorText: string;
+    statusCode?: number;
 }
 
 interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
@@ -39,7 +45,7 @@ export default class LunaServiceAdapter {
                 method: method,
                 parameters: params,
                 onSuccess: (res: ProxySuccessResponse<TResult>) => resolve(res),
-                onFailure: (res) => reject(res),
+                onFailure: (res: ProxyErrorResponse) => reject(res),
                 onComplete: () => {
                     console.log('lsa:%s end', method);
                 }

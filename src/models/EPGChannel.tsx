@@ -7,7 +7,7 @@ export default class EPGChannel {
     private events: EPGEvent[];
 
     constructor(
-        private icon: URL,
+        private icon: URL | undefined,
         private name: string,
         private id: number,
         private uuid: string,

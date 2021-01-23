@@ -115,6 +115,10 @@ export default class App extends Component {
     preloadImages() {
         this.epgData.getChannels().forEach((channel) => {
             const imageURL = channel.getImageURL();
+            // logo url is optional
+            if (!imageURL) {
+                return;
+            }
             const img = new Image();
             img.src = imageURL.toString();
             img.onload = () => {

@@ -291,7 +291,7 @@ export default class TVHDataService {
                 const parserResult = parser.parse();
                 parserResult.items.forEach((item) => {
                     const channel = new EPGChannel(
-                        new URL(item.logoUrl),
+                        item.logoUrl ? new URL(item.logoUrl) : undefined,
                         item.channelName,
                         this.channels.length + 1, // use our own numbers item.channelNumber
                         item.channelId,

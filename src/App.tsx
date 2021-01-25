@@ -98,9 +98,7 @@ export default class App extends Component {
             const locale = localInfoResult.settings.localeInfo.locales.UI;
 
             this.setState((state, props) => ({
-                context: {
-                    locale: locale
-                }
+                context: { ...this.state.context, locale: locale }
             }));
             console.log('Retrieved locale info:', locale);
         } catch (error) {

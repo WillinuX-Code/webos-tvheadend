@@ -73,9 +73,7 @@ const ChannelInfo = (props: { unmount: () => void }) => {
         drawingRect.right -= mChannelLayoutMargin;
         drawingRect.bottom -= mChannelLayoutMargin;
 
-        console.log('display channel info for: ' + currentChannelPosition);
         const channel = epgData.getChannel(currentChannelPosition);
-        console.log(channel);
 
         // should not happen, but better check it
         if (!channel) return;

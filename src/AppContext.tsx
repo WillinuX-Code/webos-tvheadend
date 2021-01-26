@@ -35,7 +35,7 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
         tvhDataService: tvhDataService,
         setTvhDataService: (value: TVHDataService) => setTvhDataService(value),
         epgData: epgData,
-        setEpgData: (value: EPGData) => setEpgData(value),
+        setEpgData: (value: EPGData) => {console.log('NEW EPG DATA IS: '); console.log(value); setEpgData(value);},
         imageCache: imageCache,
         setImageCache: (value: Map<URL, HTMLImageElement>) => setImageCache(value),
         currentChannelPosition: currentChannelPosition,

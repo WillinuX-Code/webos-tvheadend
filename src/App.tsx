@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import TVHDataService from './services/TVHDataService';
 import TV from './components/TV';
 import TVHSettings, { STORAGE_TVH_SETTING_KEY } from './components/TVHSettings';
@@ -17,23 +17,31 @@ const App = () => {
         imageCache
     } = useContext(AppContext);
 
-    const reloadData = async () => {
+    const [isEpgDataLoaded, setEpgDataLoaded] = useState(false);
+
+    const reloadData = () => {
         if (tvhDataService) {
             // load locale
             loadLocale(tvhDataService);
 
             // retrieve channel infos etc
-            const channels = await tvhDataService.retrieveM3UChannels();
-            epgData.updateChannels(channels);
+            tvhDataService.retrieveM3UChannels().then((channels) => {
+                epgData.updateChannels(channels);
+                setEpgDataLoaded(true);
 
-            // preload images
-            preloadImages(channels);
+                // preload images
+                preloadImages(channels);
 
-            // retrieve epg and update channels
-            tvhDataService.retrieveTVHEPG(0, (channels) => epgData.updateChannels(channels));
+                // retrieve epg and update channels
+                tvhDataService.retrieveTVHEPG(0, (channels) => {
+                    epgData.updateChannels(channels);
+                });
 
-            // retrieve recordings and update channels
-            tvhDataService.retrieveUpcomingRecordings((recordings) => epgData.updateRecordings(recordings));
+                // retrieve recordings and update channels
+                tvhDataService.retrieveUpcomingRecordings((recordings) => {
+                    epgData.updateRecordings(recordings);
+                });
+            });
 
             setSettingsVisible(false);
         } else {
@@ -100,7 +108,7 @@ const App = () => {
     return (
         <div className="app" onKeyDown={handleKeyPress}>
             {isSettingsVisible && <TVHSettings />}
-            {!isSettingsVisible && epgData && <TV />}
+            {!isSettingsVisible && isEpgDataLoaded && <TV />}
         </div>
     );
 };

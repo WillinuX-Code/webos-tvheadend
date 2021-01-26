@@ -10,9 +10,7 @@ type AppContext = {
     tvhDataService?: TVHDataService;
     setTvhDataService: (value: TVHDataService) => void;
     epgData: EPGData;
-    setEpgData: (value: EPGData) => void;
     imageCache: Map<URL, HTMLImageElement>;
-    setImageCache: (value: Map<URL, HTMLImageElement>) => void;
     currentChannelPosition: number;
     setCurrentChannelPosition: (value: number) => void;
 };
@@ -23,8 +21,8 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
     const [locale, setLocale] = useState('en-US');
     const [isSettingsVisible, setSettingsVisible] = useState(false);
     const [tvhDataService, setTvhDataService] = useState<TVHDataService>();
-    const [epgData, setEpgData] = useState(new EPGData());
-    const [imageCache, setImageCache] = useState(new Map<URL, HTMLImageElement>());
+    const [epgData] = useState(new EPGData());
+    const [imageCache] = useState(new Map<URL, HTMLImageElement>());
     const [currentChannelPosition, setCurrentChannelPosition] = useState(0);
     
     const appContext: AppContext = {
@@ -35,9 +33,7 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
         tvhDataService: tvhDataService,
         setTvhDataService: (value: TVHDataService) => setTvhDataService(value),
         epgData: epgData,
-        setEpgData: (value: EPGData) => setEpgData(value),
         imageCache: imageCache,
-        setImageCache: (value: Map<URL, HTMLImageElement>) => setImageCache(value),
         currentChannelPosition: currentChannelPosition,
         setCurrentChannelPosition: (value: number) => setCurrentChannelPosition(value)
     };

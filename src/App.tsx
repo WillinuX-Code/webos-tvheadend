@@ -79,7 +79,7 @@ const App = () => {
             case 404: // green button
             case 71: //'g'
                 event.stopPropagation();
-                setSettingsVisible(true);
+                setSettingsVisible(!isSettingsVisible);
                 break;
             default:
                 console.log('App-keyPressed:', keyCode);
@@ -94,7 +94,7 @@ const App = () => {
     }, []);
 
     useEffect(() => {
-        reloadData();
+        tvhDataService && reloadData();
     }, [tvhDataService]);
 
     return (

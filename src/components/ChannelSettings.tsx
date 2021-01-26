@@ -1,133 +1,109 @@
 import Icon from '@enact/moonstone/Icon';
 import Picker from '@enact/moonstone/Picker';
-import React from 'react';
-import { Component } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-export default class ChannelSettings extends Component {
-    private textTracks: [{ enabled: boolean; language: string }];
-    private audioTracks: [{ enabled: boolean; language: string }];
-    private textTracksDisplay: string[];
-    private audioTracksDisplay: string[];
-    private timeoutId: NodeJS.Timeout | null;
+const ChannelSettings = (props: {
+    channelName: string;
+    textTracks: TextTrackList | undefined;
+    audioTracks: AudioTrackList | undefined;
+    unmount: () => void;
+}) => {
+    const [selectedAudioTrack, setSelectedAudioTrack] = useState(0);
+    const [selectedTextTrack, setSelectedTextTrack] = useState(0);
+    const textTracksDisplay: string[] = [];
+    const audioTracksDisplay: string[] = [];
+    const timeoutReference = useRef<NodeJS.Timeout | null>(null);
 
-    state: Readonly<any>;
+    const handleTextChange = (event: any) => {
+        updateAutomaticUnmount();
 
-    constructor(public props: Readonly<any>) {
-        super(props);
-
-        this.textTracks = props.textTracks;
-        this.audioTracks = props.audioTracks;
-        this.textTracksDisplay = [];
-        this.audioTracksDisplay = [];
-        this.timeoutId = null;
-
-        let selectedAudioTrack = -1;
-        this.audioTracks.forEach((audioTrack, index) => {
-            if (audioTrack.enabled) {
-                selectedAudioTrack = index;
-            }
-            this.audioTracksDisplay.push(audioTrack.language);
-        });
-
-        const selectedTextTrack = -1;
-        this.textTracks.forEach((textTrack, index) => {
-            if (textTrack.enabled) {
-                selectedAudioTrack = index;
-            }
-            this.textTracksDisplay.push(textTrack.language);
-        });
-
-        this.state = {
-            channelName: props.channelName,
-            selectedAudioTrack: selectedAudioTrack,
-            selectedTextTrack: selectedTextTrack
-        };
-    }
-
-    textChangeHandler = (object: any) => {
-        this.updateAutomaticUnmount();
-
-        // disable previous track
-        this.textTracks[this.state.selectedTextTrack].enabled = false;
         // enable new track
-        this.textTracks[object.value].enabled = true;
-        // enable current selected audio
-        this.setState((state, props) => ({
-            selectedTextTrack: object.value
-        }));
+        if (props.textTracks) {
+            for (let i = 0; i < props.textTracks.length; i++) {
+                // const textTrack = props.textTracks[i];
+                // textTrack.enabled = (event.value === i);
+            }
+        }
+        setSelectedTextTrack(event.value);
+
+        // TODO: save selected text track index for channel
+        // localStorage.setItem(props.channelName, event.value);
+
         // do not pass this event further
         return false;
     };
 
-    audioChangeHandler = (object: any) => {
-        this.updateAutomaticUnmount();
-        // disable previous track
-        this.audioTracks[this.state.selectedAudioTrack].enabled = false;
+    const handleAudioChange = (event: any) => {
+        updateAutomaticUnmount();
+
         // enable new track
-        this.audioTracks[object.value].enabled = true;
-        // enable current selected audio
-        this.setState((state, props) => ({
-            selectedAudioTrack: object.value
-        }));
+        if (props.audioTracks) {
+            for (let i = 0; i < props.audioTracks.length; i++) {
+                const audioTrack = props.audioTracks[i];
+                audioTrack.enabled = event.value === i;
+            }
+        }
+        setSelectedAudioTrack(event.value);
+
         // save selected audio track index for channel
-        localStorage.setItem(this.state.channelName, object.value);
+        localStorage.setItem(props.channelName, event.value);
+
         // do not pass this event further
         return false;
     };
 
-    componentDidMount() {
-        // automatic unmount
-        this.updateAutomaticUnmount();
-    }
-
-    unmountHandler = () => {
-        // clear timeout before unmount
-        this.timeoutId && clearTimeout(this.timeoutId);
-
-        this.props.stateUpdateHandler({
-            isChannelSettingsState: false
-        });
+    const updateAutomaticUnmount = () => {
+        timeoutReference.current && clearTimeout(timeoutReference.current);
+        timeoutReference.current = setTimeout(() => props.unmount(), 7000);
     };
 
-    updateAutomaticUnmount() {
-        this.timeoutId && clearTimeout(this.timeoutId);
-        this.timeoutId = setTimeout(this.unmountHandler, 7000);
-    }
+    useEffect(() => {
+        if (props.audioTracks) {
+            for (let i = 0; i < props.audioTracks.length; i++) {
+                const audioTrack = props.audioTracks[i];
+                audioTracksDisplay.push(audioTrack.language);
+                audioTrack.enabled && setSelectedAudioTrack(i);
+            }
+        }
 
-    componentWillUnmount() {
-        // clear timeout in case component is unmounted (possible trigger also from TV Component)
-        this.timeoutId && clearTimeout(this.timeoutId);
-    }
+        if (props.textTracks) {
+            for (let i = 0; i < props.textTracks.length; i++) {
+                const textTrack = props.textTracks[i];
+                textTracksDisplay.push(textTrack.language);
+                // textTrack.enabled && setSelectedTextTrack(i);
+            }
+        }
 
-    render() {
-        return (
-            <div id="channel-settings" tabIndex={-1} className="channelSettings">
-                {this.audioTracksDisplay.length > 0 && (
-                    <>
-                        <Icon>audio</Icon>
-                        <Picker
-                            defaultValue={this.state.selectedAudioTrack}
-                            onChange={this.audioChangeHandler}
-                            width="large"
-                        >
-                            {this.audioTracksDisplay}
-                        </Picker>
-                    </>
-                )}
+        // automatic unmount
+        updateAutomaticUnmount();
 
-                {this.textTracksDisplay.length > 0 && (
-                    <>
-                        <Icon>sub</Icon>
-                        <Picker
-                            defaultValue={this.state.selectedTextTrack}
-                            onChange={this.textChangeHandler}
-                            width="large"
-                        >
-                            {this.textTracksDisplay}
-                        </Picker>
-                    </>
-                )}
-            </div>
-        );
-    }
-}
+        return () => {
+            // clear timeout in case component is unmounted
+            timeoutReference.current && clearTimeout(timeoutReference.current);
+        };
+    }, []);
+
+    return (
+        <div id="channel-settings" tabIndex={-1} className="channelSettings">
+            {audioTracksDisplay.length > 0 && (
+                <>
+                    <Icon>audio</Icon>
+                    <Picker defaultValue={selectedAudioTrack} onChange={handleAudioChange} width="large">
+                        {audioTracksDisplay}
+                    </Picker>
+                </>
+            )}
+
+            {textTracksDisplay.length > 0 && (
+                <>
+                    <Icon>sub</Icon>
+                    <Picker defaultValue={selectedTextTrack} onChange={handleTextChange} width="large">
+                        {textTracksDisplay}
+                    </Picker>
+                </>
+            )}
+        </div>
+    );
+};
+
+export default ChannelSettings;

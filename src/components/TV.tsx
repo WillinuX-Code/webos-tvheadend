@@ -9,13 +9,14 @@ import EPGData from '../models/EPGData';
 import TVHDataService from '../services/TVHDataService';
 import '../styles/app.css';
 
-interface HTMLVideoElementEx extends HTMLVideoElement {
-    videoTracks: globalThis.MediaStreamTrack[];
-    audioTracks: globalThis.MediaStreamTrack[];
-}
-
 export interface StateUpdateHandler {
     (newState: any): void;
+}
+
+interface HTMLVideoElementEx extends HTMLVideoElement {
+    videoTracks: any[]; // type VideoTrackList
+    audioTracks: any[]; // type AudioTrackList
+    textTracks: TextTrackList;
 }
 
 export default class TV extends Component {
@@ -37,8 +38,8 @@ export default class TV extends Component {
         isChannelListState: boolean;
         channelPosition: number;
         channelNumberText: string;
-        audioTracks: any[];
-        textTracks: any[];
+        audioTracks?: any[];
+        textTracks?: TextTrackList;
     };
 
     constructor(public props: Readonly<any>) {
@@ -52,15 +53,13 @@ export default class TV extends Component {
             isEpgState: false,
             isChannelListState: false,
             channelPosition: 0,
-            channelNumberText: '',
+            channelNumberText: ''
             // audioTracks: [
-            //     {enabled:true,id:1,language:"de"},
-            //     {enabled:true,id:2,language:"mis"},
-            //     {enabled:true,id:3,language:"mul"},
-            //     {enabled:false,id:4,language:"en"},
+            //     { enabled: true, id: 1, language: 'de' },
+            //     { enabled: true, id: 2, language: 'mis' },
+            //     { enabled: true, id: 3, language: 'mul' },
+            //     { enabled: false, id: 4, language: 'en' }
             // ],
-            audioTracks: [],
-            textTracks: []
         };
 
         this.tvhService = props.tvhService;

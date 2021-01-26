@@ -15,27 +15,27 @@ export default class ChannelSettings extends Component {
     constructor(public props: Readonly<any>) {
         super(props);
 
-        this.textTracks = props.textTracks;
-        this.audioTracks = props.audioTracks;
+        this.textTracks = this.props.textTracks;
+        this.audioTracks = this.props.audioTracks;
         this.textTracksDisplay = [];
         this.audioTracksDisplay = [];
         this.timeoutId = null;
 
         let selectedAudioTrack = -1;
-        this.audioTracks.forEach((audioTrack, index) => {
-            if (audioTrack.enabled) {
-                selectedAudioTrack = index;
+        for (let i = 0; i < this.audioTracks.length; i++) {
+            if (this.audioTracks[i].enabled) {
+                selectedAudioTrack = i;
             }
-            this.audioTracksDisplay.push(audioTrack.language);
-        });
+            this.audioTracksDisplay.push(this.audioTracks[i].language);
+        }
 
         const selectedTextTrack = -1;
-        this.textTracks.forEach((textTrack, index) => {
-            if (textTrack.enabled) {
-                selectedAudioTrack = index;
+        for (let i = 0; i < this.textTracks.length; i++) {
+            if (this.textTracks[i].enabled) {
+                selectedAudioTrack = i;
             }
-            this.textTracksDisplay.push(textTrack.language);
-        });
+            this.textTracksDisplay.push(this.textTracks[i].language);
+        }
 
         this.state = {
             channelName: props.channelName,

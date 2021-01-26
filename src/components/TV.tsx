@@ -1,35 +1,147 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { Component } from 'react';
 import ChannelInfo from './ChannelInfo';
 import TVGuide from './TVGuide';
 import ChannelHeader from './ChannelHeader';
 import ChannelList from './ChannelList';
 import ChannelSettings from './ChannelSettings';
 import EPGUtils from '../utils/EPGUtils';
-import AppContext from '../AppContext';
+import EPGData from '../models/EPGData';
+import TVHDataService from '../services/TVHDataService';
 import '../styles/app.css';
 
-const STORAGE_KEY_LAST_CHANNEL = 'lastChannel';
+interface HTMLVideoElementEx extends HTMLVideoElement {
+    videoTracks: globalThis.MediaStreamTrack[];
+    audioTracks: globalThis.MediaStreamTrack[];
+}
 
-const TV = () => {
-    const { tvhDataService, epgData, currentChannelPosition, setCurrentChannelPosition } = useContext(AppContext);
+export interface StateUpdateHandler {
+    (newState: any): void;
+}
 
-    const tvWrapper = useRef<HTMLDivElement>(null);
-    const video = useRef<HTMLVideoElement>(null);
-    const timeoutChangeChannel = useRef<NodeJS.Timeout | null>(null);
+export default class TV extends Component {
+    static STORAGE_KEY_LAST_CHANNEL = 'lastChannel';
 
-    const [audioTracks, setAudioTracks] = useState<AudioTrackList>();
-    const [textTracks, setTextTracks] = useState<TextTrackList>();
-    const [channelNumberText, setChannelNumberText] = useState('');
-    const [isEpgState, setEpgState] = useState(false);
-    const [isInfoState, setInfoState] = useState(false);
-    const [isChannelListState, setChannelListState] = useState(false);
-    const [isChannelSettingsState, setChannelSettingsState] = useState(false);
-    const epgUtils = new EPGUtils();
+    private tvWrapper: React.RefObject<HTMLDivElement>;
+    private video: React.RefObject<HTMLVideoElementEx>;
+    private epgData: EPGData;
 
-    const focus = () => tvWrapper.current?.focus();
+    private tvhService: TVHDataService;
+    private epgUtils = new EPGUtils();
+    private imageCache: any;
+    private timeoutChangeChannel?: NodeJS.Timeout;
 
-    const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    state: {
+        isChannelSettingsState: boolean;
+        isInfoState: boolean;
+        isEpgState: boolean;
+        isChannelListState: boolean;
+        channelPosition: number;
+        channelNumberText: string;
+        audioTracks: any[];
+        textTracks: any[];
+    };
+
+    constructor(public props: Readonly<any>) {
+        super(props);
+
+        this.tvWrapper = React.createRef();
+        this.video = React.createRef();
+        this.state = {
+            isChannelSettingsState: false,
+            isInfoState: true,
+            isEpgState: false,
+            isChannelListState: false,
+            channelPosition: 0,
+            channelNumberText: '',
+            // audioTracks: [
+            //     {enabled:true,id:1,language:"de"},
+            //     {enabled:true,id:2,language:"mis"},
+            //     {enabled:true,id:3,language:"mul"},
+            //     {enabled:false,id:4,language:"en"},
+            // ],
+            audioTracks: [],
+            textTracks: []
+        };
+
+        this.tvhService = props.tvhService;
+        this.epgData = props.epgData;
+        this.imageCache = props.imageCache;
+    }
+
+    componentDidMount() {
+        // read last channel position from storage
+        const lastChannelPosition = localStorage.getItem(TV.STORAGE_KEY_LAST_CHANNEL);
+        //console.log("Last Channel position:", lastChannelPosition);
+        if (lastChannelPosition) {
+            this.changeChannelPosition(parseInt(lastChannelPosition));
+        }
+        // init video element
+        this.initVideoElement();
+        this.focus();
+    }
+
+    getWidth() {
+        return window.innerWidth;
+    }
+
+    getHeight() {
+        return window.innerHeight;
+    }
+
+    getCurrentChannel() {
+        return this.epgData.getChannel(this.state.channelPosition);
+    }
+
+    componentWillUnmount() {
+        const videoElement = this.getMediaElement();
+        // Remove all source elements
+        while (videoElement?.firstChild) {
+            videoElement.removeChild(videoElement.firstChild);
+        }
+    }
+
+    componentDidUpdate(prevProps: any, prevState: any, snapshot: any) {
+        /*
+         * if video doesn't have a source yet - we set it
+         * this normally happens when the epg is loaded
+         */
+        // if (this.epgData.getChannelCount() > 0 && !this.getMediaElement().hasChildNodes()) {
+        //     this.changeSource(this.epgData.getChannel(this.state.channelPosition).getStreamUrl());
+        // }
+
+        // change channel in case we have channels retrieved and channel position changed or we don't have a channel active
+        const videoElement = this.getMediaElement();
+        if (
+            this.epgData.getChannelCount() > 0 &&
+            (prevState.channelPosition !== this.state.channelPosition || !videoElement?.hasChildNodes())
+        ) {
+            const currentChannel = this.getCurrentChannel();
+            currentChannel && this.changeSource(currentChannel.getStreamUrl());
+        }
+
+        // request focus if none of the other components are active
+        if (
+            !this.state.isInfoState &&
+            !this.state.isEpgState &&
+            !this.state.isChannelListState &&
+            !this.state.isChannelSettingsState
+        ) {
+            this.focus();
+        }
+        //this.setFocus();
+    }
+
+    private stateUpdateHandler: StateUpdateHandler = (newState: any) => {
+        this.setState((state, props) => newState);
+    };
+
+    focus() {
+        this.tvWrapper.current?.focus();
+    }
+
+    handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
         const keyCode = event.keyCode;
+        let channelPosition = this.state.channelPosition;
 
         switch (keyCode) {
             case 48: // 0
@@ -43,145 +155,169 @@ const TV = () => {
             case 56: // 8
             case 57: // 9
                 event.stopPropagation();
-                enterChannelNumberPart(keyCode - 48);
+                this.enterChannelNumberPart(keyCode - 48);
                 break;
             case 34: // programm down
                 event.stopPropagation();
                 // channel down
-                if (currentChannelPosition === 0) {
+                if (channelPosition === 0) {
                     return;
                 }
-                changeChannelPosition(currentChannelPosition - 1);
+                channelPosition -= 1;
+                this.changeChannelPosition(channelPosition);
                 break;
             case 40: // arrow down
                 event.stopPropagation();
-                setChannelListState(true);
-                setInfoState(false);
+                this.stateUpdateHandler({
+                    isChannelListState: true,
+                    isInfoState: false,
+                    channelPosition: channelPosition
+                });
                 break;
             case 33: // programm up
                 event.stopPropagation();
                 // channel up
-                if (currentChannelPosition === epgData.getChannelCount() - 1) {
+                if (channelPosition === this.epgData.getChannelCount() - 1) {
                     return;
                 }
-                changeChannelPosition(currentChannelPosition + 1);
+                channelPosition += 1;
+                this.changeChannelPosition(channelPosition);
                 break;
             case 67: // 'c'
             case 38: // arrow up
                 event.stopPropagation();
-                setChannelListState(true);
-                setInfoState(false);
+                this.stateUpdateHandler({
+                    isChannelListState: true,
+                    isInfoState: false,
+                    channelPosition: channelPosition
+                });
                 break;
             case 406: // blue button show epg
             case 66: // keyboard 'b'
                 event.stopPropagation();
-                setEpgState(true);
+                this.stateUpdateHandler({
+                    isEpgState: true,
+                    channelPosition: channelPosition
+                });
                 break;
             case 13: // ok button ->show/disable channel info
                 event.stopPropagation();
                 // in channel settings state we dont process the ok - the channel settings component handles it
-                if (isChannelSettingsState) {
+                if (this.state.isChannelSettingsState) {
                     break;
                 }
-                setInfoState(!isInfoState);
+                this.stateUpdateHandler({
+                    isInfoState: !this.state.isInfoState
+                });
                 break;
             case 405: // yellow button
             case 89: //'y'
                 event.stopPropagation();
-                setChannelSettingsState(!isChannelSettingsState);
+                this.stateUpdateHandler({
+                    isChannelSettingsState: !this.state.isChannelSettingsState
+                });
                 break;
             case 403: // red button to trigger or cancel recording
                 event.stopPropagation();
-                toggleRecording();
+                this.toggleRecording();
                 break;
             default:
                 console.log('TV-keyPressed:', keyCode);
         }
     };
 
-    const getMediaElement = () => video.current;
+    private getMediaElement(): HTMLVideoElementEx | null {
+        return this.video.current;
+    }
 
-    const toggleRecording = () => {
+    private toggleRecording(): void {
         // add current viewing channel to records
         // get current event
-        const channel = getCurrentChannel();
+        const channel = this.getCurrentChannel();
         const epgEvent = channel?.getEvents().find((channel) => channel.isCurrent());
 
         if (!epgEvent) return;
-        if (epgEvent.isPastDated(epgUtils.getNow())) {
+        if (epgEvent.isPastDated(this.epgUtils.getNow())) {
             // past dated do nothing
             return;
         }
-
-        if (tvhDataService) {
-            // check if event is already marked for recording
-            const recEvent = epgData.getRecording(epgEvent);
-            if (recEvent) {
-                // cancel recording
-                tvhDataService.cancelRec(recEvent, (recordings) => {
-                    epgData.updateRecordings(recordings);
-                    //this.updateCanvas();
-                });
-            } else {
-                // creat new recording from event
-                tvhDataService.createRec(epgEvent, (recordings) => {
-                    epgData.updateRecordings(recordings);
-                    //this.updateCanvas();
-                });
-            }
+        // check if event is already marked for recording
+        const recEvent = this.epgData.getRecording(epgEvent);
+        if (recEvent) {
+            // cancel recording
+            this.tvhService.cancelRec(recEvent, (recordings) => {
+                this.epgData.updateRecordings(recordings);
+                //this.updateCanvas();
+            });
+        } else {
+            // creat new recording from event
+            this.tvhService.createRec(epgEvent, (recordings) => {
+                this.epgData.updateRecordings(recordings);
+                //this.updateCanvas();
+            });
         }
-    };
+    }
 
     /**
      * Enters a digit that is used as part of the new channel number
+     *
+     * @param {Number} digit
      */
-    const enterChannelNumberPart = (digit: number) => {
-        if (channelNumberText.length < 3) {
-            const newChannelNumberText = channelNumberText + digit;
-            setChannelNumberText(newChannelNumberText);
+    enterChannelNumberPart(digit: number) {
+        if (this.state.channelNumberText.length < 3) {
+            const newChannelNumberText = this.state.channelNumberText + digit;
+            this.stateUpdateHandler({
+                channelNumberText: newChannelNumberText
+            });
 
             // automatically switch to new channel after 3 seconds
-            timeoutChangeChannel.current && clearTimeout(timeoutChangeChannel.current);
-            timeoutChangeChannel.current = setTimeout(() => {
+            this.timeoutChangeChannel && clearTimeout(this.timeoutChangeChannel);
+            this.timeoutChangeChannel = setTimeout(() => {
                 const channelNumber = parseInt(newChannelNumberText);
 
-                epgData.getChannels().forEach((channel, channelPosition) => {
+                this.epgData.getChannels().forEach((channel, channelPosition) => {
                     if (channel.getChannelID() === channelNumber) {
-                        changeChannelPosition(channelPosition);
+                        this.changeChannelPosition(channelPosition);
                     }
                 });
             }, 3000);
         }
-    };
+    }
 
-    const changeChannelPosition = (newChannelPosition: number) => {
-        if (newChannelPosition === currentChannelPosition) {
+    private changeChannelPosition(channelPosition: number) {
+        if (channelPosition === this.state.channelPosition) {
             return;
         }
 
-        setCurrentChannelPosition(newChannelPosition);
-        setInfoState(true);
+        const channel = this.epgData.getChannel(channelPosition);
+
+        this.stateUpdateHandler({
+            isInfoState: true,
+            channelPosition: channelPosition,
+            channelNumberText: channel?.getChannelID() || ''
+        });
 
         // store last used channel
-        localStorage.setItem(STORAGE_KEY_LAST_CHANNEL, newChannelPosition.toString());
-    };
+        localStorage.setItem(TV.STORAGE_KEY_LAST_CHANNEL, channelPosition.toString());
+    }
 
-    const initVideoElement = () => {
-        const videoElement = getMediaElement();
+    initVideoElement() {
+        const videoElement = this.getMediaElement();
 
-        videoElement?.addEventListener('loadedmetadata', () => {
+        videoElement?.addEventListener('loadedmetadata', (event) => {
             if (!videoElement) return;
+            // console.log(JSON.stringify(event));
             console.log('Audio Tracks: ', videoElement.audioTracks);
+            console.log('Video Tracks: ', videoElement.videoTracks);
             console.log('Text Tracks: ', videoElement.textTracks);
 
             // restore selected audio channel from storage
-            const currentChannel = getCurrentChannel();
+            const currentChannel = this.getCurrentChannel();
             if (!currentChannel) return;
             const indexStr = localStorage.getItem(currentChannel.getName());
             if (indexStr) {
                 const index = parseInt(indexStr);
-                console.log('restore index %d for channel %s', index, getCurrentChannel()?.getName());
-
+                console.log('restore index %d for channel %s', index, this.getCurrentChannel()?.getName());
                 if (index < videoElement.audioTracks.length) {
                     for (let i = 0; i < videoElement.audioTracks.length; i++) {
                         if (videoElement.audioTracks[i].enabled === true && i === index) {
@@ -197,14 +333,15 @@ const TV = () => {
                 }
             }
 
-            setAudioTracks(videoElement.audioTracks);
-            setTextTracks(videoElement.textTracks);
+            this.stateUpdateHandler({
+                audioTracks: videoElement.audioTracks,
+                textTracks: videoElement.textTracks
+            });
         });
-    };
+    }
 
-    const changeSource = (dataUrl: URL) => {
-        console.log('change source');
-        const videoElement = getMediaElement();
+    changeSource(dataUrl: URL) {
+        const videoElement = this.getMediaElement();
         if (!videoElement) return;
 
         // Remove all source elements
@@ -215,9 +352,8 @@ const TV = () => {
         // Reset video
         videoElement.load();
 
-        const options = {
-            mediaTransportType: 'URI'
-        };
+        const options: any = {};
+        options.mediaTransportType = 'URI';
 
         // Convert the created object to JSON string and encode it.
         const mediaOption = encodeURI(JSON.stringify(options));
@@ -232,97 +368,71 @@ const TV = () => {
         //source.setAttribute('type', 'video/mp4');
         videoElement.appendChild(source);
 
-        // Auto-play video with some (unused) error handling
-        videoElement.play().then().catch();
-    };
+        // Auto-play video with error handling
+        videoElement
+            .play()
+            .then((_) => {
+                // Automatic playback started!
+            })
+            .catch((error) => {
+                // Auto-play was prevented...
+            });
+    }
 
-    const getWidth = () => window.innerWidth;
-    const getHeight = () => window.innerHeight;
-    const getCurrentChannel = () => epgData.getChannel(currentChannelPosition);
+    render() {
+        return (
+            <div id="tv-wrapper" ref={this.tvWrapper} tabIndex={-1} onKeyDown={this.handleKeyPress} className="tv">
+                {this.state.isChannelSettingsState && (
+                    <ChannelSettings
+                        stateUpdateHandler={this.stateUpdateHandler}
+                        channelName={this.getCurrentChannel()?.getName()}
+                        audioTracks={this.state.audioTracks}
+                        textTracks={this.state.textTracks}
+                    />
+                )}
 
-    const showCurrentChannelNumber = () => {
-        const channel = epgData.getChannel(currentChannelPosition);
-        setChannelNumberText(channel?.getChannelID().toString() || '');
-    };
+                {this.state.channelNumberText !== '' && (
+                    <ChannelHeader
+                        stateUpdateHandler={this.stateUpdateHandler}
+                        channelNumberText={this.state.channelNumberText}
+                    />
+                )}
 
-    useEffect(() => {
-        // read last channel position from storage
-        const lastChannelPosition = parseInt(localStorage.getItem(STORAGE_KEY_LAST_CHANNEL) || '0');
-        changeChannelPosition(lastChannelPosition);
+                {this.state.isInfoState && (
+                    <ChannelInfo
+                        epgData={this.epgData}
+                        imageCache={this.imageCache}
+                        stateUpdateHandler={this.stateUpdateHandler}
+                        channelPosition={this.state.channelPosition}
+                    />
+                )}
 
-        // init video element
-        initVideoElement();
-        focus();
+                {this.state.isChannelListState && (
+                    <ChannelList
+                        epgData={this.epgData}
+                        imageCache={this.imageCache}
+                        stateUpdateHandler={this.stateUpdateHandler}
+                        channelPosition={this.state.channelPosition}
+                    />
+                )}
 
-        return () => {
-            // Anything in here is fired on component unmount.
-            const videoElement = getMediaElement();
+                {this.state.isEpgState && (
+                    <TVGuide
+                        epgData={this.epgData}
+                        imageCache={this.imageCache}
+                        stateUpdateHandler={this.stateUpdateHandler}
+                        channelPosition={this.state.channelPosition}
+                    />
+                )}
 
-            // Remove all source elements
-            while (videoElement?.firstChild) {
-                videoElement.removeChild(videoElement.firstChild);
-            }
-        };
-    }, []);
-
-    useEffect(() => {
-        // change channel in case we have channels retrieved and channel position changed or we don't have a channel active
-        const videoElement = getMediaElement();
-        if (epgData.getChannelCount() > 0 && !videoElement?.hasChildNodes()) {
-            const currentChannel = getCurrentChannel();
-            currentChannel && changeSource(currentChannel.getStreamUrl());
-        }
-
-        // show the channel info, if the channel was changed
-        setInfoState(true);
-
-        // also show the current channel number
-        showCurrentChannelNumber();
-    }, [currentChannelPosition]);
-
-    useEffect(() => {
-        // if the channel info is shown, also show the current channel number
-        if (isInfoState) {
-            showCurrentChannelNumber();
-        }
-
-        // request focus if none of the other components are active
-        if (!isInfoState && !isEpgState && !isChannelListState && !isChannelSettingsState) {
-            focus();
-        }
-    }, [isInfoState, isEpgState, isChannelListState, isChannelSettingsState]);
-
-    return (
-        <div id="tv-wrapper" ref={tvWrapper} tabIndex={-1} onKeyDown={handleKeyPress} className="tv">
-            {channelNumberText !== '' && (
-                <ChannelHeader channelNumberText={channelNumberText} unmount={() => setChannelNumberText('')} />
-            )}
-
-            {isChannelSettingsState && (
-                <ChannelSettings
-                    channelName={getCurrentChannel()?.getName() || ''}
-                    audioTracks={audioTracks}
-                    textTracks={textTracks}
-                    unmount={() => setChannelSettingsState(false)}
-                />
-            )}
-
-            {isInfoState && (
-                <ChannelInfo
-                    unmount={() => {
-                        setInfoState(false);
-                        setChannelNumberText('');
-                    }}
-                />
-            )}
-
-            {isChannelListState && <ChannelList unmount={() => setChannelListState(false)} />}
-
-            {isEpgState && <TVGuide unmount={() => setEpgState(false)} />}
-
-            <video id="myVideo" ref={video} width={getWidth()} height={getHeight()} preload="none"></video>
-        </div>
-    );
-};
-
-export default TV;
+                <video
+                    id="myVideo"
+                    ref={this.video}
+                    width={this.getWidth()}
+                    height={this.getHeight()}
+                    preload="none"
+                ></video>
+            </div>
+        );
+    }
+}

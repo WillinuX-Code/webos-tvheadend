@@ -1,117 +1,148 @@
 /**
  * Created by satadru on 3/31/17.
  */
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { Component } from 'react';
 
 import Rect from '../models/Rect';
 import EPGUtils from '../utils/EPGUtils';
+import TVHDataService from '../services/TVHDataService';
 import CanvasUtils from '../utils/CanvasUtils';
+import TVHSettings from './TVHSettings';
+import EPGData from '../models/EPGData';
 import EPGEvent from '../models/EPGEvent';
-import AppContext from '../AppContext';
 import '../styles/app.css';
+import { StateUpdateHandler } from './TV';
+import { AppContext } from '../AppContext';
 
-const DAYS_BACK_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
-const DAYS_FORWARD_MILLIS = 1 * 24 * 60 * 60 * 1000; // 1 days
-const HOURS_IN_VIEWPORT_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
-const TIME_LABEL_SPACING_MILLIS = 30 * 60 * 1000; // 30 minutes
+export default class TVGuide extends Component {
+    static contextType = AppContext;
 
-const VISIBLE_CHANNEL_COUNT = 8; // No of channel to show at a time
-const VERTICAL_SCROLL_BOTTOM_PADDING_ITEM = VISIBLE_CHANNEL_COUNT / 2 - 1;
-const VERTICAL_SCROLL_TOP_PADDING_ITEM = VISIBLE_CHANNEL_COUNT / 2 - 1;
+    static DAYS_BACK_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
+    static DAYS_FORWARD_MILLIS = 1 * 24 * 60 * 60 * 1000; // 1 days
+    static HOURS_IN_VIEWPORT_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
+    static TIME_LABEL_SPACING_MILLIS = 30 * 60 * 1000; // 30 minutes
 
-const TVGuide = (props: { unmount: () => void }) => {
-    const {
-        locale,
-        currentChannelPosition,
-        epgData,
-        tvhDataService,
-        imageCache,
-        setCurrentChannelPosition
-    } = useContext(AppContext);
+    static VISIBLE_CHANNEL_COUNT = 8; // No of channel to show at a time
+    static VERTICAL_SCROLL_BOTTOM_PADDING_ITEM = TVGuide.VISIBLE_CHANNEL_COUNT / 2 - 1;
+    static VERTICAL_SCROLL_TOP_PADDING_ITEM = TVGuide.VISIBLE_CHANNEL_COUNT / 2 - 1;
 
-    const canvas = useRef<HTMLCanvasElement>(null);
-    const epgWrapper = useRef<HTMLDivElement>(null);
-    const programguideContents = useRef<HTMLDivElement>(null);
-    const scrollAnimationId = useRef(0);
+    private canvas: React.RefObject<HTMLCanvasElement>;
+    private epgWrapper: React.RefObject<HTMLDivElement>;
 
-    const canvasUtils = new CanvasUtils();
-    const epgUtils = new EPGUtils();
+    private ctx?: CanvasRenderingContext2D | null;
+    private stateUpdateHandler: StateUpdateHandler;
+    private epgData: EPGData;
+    private epgUtils: EPGUtils;
+    private canvasUtils: CanvasUtils;
+    private tvhDataService: TVHDataService;
+    private scrollX: number;
+    private scrollY: number;
+    private timePosition: number;
+    private focusedChannelPosition: number;
+    private focusedEventPosition: number;
+    private focusedEvent?: EPGEvent;
 
-    const [scrollX, setScrollX] = useState(0);
-    const [scrollY, setScrollY] = useState(0);
-    const [timePosition, setTimePosition] = useState(epgUtils.getNow());
-    const [focusedChannelPosition, setFocusedChannelPosition] = useState(currentChannelPosition);
-    const [focusedEventPosition, setFocusedEventPosition] = useState(-1);
-    const [focusedEvent, setFocusedEvent] = useState<EPGEvent | null>(null);
+    private mChannelImageCache: Map<URL, HTMLImageElement>;
+    private mClipRect = new Rect();
+    private mDrawingRect = new Rect();
+    private mMeasuringRect = new Rect();
 
-    const millisPerPixel = useRef(0);
-    const timeOffset = useRef(0);
-    const timeLowerBoundary = useRef(0);
-    const timeUpperBoundary = useRef(0);
-    const maxHorizontalScroll = useRef(0);
-    const maxVerticalScroll = useRef(0);
+    private mEPGBackground = '#1e1e1e';
+    private mChannelLayoutMargin = 3;
+    private mChannelLayoutPadding = 10;
+    private mChannelLayoutHeight = 75;
+    private mChannelLayoutWidth = 120;
+    private mChannelLayoutBackground = '#323232';
 
-    const mDrawingRect = new Rect();
-    const mMeasuringRect = new Rect();
+    private mEventLayoutBackground = '#234054';
+    private mEventLayoutBackgroundCurrent = '#234054';
+    private mEventLayoutBackgroundFocus = 'rgb(65,182,230)';
+    private mEventLayoutTextColor = '#d6d6d6';
+    private mEventLayoutTextSize = 28;
+    private mEventLayoutRecordingColor = '#da0000';
 
-    const mEPGBackground = '#1e1e1e';
-    const mChannelLayoutMargin = 3;
-    const mChannelLayoutPadding = 10;
-    const mChannelLayoutHeight = 75;
-    const mChannelLayoutWidth = 120;
-    const mChannelLayoutBackground = '#323232';
+    private mDetailsLayoutMargin = 5;
+    private mDetailsLayoutPadding = 8;
+    private mDetailsLayoutTextColor = '#d6d6d6';
+    private mDetailsLayoutTitleTextSize = 30;
+    private mDetailsLayoutSubTitleTextSize = 26;
+    private mDetailsLayoutSubTitleTextColor = '#969696';
+    private mDetailsLayoutDescriptionTextSize = 28;
+    private mDetailsLayoutBackground = '#2d71ac';
 
-    const mEventLayoutBackground = '#234054';
-    const mEventLayoutBackgroundCurrent = 'rgb(50,85,110)';
-    const mEventLayoutBackgroundFocus = 'rgb(65,182,230)';
-    const mEventLayoutTextColor = '#d6d6d6';
-    const mEventLayoutTextSize = 28;
-    const mEventLayoutRecordingColor = '#da0000';
+    private mTimeBarHeight = 70;
+    private mTimeBarTextSize = 32;
+    private mTimeBarNowTextSize = 22;
+    private mTimeBarLineWidth = 3;
+    private mTimeBarLineColor = '#c57120';
+    private mTimeBarLinePositionColor = 'rgb(65,182,230)';
+    private mResetButtonSize = 40;
+    private mResetButtonMargin = 10;
 
-    const mDetailsLayoutMargin = 5;
-    const mDetailsLayoutPadding = 8;
-    const mDetailsLayoutTextColor = '#d6d6d6';
-    const mDetailsLayoutTitleTextSize = 30;
-    const mDetailsLayoutSubTitleTextSize = 26;
-    const mDetailsLayoutSubTitleTextColor = '#969696';
-    const mDetailsLayoutDescriptionTextSize = 28;
+    private mMillisPerPixel = 0;
+    private mTimeOffset = 0;
+    private mTimeLowerBoundary = 0;
+    private mTimeUpperBoundary = 0;
+    private mMaxHorizontalScroll = 0;
+    private mMaxVerticalScroll = 0;
 
-    const mTimeBarHeight = 70;
-    const mTimeBarTextSize = 32;
-    const mTimeBarNowTextSize = 22;
-    const mTimeBarLineWidth = 3;
-    const mTimeBarLineColor = '#c57120';
-    const mTimeBarLinePositionColor = 'rgb(65,182,230)';
+    private scrollAnimationId?: number;
+    private scroller?: Element;
 
-    const resetBoundaries = () => {
-        millisPerPixel.current = calculateMillisPerPixel();
-        timeOffset.current = calculatedBaseLine();
-        timeLowerBoundary.current = getTimeFrom(0);
-        timeUpperBoundary.current = getTimeFrom(getWidth());
-    };
+    constructor(public props: Readonly<any>) {
+        super(props);
 
-    const calculateMaxHorizontalScroll = () => {
-        maxHorizontalScroll.current = Math.floor(
-            (DAYS_BACK_MILLIS + DAYS_FORWARD_MILLIS - HOURS_IN_VIEWPORT_MILLIS) / millisPerPixel.current
+        this.canvas = React.createRef();
+        this.epgWrapper = React.createRef();
+        this.stateUpdateHandler = this.props.stateUpdateHandler;
+        this.epgData = this.props.epgData;
+        this.epgUtils = new EPGUtils();
+        this.canvasUtils = new CanvasUtils();
+        // read settings from storage
+        const tvhSettings = JSON.parse(localStorage.getItem(TVHSettings.STORAGE_TVH_SETTING_KEY) || '');
+        this.tvhDataService = new TVHDataService(tvhSettings);
+        this.scrollX = 0;
+        this.scrollY = 0;
+        this.timePosition = this.epgUtils.getNow();
+        this.focusedChannelPosition = this.props.channelPosition;
+        this.focusedEventPosition = -1;
+
+        this.mChannelImageCache = this.props.imageCache;
+    }
+
+    resetBoundaries() {
+        this.mMillisPerPixel = this.calculateMillisPerPixel();
+        this.mTimeOffset = this.calculatedBaseLine();
+        this.mTimeLowerBoundary = this.getTimeFrom(0);
+        this.mTimeUpperBoundary = this.getTimeFrom(this.getWidth());
+    }
+
+    calculateMaxHorizontalScroll() {
+        this.mMaxHorizontalScroll = Math.floor(
+            (TVGuide.DAYS_BACK_MILLIS + TVGuide.DAYS_FORWARD_MILLIS - TVGuide.HOURS_IN_VIEWPORT_MILLIS) /
+                this.mMillisPerPixel
         );
-    };
+    }
 
-    const calculateMaxVerticalScroll = () => {
-        const scrollTop = getTopFrom(epgData.getChannelCount() - 1) + mChannelLayoutHeight;
-        maxVerticalScroll.current = scrollTop < getChannelListHeight() ? 0 : scrollTop - getChannelListHeight();
-    };
+    calculateMaxVerticalScroll() {
+        const maxVerticalScroll = this.getTopFrom(this.epgData.getChannelCount() - 1) + this.mChannelLayoutHeight;
+        this.mMaxVerticalScroll =
+            maxVerticalScroll < this.getChannelListHeight() ? 0 : maxVerticalScroll - this.getChannelListHeight();
+    }
 
-    const calculateMillisPerPixel = () => {
-        return HOURS_IN_VIEWPORT_MILLIS / (getWidth() - mChannelLayoutWidth - mChannelLayoutMargin);
-    };
+    calculateMillisPerPixel() {
+        return (
+            TVGuide.HOURS_IN_VIEWPORT_MILLIS / (this.getWidth() - this.mChannelLayoutWidth - this.mChannelLayoutMargin)
+        );
+    }
 
-    const calculatedBaseLine = () => {
+    calculatedBaseLine() {
         //return LocalDateTime.now().toDateTime().minusMillis(DAYS_BACK_MILLIS).getMillis();
-        return epgUtils.getNow() - DAYS_BACK_MILLIS;
-    };
+        return this.epgUtils.getNow() - TVGuide.DAYS_BACK_MILLIS;
+    }
 
-    const getEventPosition = (channelPosition: number, time: number) => {
-        const events = epgData.getEvents(channelPosition);
+    getProgramPosition(channelPosition: number, time: number) {
+        const events = this.epgData.getEvents(channelPosition);
         if (events !== null) {
             for (let eventPos = 0; eventPos < events.length; eventPos++) {
                 const event = events[eventPos];
@@ -121,124 +152,144 @@ const TVGuide = (props: { unmount: () => void }) => {
             }
         }
         return -1;
-    };
+    }
 
-    const getFirstVisibleChannelPosition = () => {
-        const y = getScrollY(false);
+    getFirstVisibleChannelPosition() {
+        const y = this.getScrollY(false);
 
         let position =
-            Math.round((y - mChannelLayoutMargin - mTimeBarHeight) / (mChannelLayoutHeight + mChannelLayoutMargin)) + 1;
+            Math.round(
+                (y - this.mChannelLayoutMargin - this.mTimeBarHeight) /
+                    (this.mChannelLayoutHeight + this.mChannelLayoutMargin)
+            ) + 1;
 
         if (position < 0) {
             position = 0;
         }
 
         return position;
-    };
+    }
 
-    const getLastVisibleChannelPosition = () => {
-        const y = getScrollY(false);
-        const screenHeight = getChannelListHeight();
+    getLastVisibleChannelPosition() {
+        const y = this.getScrollY(false);
+        const screenHeight = this.getChannelListHeight();
         const position = Math.floor(
-            (y + screenHeight - mTimeBarHeight - mChannelLayoutMargin) / (mChannelLayoutHeight + mChannelLayoutMargin)
+            (y + screenHeight - this.mTimeBarHeight - this.mChannelLayoutMargin) /
+                (this.mChannelLayoutHeight + this.mChannelLayoutMargin)
         );
 
         return position + 1;
-    };
+    }
 
-    const getXFrom = (time: number) => {
+    getXFrom(time: number) {
         return Math.floor(
-            (time - timeLowerBoundary.current) / millisPerPixel.current +
-                mChannelLayoutMargin +
-                mChannelLayoutWidth +
-                mChannelLayoutMargin
+            (time - this.mTimeLowerBoundary) / this.mMillisPerPixel +
+                this.mChannelLayoutMargin +
+                this.mChannelLayoutWidth +
+                this.mChannelLayoutMargin
         );
-    };
+    }
 
-    const getTopFrom = (position: number) => {
-        const y = position * (mChannelLayoutHeight + mChannelLayoutMargin) + mChannelLayoutMargin + mTimeBarHeight;
-        return y - getScrollY(false);
-    };
+    getTopFrom(position: number) {
+        const y =
+            position * (this.mChannelLayoutHeight + this.mChannelLayoutMargin) +
+            this.mChannelLayoutMargin +
+            this.mTimeBarHeight;
+        return y - this.getScrollY(false);
+    }
 
-    const getXPositionStart = () => {
-        return getXFrom(epgUtils.getNow() - HOURS_IN_VIEWPORT_MILLIS / 2);
-    };
+    getXPositionStart() {
+        return this.getXFrom(this.epgUtils.getNow() - TVGuide.HOURS_IN_VIEWPORT_MILLIS / 2);
+    }
 
-    const getTimeFrom = (x: number) => {
-        return x * millisPerPixel.current + timeOffset.current;
-    };
+    getTimeFrom(x: number) {
+        return x * this.mMillisPerPixel + this.mTimeOffset;
+    }
 
-    const shouldDrawTimeLine = (now: number) => {
-        return now >= timeLowerBoundary.current && now < timeUpperBoundary.current;
-    };
+    shouldDrawTimeLine(now: number) {
+        return now >= this.mTimeLowerBoundary && now < this.mTimeUpperBoundary;
+    }
 
-    const shouldDrawPastTimeOverlay = (now: number) => {
-        return now >= timeLowerBoundary.current;
-    };
+    shouldDrawPastTimeOverlay(now: number) {
+        return now >= this.mTimeLowerBoundary;
+    }
 
-    const isEventVisible = (start: number, end: number) => {
+    isEventVisible(start: number, end: number) {
         return (
-            (start >= timeLowerBoundary.current && start <= timeUpperBoundary.current) ||
-            (end >= timeLowerBoundary.current && end <= timeUpperBoundary.current) ||
-            (start <= timeLowerBoundary.current && end >= timeUpperBoundary.current)
+            (start >= this.mTimeLowerBoundary && start <= this.mTimeUpperBoundary) ||
+            (end >= this.mTimeLowerBoundary && end <= this.mTimeUpperBoundary) ||
+            (start <= this.mTimeLowerBoundary && end >= this.mTimeUpperBoundary)
         );
-    };
+    }
 
-    const isRTL = () => {
+    getFocusedChannelPosition() {
+        return this.focusedChannelPosition;
+    }
+
+    getFocusedEventPosition() {
+        return this.focusedEventPosition;
+    }
+
+    isRTL() {
         return false;
-    };
+    }
 
-    const getScrollX = (neglect = true) => {
+    getScrollX(neglect = true) {
         if (neglect) {
             return 0;
         }
-        return scrollX;
-    };
+        return this.scrollX;
+        //return window.scrollX;
+    }
 
-    const getScrollY = (neglect = true) => {
+    getScrollY(neglect = true) {
         if (neglect) {
             return 0;
         }
-        return scrollY;
-    };
+        return this.scrollY;
+        //return window.scrollY;
+    }
 
-    const getWidth = () => {
+    getWidth() {
         return window.innerWidth;
-    };
+    }
 
-    const getHeight = () => {
+    getHeight() {
         return window.innerHeight;
-    };
+    }
 
-    const getChannelListHeight = () => {
-        return mTimeBarHeight + (mChannelLayoutMargin + mChannelLayoutHeight) * VISIBLE_CHANNEL_COUNT;
-    };
+    getChannelListHeight() {
+        return (
+            this.mTimeBarHeight +
+            (this.mChannelLayoutMargin + this.mChannelLayoutHeight) * TVGuide.VISIBLE_CHANNEL_COUNT
+        );
+    }
 
-    const onDraw = (canvas: CanvasRenderingContext2D) => {
-        if (epgData?.hasData()) {
-            timeLowerBoundary.current = getTimeFrom(getScrollX(false));
-            timeUpperBoundary.current = getTimeFrom(getScrollX(false) + getWidth());
-            const drawingRect = mDrawingRect;
-            //console.log("X:" + getScrollX());
-            drawingRect.left = getScrollX();
-            drawingRect.top = getScrollY();
-            drawingRect.right = drawingRect.left + getWidth();
-            drawingRect.bottom = drawingRect.top + getHeight();
+    onDraw(canvas: CanvasRenderingContext2D) {
+        if (this.epgData?.hasData()) {
+            this.mTimeLowerBoundary = this.getTimeFrom(this.getScrollX(false));
+            this.mTimeUpperBoundary = this.getTimeFrom(this.getScrollX(false) + this.getWidth());
+            const drawingRect = this.mDrawingRect;
+            //console.log("X:" + this.getScrollX());
+            drawingRect.left = this.getScrollX();
+            drawingRect.top = this.getScrollY();
+            drawingRect.right = drawingRect.left + this.getWidth();
+            drawingRect.bottom = drawingRect.top + this.getHeight();
             // clear rect
             //canvas.clearRect(0, 0, this.getWidth(), this.getChannelListHeight());
             // draw background
             // canvas.fillStyle = '#000000';
             // canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
-            drawBackground(canvas, drawingRect);
-            drawChannelListItems(canvas, drawingRect);
-            drawEvents(canvas, drawingRect);
-            drawTimebar(canvas, drawingRect);
+            this.drawBackground(canvas, drawingRect);
+            this.drawChannelListItems(canvas, drawingRect);
+            this.drawEvents(canvas, drawingRect);
+            this.drawTimebar(canvas, drawingRect);
             //drawResetButton(canvas, drawingRect);
-            drawTimeLine(canvas, drawingRect);
+            this.drawTimeLine(canvas, drawingRect);
             // draw details pane
-            drawDetails(canvas, drawingRect);
+            this.drawDetails(canvas, drawingRect);
         }
-    };
+    }
 
     /**
      * draw background and usee cache for future
@@ -246,35 +297,40 @@ const TVGuide = (props: { unmount: () => void }) => {
      * @param canvas
      * @param drawingRect
      */
-    const drawBackground = async (canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
-        drawingRect.left = getScrollX();
-        drawingRect.top = getScrollY();
-        drawingRect.right = drawingRect.left + getWidth();
-        drawingRect.bottom = drawingRect.top + getHeight();
+    async drawBackground(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
+        drawingRect.left = this.getScrollX();
+        drawingRect.top = this.getScrollY();
+        drawingRect.right = drawingRect.left + this.getWidth();
+        drawingRect.bottom = drawingRect.top + this.getHeight();
 
         canvas.fillStyle = '#000000';
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
         // channel Background
-        mMeasuringRect.left = getScrollX();
-        mMeasuringRect.top = getScrollY();
-        mMeasuringRect.right = drawingRect.left + mChannelLayoutWidth;
-        mMeasuringRect.bottom = mMeasuringRect.top + getChannelListHeight();
+        this.mMeasuringRect.left = this.getScrollX();
+        this.mMeasuringRect.top = this.getScrollY();
+        this.mMeasuringRect.right = drawingRect.left + this.mChannelLayoutWidth;
+        this.mMeasuringRect.bottom = this.mMeasuringRect.top + this.getChannelListHeight();
 
         //mPaint.setColor(mChannelLayoutBackground);
-        canvas.fillStyle = mChannelLayoutBackground;
-        canvas.fillRect(mMeasuringRect.left, mMeasuringRect.top, mMeasuringRect.width, mMeasuringRect.height);
+        canvas.fillStyle = this.mChannelLayoutBackground;
+        canvas.fillRect(
+            this.mMeasuringRect.left,
+            this.mMeasuringRect.top,
+            this.mMeasuringRect.width,
+            this.mMeasuringRect.height
+        );
 
         // events Background
-        drawingRect.left = mChannelLayoutWidth + mChannelLayoutMargin;
-        drawingRect.top = mTimeBarHeight + mChannelLayoutMargin;
-        drawingRect.right = getWidth();
-        drawingRect.bottom = getChannelListHeight();
+        drawingRect.left = this.mChannelLayoutWidth + this.mChannelLayoutMargin;
+        drawingRect.top = this.mTimeBarHeight + this.mChannelLayoutMargin;
+        drawingRect.right = this.getWidth();
+        drawingRect.bottom = this.getChannelListHeight();
         canvas.globalAlpha = 1.0;
         // put stroke color to transparent
         //canvas.strokeStyle = "transparent";
         canvas.strokeStyle = 'gradient';
         //mPaint.setColor(mChannelLayoutBackground);
-        // canvas.fillStyle = mChannelLayoutBackground;
+        // canvas.fillStyle = this.mChannelLayoutBackground;
         // Create gradient
         const grd = canvas.createLinearGradient(
             drawingRect.left,
@@ -295,44 +351,44 @@ const TVGuide = (props: { unmount: () => void }) => {
         // draw vertical line
         canvas.beginPath();
         canvas.lineWidth = 0.5;
-        canvas.strokeStyle = mEventLayoutTextColor;
+        canvas.strokeStyle = this.mEventLayoutTextColor;
         canvas.moveTo(drawingRect.left, drawingRect.top);
         canvas.lineTo(drawingRect.left, drawingRect.bottom);
         canvas.stroke();
 
         // timebar
-        drawingRect.left = getScrollX() + mChannelLayoutWidth + mChannelLayoutMargin;
-        drawingRect.top = getScrollY();
-        drawingRect.right = drawingRect.left + getWidth();
-        drawingRect.bottom = drawingRect.top + mTimeBarHeight;
+        drawingRect.left = this.getScrollX() + this.mChannelLayoutWidth + this.mChannelLayoutMargin;
+        drawingRect.top = this.getScrollY();
+        drawingRect.right = drawingRect.left + this.getWidth();
+        drawingRect.bottom = drawingRect.top + this.mTimeBarHeight;
 
         // Background
-        canvas.fillStyle = mChannelLayoutBackground;
+        canvas.fillStyle = this.mChannelLayoutBackground;
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
-    };
+    }
 
-    const drawDetails = (canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
+    drawDetails(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
         // Background
-        drawingRect.left = getScrollX();
-        drawingRect.top = getChannelListHeight();
-        drawingRect.right = getWidth();
-        drawingRect.bottom = getHeight();
+        drawingRect.left = this.getScrollX();
+        drawingRect.top = this.getChannelListHeight();
+        drawingRect.right = this.getWidth();
+        drawingRect.bottom = this.getHeight();
 
-        canvas.fillStyle = '#000000'; //mChannelLayoutBackground'';
+        canvas.fillStyle = '#000000'; //this.mChannelLayoutBackground'';
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
 
         // rect for logo
-        drawingRect.left = getScrollX();
-        drawingRect.top = getChannelListHeight();
+        drawingRect.left = this.getScrollX();
+        drawingRect.top = this.getChannelListHeight();
         drawingRect.right = drawingRect.left + 300;
-        drawingRect.bottom = getHeight();
+        drawingRect.bottom = this.getHeight();
 
-        const channel = epgData.getChannel(focusedChannelPosition);
-        const event = epgData.getEvent(focusedChannelPosition, focusedEventPosition);
+        const channel = this.epgData.getChannel(this.getFocusedChannelPosition());
+        const event = this.epgData.getEvent(this.getFocusedChannelPosition(), this.getFocusedEventPosition());
         const imageURL = channel?.getImageURL();
-        const image = imageURL && imageCache.get(imageURL);
+        const image = imageURL && this.mChannelImageCache.get(imageURL);
         if (image) {
-            const imageDrawingRect = getDrawingRectForChannelImage(drawingRect, image);
+            const imageDrawingRect = this.getDrawingRectForChannelImage(drawingRect, image);
             canvas.drawImage(
                 image,
                 imageDrawingRect.left,
@@ -344,184 +400,192 @@ const TVGuide = (props: { unmount: () => void }) => {
 
         // rect for background
         drawingRect.left = drawingRect.right;
-        drawingRect.top = getChannelListHeight();
-        drawingRect.right = getWidth();
-        drawingRect.bottom = getHeight();
+        drawingRect.top = this.getChannelListHeight();
+        drawingRect.right = this.getWidth();
+        drawingRect.bottom = this.getHeight();
 
         if (event !== undefined) {
             // rect event details
-            drawingRect.left += mDetailsLayoutMargin;
-            drawingRect.top += mDetailsLayoutTitleTextSize + mDetailsLayoutMargin;
-            drawingRect.right -= mDetailsLayoutMargin;
-            drawingRect.bottom -= mDetailsLayoutMargin;
+            drawingRect.left += this.mDetailsLayoutMargin;
+            drawingRect.top += this.mDetailsLayoutTitleTextSize + this.mDetailsLayoutMargin;
+            drawingRect.right -= this.mDetailsLayoutMargin;
+            drawingRect.bottom -= this.mDetailsLayoutMargin;
             // draw title, description etc
-            canvasUtils.writeText(canvas, event.getTitle(), drawingRect.left, drawingRect.top, {
-                fontSize: mDetailsLayoutTitleTextSize,
+            this.canvasUtils.writeText(canvas, event.getTitle(), drawingRect.left, drawingRect.top, {
+                fontSize: this.mDetailsLayoutTitleTextSize,
                 isBold: true,
-                fillStyle: mDetailsLayoutTextColor
+                fillStyle: this.mDetailsLayoutTextColor
             });
             if (event.getSubTitle() !== undefined) {
-                drawDetailsSubtitle(event.getSubTitle(), canvas, drawingRect);
+                this.drawDetailsSubtitle(event.getSubTitle(), canvas, drawingRect);
             }
-            drawDetailsTimeInfo(event, canvas, drawingRect);
+            this.drawDetailsTimeInfo(event, canvas, drawingRect);
             if (event.getDescription() !== undefined) {
-                drawDetailsDescription(event.getDescription(), canvas, drawingRect);
+                this.drawDetailsDescription(event.getDescription(), canvas, drawingRect);
             }
         }
-    };
+    }
 
-    const drawDetailsDescription = (description: string, canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
+    drawDetailsDescription(description: string, canvas: CanvasRenderingContext2D, drawingRect: Rect) {
         const drect = drawingRect.clone();
-        drect.right = getWidth() - 10;
-        drect.top += (mDetailsLayoutTitleTextSize + mDetailsLayoutPadding) * 2 + 3;
+        drect.right = this.getWidth() - 10;
+        drect.top += (this.mDetailsLayoutTitleTextSize + this.mDetailsLayoutPadding) * 2 + 3;
         // draw title, description etc
-        canvas.font = mDetailsLayoutDescriptionTextSize + 'px Arial';
-        canvas.fillStyle = mDetailsLayoutTextColor;
-        canvasUtils.wrapText(canvas, description, drect.left, drect.top, drect.width, mDetailsLayoutTitleTextSize + 5);
-    };
+        canvas.font = this.mDetailsLayoutDescriptionTextSize + 'px Arial';
+        canvas.fillStyle = this.mDetailsLayoutTextColor;
+        this.canvasUtils.wrapText(
+            canvas,
+            description,
+            drect.left,
+            drect.top,
+            drect.width,
+            this.mDetailsLayoutTitleTextSize + 5
+        );
+    }
 
-    const drawDetailsTimeInfo = (event: EPGEvent, canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
+    drawDetailsTimeInfo(event: EPGEvent, canvas: CanvasRenderingContext2D, drawingRect: Rect) {
         const tDrawingRect = drawingRect.clone();
-        tDrawingRect.right = getWidth() - 10;
-        const timeFrameText = epgUtils.toTimeFrameString(event.getStart(), event.getEnd(), locale);
-        canvasUtils.writeText(canvas, timeFrameText, tDrawingRect.right, tDrawingRect.top, {
-            fontSize: mDetailsLayoutTitleTextSize,
+        tDrawingRect.right = this.getWidth() - 10;
+        const timeFrameText = this.epgUtils.toTimeFrameString(event.getStart(), event.getEnd(), this.context.locale);
+        this.canvasUtils.writeText(canvas, timeFrameText, tDrawingRect.right, tDrawingRect.top, {
+            fontSize: this.mDetailsLayoutTitleTextSize,
             textAlign: 'right',
             isBold: true
         });
-    };
+    }
 
-    const drawDetailsSubtitle = (subtitle: string, canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
+    drawDetailsSubtitle(subtitle: string, canvas: CanvasRenderingContext2D, drawingRect: Rect) {
         const drect = drawingRect.clone();
-        drect.top += mDetailsLayoutTitleTextSize + mDetailsLayoutPadding;
-        canvasUtils.writeText(canvas, subtitle, drect.left, drect.top, {
-            fontSize: mDetailsLayoutSubTitleTextSize,
-            fillStyle: mDetailsLayoutSubTitleTextColor,
+        drect.top += this.mDetailsLayoutTitleTextSize + this.mDetailsLayoutPadding;
+        this.canvasUtils.writeText(canvas, subtitle, drect.left, drect.top, {
+            fontSize: this.mDetailsLayoutSubTitleTextSize,
+            fillStyle: this.mDetailsLayoutSubTitleTextColor,
             isBold: true,
             maxWidth: drect.width
         });
-    };
+    }
 
-    const drawTimebar = (canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
-        drawingRect.left = getScrollX() + mChannelLayoutWidth + mChannelLayoutMargin;
-        drawingRect.top = getScrollY();
-        drawingRect.right = drawingRect.left + getWidth();
-        drawingRect.bottom = drawingRect.top + mTimeBarHeight;
+    drawTimebar(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
+        drawingRect.left = this.getScrollX() + this.mChannelLayoutWidth + this.mChannelLayoutMargin;
+        drawingRect.top = this.getScrollY();
+        drawingRect.right = drawingRect.left + this.getWidth();
+        drawingRect.bottom = drawingRect.top + this.mTimeBarHeight;
         // draw time stamps
-        for (let i = 0; i < HOURS_IN_VIEWPORT_MILLIS / TIME_LABEL_SPACING_MILLIS; i++) {
+        for (let i = 0; i < TVGuide.HOURS_IN_VIEWPORT_MILLIS / TVGuide.TIME_LABEL_SPACING_MILLIS; i++) {
             // Get time and round to nearest half hour
             let time =
-                TIME_LABEL_SPACING_MILLIS *
-                ((timeLowerBoundary.current + TIME_LABEL_SPACING_MILLIS * i + TIME_LABEL_SPACING_MILLIS / 2) /
-                    TIME_LABEL_SPACING_MILLIS);
-            time = epgUtils.getRoundedDate(30, new Date(time)).getTime();
+                TVGuide.TIME_LABEL_SPACING_MILLIS *
+                ((this.mTimeLowerBoundary +
+                    TVGuide.TIME_LABEL_SPACING_MILLIS * i +
+                    TVGuide.TIME_LABEL_SPACING_MILLIS / 2) /
+                    TVGuide.TIME_LABEL_SPACING_MILLIS);
+            time = this.epgUtils.getRoundedDate(30, new Date(time)).getTime();
 
-            const timeText = epgUtils.toTimeString(time, locale);
-            const x = getXFrom(time);
+            const timeText = this.epgUtils.toTimeString(time, this.context.locale);
+            const x = this.getXFrom(time);
             const y = drawingRect.middle;
-            canvasUtils.writeText(canvas, timeText, x, y, {
-                fontSize: mEventLayoutTextSize,
-                fillStyle: mEventLayoutTextColor,
+            this.canvasUtils.writeText(canvas, timeText, x, y, {
+                fontSize: this.mEventLayoutTextSize,
+                fillStyle: this.mEventLayoutTextColor,
                 textAlign: 'center',
                 isBold: true
             });
         }
 
-        drawTimebarDayIndicator(canvas, drawingRect);
-        drawTimebarBottomStroke(canvas, drawingRect);
-    };
+        this.drawTimebarDayIndicator(canvas, drawingRect);
+        this.drawTimebarBottomStroke(canvas, drawingRect);
+    }
 
-    const drawTimebarDayIndicator = (canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
-        drawingRect.left = getScrollX();
-        drawingRect.top = getScrollY();
-        drawingRect.right = drawingRect.left + mChannelLayoutWidth;
-        drawingRect.bottom = drawingRect.top + mTimeBarHeight;
+    drawTimebarDayIndicator(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
+        drawingRect.left = this.getScrollX();
+        drawingRect.top = this.getScrollY();
+        drawingRect.right = drawingRect.left + this.mChannelLayoutWidth;
+        drawingRect.bottom = drawingRect.top + this.mTimeBarHeight;
 
         // Background
-        canvas.fillStyle = mChannelLayoutBackground;
+        canvas.fillStyle = this.mChannelLayoutBackground;
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
 
         // Text
-        const weekdayText = epgUtils.getWeekdayName(timeLowerBoundary.current, locale);
-        canvasUtils.writeText(canvas, weekdayText, drawingRect.center, drawingRect.middle, {
-            fontSize: mTimeBarTextSize,
-            fillStyle: mEventLayoutTextColor,
+        const weekdayText = this.epgUtils.getWeekdayName(this.mTimeLowerBoundary, this.context.locale);
+        this.canvasUtils.writeText(canvas, weekdayText, drawingRect.center, drawingRect.middle, {
+            fontSize: this.mTimeBarTextSize,
+            fillStyle: this.mEventLayoutTextColor,
             textAlign: 'center',
             isBold: true
         });
-    };
+    }
 
-    const drawTimebarBottomStroke = (canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
-        drawingRect.left = getScrollX();
-        drawingRect.top = getScrollY() + mTimeBarHeight;
-        drawingRect.right = drawingRect.left + getWidth();
-        drawingRect.bottom = drawingRect.top + mChannelLayoutMargin;
+    drawTimebarBottomStroke(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
+        drawingRect.left = this.getScrollX();
+        drawingRect.top = this.getScrollY() + this.mTimeBarHeight;
+        drawingRect.right = drawingRect.left + this.getWidth();
+        drawingRect.bottom = drawingRect.top + this.mChannelLayoutMargin;
 
         // Bottom stroke
         //mPaint.setColor(mEPGBackground);
-        canvas.fillStyle = mEPGBackground;
+        canvas.fillStyle = this.mEPGBackground;
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
-    };
+    }
 
-    const drawTimeLine = (canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
-        const now = epgUtils.getNow();
+    drawTimeLine(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
+        const now = this.epgUtils.getNow();
 
-        if (shouldDrawPastTimeOverlay(now)) {
+        if (this.shouldDrawPastTimeOverlay(now)) {
             // draw opaque overlay
-            drawingRect.left = getScrollX() + mChannelLayoutWidth + mChannelLayoutMargin;
-            drawingRect.top = getScrollY();
-            drawingRect.right = getXFrom(now);
-            drawingRect.bottom = drawingRect.top + getChannelListHeight();
+            drawingRect.left = this.getScrollX() + this.mChannelLayoutWidth + this.mChannelLayoutMargin;
+            drawingRect.top = this.getScrollY();
+            drawingRect.right = this.getXFrom(now);
+            drawingRect.bottom = drawingRect.top + this.getChannelListHeight();
 
-            canvas.fillStyle = mTimeBarLineColor;
+            canvas.fillStyle = this.mTimeBarLineColor;
             const currentAlpha = canvas.globalAlpha;
             canvas.globalAlpha = 0.2;
             canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
             canvas.globalAlpha = currentAlpha;
         }
 
-        if (shouldDrawTimeLine(now)) {
-            drawingRect.left = getXFrom(now);
-            drawingRect.top = getScrollY();
-            drawingRect.right = drawingRect.left + mTimeBarLineWidth;
-            drawingRect.bottom = drawingRect.top + getChannelListHeight();
+        if (this.shouldDrawTimeLine(now)) {
+            drawingRect.left = this.getXFrom(now);
+            drawingRect.top = this.getScrollY();
+            drawingRect.right = drawingRect.left + this.mTimeBarLineWidth;
+            drawingRect.bottom = drawingRect.top + this.getChannelListHeight();
 
             //mPaint.setColor(mTimeBarLineColor);
-            canvas.fillStyle = mTimeBarLineColor;
+            canvas.fillStyle = this.mTimeBarLineColor;
             //canvas.drawRect(drawingRect, mPaint);
             canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
         }
 
         // draw current position
-        drawingRect.left = getXFrom(timePosition);
-        drawingRect.top = getScrollY() + mTimeBarHeight - mTimeBarTextSize + 10;
-        drawingRect.right = drawingRect.left + mTimeBarLineWidth;
-        drawingRect.bottom = drawingRect.top + getChannelListHeight();
+        drawingRect.left = this.getXFrom(this.timePosition);
+        drawingRect.top = this.getScrollY() + this.mTimeBarHeight - this.mTimeBarTextSize + 10;
+        drawingRect.right = drawingRect.left + this.mTimeBarLineWidth;
+        drawingRect.bottom = drawingRect.top + this.getChannelListHeight();
 
         // draw now time stroke
-        canvas.fillStyle = mTimeBarLinePositionColor;
+        canvas.fillStyle = this.mTimeBarLinePositionColor;
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
-
         // draw now time text
-        drawingRect.top += mTimeBarNowTextSize / 2;
-        drawingRect.left = getXFrom(timePosition) + mChannelLayoutPadding;
-        const timeText = epgUtils.toTimeString(timePosition, locale);
-        canvasUtils.writeText(canvas, timeText, drawingRect.left, drawingRect.top, {
-            fontSize: mTimeBarNowTextSize,
-            fillStyle: mTimeBarLinePositionColor,
+        drawingRect.top += this.mTimeBarNowTextSize / 2;
+        drawingRect.left = this.getXFrom(this.timePosition) + this.mChannelLayoutPadding;
+        const timeText = this.epgUtils.toTimeString(this.timePosition, this.context.locale);
+        this.canvasUtils.writeText(canvas, timeText, drawingRect.left, drawingRect.top, {
+            fontSize: this.mTimeBarNowTextSize,
+            fillStyle: this.mTimeBarLinePositionColor,
             isBold: true
         });
-    };
+    }
 
-    const drawEvents = (canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
+    drawEvents(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
         // Background
-        drawingRect.left = mChannelLayoutWidth + mChannelLayoutMargin;
-        drawingRect.top = mTimeBarHeight + mChannelLayoutMargin;
-        drawingRect.right = getWidth();
-        drawingRect.bottom = getChannelListHeight();
+        drawingRect.left = this.mChannelLayoutWidth + this.mChannelLayoutMargin;
+        drawingRect.top = this.mTimeBarHeight + this.mChannelLayoutMargin;
+        drawingRect.right = this.getWidth();
+        drawingRect.bottom = this.getChannelListHeight();
 
-        const firstPos = getFirstVisibleChannelPosition();
-        const lastPos = getLastVisibleChannelPosition();
+        const firstPos = this.getFirstVisibleChannelPosition();
+        const lastPos = this.getLastVisibleChannelPosition();
 
         //console.log("Channel: First: " + firstPos + " Last: " + lastPos);
         //let transparentTop = firstPos + 3;
@@ -538,147 +602,156 @@ const TVGuide = (props: { unmount: () => void }) => {
             // draw horizontal lines
             canvas.beginPath();
             canvas.lineWidth = 0.5;
-            canvas.strokeStyle = mEventLayoutTextColor;
-            canvas.moveTo(mChannelLayoutWidth + mChannelLayoutMargin, getTopFrom(pos));
-            canvas.lineTo(getWidth(), getTopFrom(pos));
+            canvas.strokeStyle = this.mEventLayoutTextColor;
+            canvas.moveTo(this.mChannelLayoutWidth + this.mChannelLayoutMargin, this.getTopFrom(pos));
+            canvas.lineTo(this.getWidth(), this.getTopFrom(pos));
             canvas.stroke();
 
-            const epgEvents = epgData.getEvents(pos);
+            const epgEvents = this.epgData.getEvents(pos);
             let wasVisible = false;
             //  the list is ordered by time so its only a few events processed
-            epgEvents.forEach((event) => {
-                const isVisible = isEventVisible(event.getStart(), event.getEnd());
+            for (const event of epgEvents) {
+                const isVisible = this.isEventVisible(event.getStart(), event.getEnd());
                 if (isVisible) {
                     wasVisible = true;
-                    drawEvent(canvas, pos, event, drawingRect);
+                    this.drawEvent(canvas, pos, event, drawingRect);
                 }
                 if (wasVisible && !isVisible) {
-                    return;
+                    break;
                 }
-            });
+            }
         }
         canvas.globalAlpha = 1;
-    };
+    }
 
-    const drawEvent = (
-        canvas: CanvasRenderingContext2D,
-        channelPosition: number,
-        event: EPGEvent,
-        drawingRect: Rect
-    ) => {
-        setEventDrawingRectangle(channelPosition, event.getStart(), event.getEnd(), drawingRect);
-
-        // canvas.drawRect(drawingRect, mPaint);
-        // set starting minimal behind channel list
-        if (drawingRect.left < getScrollX() + mChannelLayoutWidth + mChannelLayoutMargin) {
-            drawingRect.left = getScrollX() + mChannelLayoutWidth + mChannelLayoutMargin;
-        }
+    drawEvent(canvas: CanvasRenderingContext2D, channelPosition: number, event: EPGEvent, drawingRect: Rect) {
+        this.setEventDrawingRectangle(channelPosition, event.getStart(), event.getEnd(), drawingRect);
 
         // Background
-        canvas.fillStyle = event.isCurrent() ? mEventLayoutBackgroundCurrent : mEventLayoutBackground;
-        if (event.getId() === focusedEvent?.getId()) {
-            canvas.fillStyle = mEventLayoutBackgroundFocus;
+        //mPaint.setColor(event.isCurrent() ? mEventLayoutBackgroundCurrent : mEventLayoutBackground);
+        canvas.fillStyle = event.isCurrent() ? this.mEventLayoutBackgroundCurrent : this.mEventLayoutBackground;
+        const focusedEventPosition = this.getFocusedEventPosition();
+        const focusedEvent = this.epgData.getEvent(channelPosition, focusedEventPosition);
+        if (channelPosition === this.getFocusedChannelPosition()) {
+            if (focusedEventPosition !== -1) {
+                if (focusedEvent === event) {
+                    canvas.fillStyle = this.mEventLayoutBackgroundFocus;
+                }
+            } else if (event.isCurrent()) {
+                this.focusedEventPosition = this.epgData.getEventPosition(channelPosition, event) || 0;
+                canvas.fillStyle = this.mEventLayoutBackgroundFocus;
+            }
         }
-        canvas.fillRect(drawingRect.left + 1, drawingRect.top + 1, drawingRect.width + 1, drawingRect.height + 1);
+        //canvas.drawRect(drawingRect, mPaint);
+        // set starting minimal behind channel list
+        if (drawingRect.left < this.getScrollX() + this.mChannelLayoutWidth + this.mChannelLayoutMargin) {
+            drawingRect.left = this.getScrollX() + this.mChannelLayoutWidth + this.mChannelLayoutMargin;
+        }
 
+        if (
+            event.isCurrent() ||
+            event === this.epgData.getEvent(this.focusedChannelPosition, this.focusedEventPosition)
+        ) {
+            canvas.fillRect(drawingRect.left + 1, drawingRect.top + 1, drawingRect.width + 1, drawingRect.height + 1);
+        }
         // draw vertical line
         canvas.beginPath();
         canvas.lineWidth = 0.5;
-        canvas.strokeStyle = mEventLayoutTextColor;
+        canvas.strokeStyle = this.mEventLayoutTextColor;
         canvas.moveTo(drawingRect.left, drawingRect.top + 1);
         canvas.lineTo(drawingRect.left, drawingRect.bottom + 2);
         canvas.stroke();
 
-        if (epgData.isRecording(event)) {
-            canvas.fillStyle = mEventLayoutRecordingColor;
+        if (this.epgData.isRecording(event)) {
+            canvas.fillStyle = this.mEventLayoutRecordingColor;
             canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, 4);
         }
 
         // Add left and right inner padding
-        drawingRect.left += mChannelLayoutPadding;
-        drawingRect.right -= mChannelLayoutPadding;
+        drawingRect.left += this.mChannelLayoutPadding;
+        drawingRect.right -= this.mChannelLayoutPadding;
 
         // Text
-        canvasUtils.writeText(canvas, event.getTitle(), drawingRect.left, drawingRect.middle, {
-            fontSize: mEventLayoutTextSize,
-            fillStyle: mEventLayoutTextColor,
+        this.canvasUtils.writeText(canvas, event.getTitle(), drawingRect.left, drawingRect.middle, {
+            fontSize: this.mEventLayoutTextSize,
+            fillStyle: this.mEventLayoutTextColor,
             maxWidth: drawingRect.width
         });
         // if (event.getSubTitle()) {
         //     canvas.font = this.mEventLayoutTextSize - 6 + "px Arial";
         //     canvas.fillText(this.canvasUtils.getShortenedText(canvas, event.getSubTitle(), drawingRect), drawingRect.left, drawingRect.top + 18);
         // }
-    };
+    }
 
-    const setEventDrawingRectangle = (channelPosition: number, start: number, end: number, drawingRect: Rect) => {
-        drawingRect.left = getXFrom(start);
-        drawingRect.top = getTopFrom(channelPosition);
-        drawingRect.right = getXFrom(end) - mChannelLayoutMargin;
-        drawingRect.bottom = drawingRect.top + mChannelLayoutHeight;
+    setEventDrawingRectangle(channelPosition: number, start: number, end: number, drawingRect: Rect) {
+        drawingRect.left = this.getXFrom(start);
+        drawingRect.top = this.getTopFrom(channelPosition);
+        drawingRect.right = this.getXFrom(end) - this.mChannelLayoutMargin;
+        drawingRect.bottom = drawingRect.top + this.mChannelLayoutHeight;
         return drawingRect;
-    };
+    }
 
-    const drawChannelListItems = (canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
+    drawChannelListItems(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
         // Background
-        mMeasuringRect.left = getScrollX();
-        mMeasuringRect.top = getScrollY();
-        mMeasuringRect.right = drawingRect.left + mChannelLayoutWidth;
-        mMeasuringRect.bottom = mMeasuringRect.top + getChannelListHeight();
+        this.mMeasuringRect.left = this.getScrollX();
+        this.mMeasuringRect.top = this.getScrollY();
+        this.mMeasuringRect.right = drawingRect.left + this.mChannelLayoutWidth;
+        this.mMeasuringRect.bottom = this.mMeasuringRect.top + this.getChannelListHeight();
 
-        const firstPos = getFirstVisibleChannelPosition();
-        const lastPos = getLastVisibleChannelPosition();
+        const firstPos = this.getFirstVisibleChannelPosition();
+        const lastPos = this.getLastVisibleChannelPosition();
 
         //console.log("Channel: First: " + firstPos + " Last: " + lastPos);
 
         for (let pos = firstPos; pos < lastPos; pos++) {
-            drawChannelItem(canvas, pos, drawingRect);
+            this.drawChannelItem(canvas, pos, drawingRect);
         }
-    };
+    }
 
     /*
     drawChannelText(canvas, position, drawingRect) {
-        drawingRect.left = getScrollX();
-        drawingRect.top = getTopFrom(position);
-        drawingRect.right = drawingRect.left + mChannelLayoutWidth;
-        drawingRect.bottom = drawingRect.top + mChannelLayoutHeight;
+        drawingRect.left = this.getScrollX();
+        drawingRect.top = this.getTopFrom(position);
+        drawingRect.right = drawingRect.left + this.mChannelLayoutWidth;
+        drawingRect.bottom = drawingRect.top + this.mChannelLayoutHeight;
  
         drawingRect.top += (((drawingRect.bottom - drawingRect.top) / 2) + (10/2));
  
-        canvas.font = "bold " + mEventLayoutTextSize+"px Arial";
-        let channelName = epgData.getChannel(position).getName();
-        let channelNumber = epgData.getChannel(position).getId();
+        canvas.font = "bold "+this.mEventLayoutTextSize+"px Arial";
+        let channelName = this.epgData.getChannel(position).getName();
+        let channelNumber = this.epgData.getChannel(position).getId();
         //canvas.fillText(channelNumber, drawingRect.left, drawingRect.top);
         canvas.fillText(channelName, drawingRect.left + 20, drawingRect.top);
     }*/
 
-    const drawChannelItem = (canvas: CanvasRenderingContext2D, position: number, drawingRect: Rect) => {
-        drawingRect.left = getScrollX();
-        drawingRect.top = getTopFrom(position);
-        drawingRect.right = drawingRect.left + mChannelLayoutWidth;
-        drawingRect.bottom = drawingRect.top + mChannelLayoutHeight;
+    drawChannelItem(canvas: CanvasRenderingContext2D, position: number, drawingRect: Rect) {
+        drawingRect.left = this.getScrollX();
+        drawingRect.top = this.getTopFrom(position);
+        drawingRect.right = drawingRect.left + this.mChannelLayoutWidth;
+        drawingRect.bottom = drawingRect.top + this.mChannelLayoutHeight;
         /*
-                canvas.font = mEventLayoutTextSize + "px Arial";
-                canvas.fillStyle = mEventLayoutTextColor;
+                canvas.font = this.mEventLayoutTextSize + "px Arial";
+                canvas.fillStyle = this.mEventLayoutTextColor;
                 canvas.textAlign = 'right';
-                canvas.fillText(epgData.getChannel(position).getChannelID(),
-                     drawingRect.left + 60, drawingRect.top + mChannelLayoutHeight/2 + mEventLayoutTextSize/2 );
+                canvas.fillText(this.epgData.getChannel(position).getChannelID(),
+                     drawingRect.left + 60, drawingRect.top + this.mChannelLayoutHeight/2 + this.mEventLayoutTextSize/2 );
                 canvas.textAlign = 'left';
                 drawingRect.left += 75;
-                canvas.fillText(canvasUtils.getShortenedText(canvas, epgData.getChannel(position).getName(), drawingRect),
-                     drawingRect.left, drawingRect.top + mChannelLayoutHeight/2 + mEventLayoutTextSize/2 );
+                canvas.fillText(this.canvasUtils.getShortenedText(canvas, this.epgData.getChannel(position).getName(), drawingRect),
+                     drawingRect.left, drawingRect.top + this.mChannelLayoutHeight/2 + this.mEventLayoutTextSize/2 );
                 */
         // Loading channel image into target for
-        const channel = epgData.getChannel(position);
+        const channel = this.epgData.getChannel(position);
         const imageURL = channel?.getImageURL();
-        const image = imageURL && imageCache.get(imageURL);
+        const image = imageURL && this.mChannelImageCache.get(imageURL);
         if (image) {
-            drawingRect = getDrawingRectForChannelImage(drawingRect, image);
+            drawingRect = this.getDrawingRectForChannelImage(drawingRect, image);
             canvas.drawImage(image, drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
         } else {
             canvas.textAlign = 'center';
             canvas.font = 'bold 17px Arial';
-            canvas.fillStyle = mEventLayoutTextColor;
-            canvasUtils.wrapText(
+            canvas.fillStyle = this.mEventLayoutTextColor;
+            this.canvasUtils.wrapText(
                 canvas,
                 channel?.getName() || '',
                 drawingRect.left + drawingRect.width / 2,
@@ -689,13 +762,13 @@ const TVGuide = (props: { unmount: () => void }) => {
             //canvas.fillText(this.canvasUtils.getShortenedText(canvas, channel.getName(), drawingRect), drawingRect.left + (drawingRect.width /2), drawingRect.top + 9+  (drawingRect.bottom - drawingRect.top) / 2);
             canvas.textAlign = 'left';
         }
-    };
+    }
 
-    const getDrawingRectForChannelImage = (drawingRect: Rect, image: HTMLImageElement) => {
-        drawingRect.left += mChannelLayoutPadding;
-        drawingRect.top += mChannelLayoutPadding;
-        drawingRect.right -= mChannelLayoutPadding;
-        drawingRect.bottom -= mChannelLayoutPadding;
+    getDrawingRectForChannelImage(drawingRect: Rect, image: HTMLImageElement) {
+        drawingRect.left += this.mChannelLayoutPadding;
+        drawingRect.top += this.mChannelLayoutPadding;
+        drawingRect.right -= this.mChannelLayoutPadding;
+        drawingRect.bottom -= this.mChannelLayoutPadding;
 
         const imageWidth = image.width;
         const imageHeight = image.height;
@@ -716,101 +789,150 @@ const TVGuide = (props: { unmount: () => void }) => {
         }
 
         return drawingRect;
-    };
+    }
 
-    const recalculateAndRedraw = (withAnimation: boolean) => {
-        if (epgData !== null && epgData.hasData()) {
-            resetBoundaries();
-            calculateMaxVerticalScroll();
-            calculateMaxHorizontalScroll();
+    handleClick = (event: any) => {
+        this.scrollX = this.getScrollX(false) + Math.floor(TVGuide.TIME_LABEL_SPACING_MILLIS / this.mMillisPerPixel);
+        //this.scroller.scrollTo(this.scrollX, this.scrollY);
+        //window.scrollTo(this.scrollX, this.scrollY);
 
-            //scrollX = this.getScrollX() + this.getXPositionStart() - this.getScrollX();
-            scrollToChannelPosition(focusedChannelPosition, withAnimation);
+        if (this.ctx) {
+            //this.ctx.fillStyle = 'red';
+            this.ctx.clearRect(0, 0, this.getWidth(), this.getChannelListHeight());
+            this.clear();
+            this.onDraw(this.ctx);
+            //this.updateCanvas();
         }
     };
 
-    const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    clear() {
+        this.mClipRect = new Rect();
+        this.mDrawingRect = new Rect();
+        this.mMeasuringRect = new Rect();
+    }
+
+    recalculateAndRedraw(withAnimation: boolean) {
+        if (this.epgData !== null && this.epgData.hasData()) {
+            //this.resetBoundaries();
+            this.calculateMaxVerticalScroll();
+            this.calculateMaxHorizontalScroll();
+
+            //this.scrollX = this.getScrollX() + this.getXPositionStart() - this.getScrollX();
+            this.scrollToChannelPosition(this.focusedChannelPosition, withAnimation);
+            this.scroller = document.getElementsByClassName('programguide-contents')[0];
+        }
+    }
+
+    handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
         const keyCode = event.keyCode;
-        let eventPosition = focusedEventPosition;
-        let channelPosition = focusedChannelPosition;
+        let programPosition = this.getFocusedEventPosition();
+        let channelPosition = this.getFocusedChannelPosition();
 
         // do not pass this event to parents
         switch (keyCode) {
             case 39: // right arrow
                 event.stopPropagation();
-                eventPosition += 1;
-                scrollToEventPosition(eventPosition);
+                programPosition += 1;
+                this.scrollToProgramPosition(programPosition);
                 break;
             case 37: // left arrow
                 event.stopPropagation();
-                eventPosition -= 1;
-                scrollToEventPosition(eventPosition);
+                programPosition -= 1;
+                this.scrollToProgramPosition(programPosition);
                 break;
             case 40: // arrow down
                 event.stopPropagation();
                 channelPosition += 1;
-                if (channelPosition > epgData.getChannelCount() - 1) {
+                if (channelPosition > this.epgData.getChannelCount() - 1) {
                     channelPosition = 0;
                 }
-                scrollToChannelPosition(channelPosition, false);
+                this.scrollToChannelPosition(channelPosition, false);
                 return;
             case 38: // arrow up
                 event.stopPropagation();
                 channelPosition -= 1;
                 if (channelPosition < 0) {
-                    channelPosition = epgData.getChannelCount() - 1;
+                    channelPosition = this.epgData.getChannelCount() - 1;
                 }
-                scrollToChannelPosition(channelPosition, false);
+                this.scrollToChannelPosition(channelPosition, false);
                 return;
             case 403:
                 event.stopPropagation();
-                toggleRecording(channelPosition, eventPosition);
+                this.toggleRecording(channelPosition, programPosition);
                 break;
             case 461:
             case 406: // blue or back button hide epg/show tv
             case 66: // keyboard 'b'
                 event.stopPropagation();
-                props.unmount();
+                this.cancelScrollAnimation();
+                this.stateUpdateHandler({
+                    isEpgState: false
+                });
                 break;
             case 13: // ok button -> switch to focused channel
                 event.stopPropagation();
-                props.unmount();
-                setCurrentChannelPosition(channelPosition);
+                this.cancelScrollAnimation();
+                this.stateUpdateHandler({
+                    isEpgState: false,
+                    isInfoState: true,
+                    channelPosition: channelPosition
+                });
                 break;
             default:
                 console.log('EPG-keyPressed:', keyCode);
         }
+
+        if (this.ctx) {
+            this.ctx.clearRect(0, 0, this.getWidth(), this.getHeight());
+            this.clear();
+            this.onDraw(this.ctx);
+        } else {
+            this.clear();
+        }
     };
 
-    const toggleRecording = (channelPosition: number, eventPosition: number) => {
+    private toggleRecording(channelPosition: number, programPosition: number) {
         // red button to trigger or cancel recording
         // get current event
-        const currentEvent = epgData.getEvent(channelPosition, eventPosition);
-        setFocusedEvent(currentEvent);
-        if (currentEvent.isPastDated(epgUtils.getNow())) {
+        this.focusedEvent = this.epgData.getEvent(channelPosition, programPosition);
+        if (this.focusedEvent.isPastDated(this.epgUtils.getNow())) {
             // past dated do nothing
             return;
         }
         // check if event is already marked for recording
-        const recEvent = epgData.getRecording(currentEvent);
+        const recEvent = this.epgData.getRecording(this.focusedEvent);
         if (recEvent) {
             // cancel recording
-            tvhDataService?.cancelRec(recEvent, (recordings: EPGEvent[]) => {
-                epgData.updateRecordings(recordings);
-                updateCanvas(); // TODO is still still needed?
+            this.tvhDataService.cancelRec(recEvent, (recordings: EPGEvent[]) => {
+                this.epgData.updateRecordings(recordings);
+                this.updateCanvas();
             });
         } else {
             // creat new recording from event
-            tvhDataService?.createRec(currentEvent, (recordings: EPGEvent[]) => {
-                epgData.updateRecordings(recordings);
-                updateCanvas(); // TODO is still still needed?
+            this.tvhDataService.createRec(this.focusedEvent, (recordings: EPGEvent[]) => {
+                this.epgData.updateRecordings(recordings);
+                this.updateCanvas();
             });
         }
-    };
+    }
 
-    const scrollToTimePosition = (timeDeltaInMillis: number) => {
-        const targetTimePosition = timePosition + timeDeltaInMillis;
-        setTimePosition(targetTimePosition);
+    scrollToProgramPosition(programPosition: number) {
+        if (programPosition < 0) {
+            programPosition = 0;
+        }
+        const eventCount = this.epgData.getEventCount(this.getFocusedChannelPosition());
+        if (programPosition >= eventCount - 1) {
+            programPosition = eventCount - 1;
+        }
+        this.focusedEventPosition = programPosition;
+        const targetEvent = this.epgData.getEvent(this.getFocusedChannelPosition(), programPosition);
+        if (targetEvent) {
+            this.scrollToTimePosition(targetEvent.getStart() + 1 - this.timePosition);
+        }
+    }
+
+    scrollToTimePosition(timeDeltaInMillis: number) {
+        const targetTimePosition = (this.timePosition += timeDeltaInMillis);
         // if (targetTimePosition < this.mTimeLowerBoundary) {
         //     this.timePosition = this.mTimeLowerBoundary;
         //     return;
@@ -819,142 +941,120 @@ const TVGuide = (props: { unmount: () => void }) => {
         //     this.timePosition = this.mTimeUpperBoundary;
         //     return;
         // }
-    };
 
-    const scrollToEventPosition = (eventPosition: number) => {
-        const eventCount = epgData.getEventCount(focusedChannelPosition);
-
-        if (eventPosition < 0) {
-            eventPosition = 0;
+        this.timePosition = targetTimePosition;
+        this.focusedEventPosition = this.getProgramPosition(this.focusedChannelPosition, this.timePosition);
+        this.focusedEvent = this.epgData.getEvent(this.focusedChannelPosition, this.focusedEventPosition);
+        if (this.focusedEvent) {
+            this.resetBoundaries();
+            this.scrollX = this.getXFrom(this.timePosition - TVGuide.HOURS_IN_VIEWPORT_MILLIS / 2);
         }
+        this.updateCanvas();
+    }
 
-        if (eventPosition >= eventCount - 1) {
-            eventPosition = eventCount - 1;
-        }
-
-        setFocusedEventPosition(eventPosition);
-        const targetEvent = epgData.getEvent(focusedChannelPosition, eventPosition);
-        if (targetEvent) {
-            scrollToTimePosition(targetEvent.getStart() + 1 - timePosition);
-        }
-    };
-
-    const scrollToChannelPosition = (channelPosition: number, withAnimation: boolean) => {
-        setFocusedChannelPosition(channelPosition);
-
+    scrollToChannelPosition(channelPosition: number, withAnimation: boolean) {
+        this.focusedChannelPosition = channelPosition;
+        this.scrollToTimePosition(0);
         // start scrolling after padding position top
-        if (channelPosition < VERTICAL_SCROLL_TOP_PADDING_ITEM) {
-            setScrollY(0);
+        if (channelPosition < TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM) {
+            this.scrollY = 0;
+            this.updateCanvas();
             return;
         }
 
         // stop scrolling before padding position bottom
-        const maxPosition = epgData.getChannelCount() - 1 - VERTICAL_SCROLL_TOP_PADDING_ITEM;
+        const maxPosition = this.epgData.getChannelCount() - 1 - TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM;
         if (channelPosition >= maxPosition) {
             // fix scroll to channel in case it is within bottom padding
-            if (scrollY === 0) {
-                setScrollY(
-                    mChannelLayoutMargin * VISIBLE_CHANNEL_COUNT -
-                        1 +
-                        mChannelLayoutHeight * (maxPosition - VERTICAL_SCROLL_TOP_PADDING_ITEM)
-                );
+            if (this.scrollY === 0) {
+                this.scrollY =
+                    this.mChannelLayoutMargin * TVGuide.VISIBLE_CHANNEL_COUNT -
+                    1 +
+                    this.mChannelLayoutHeight * (maxPosition - TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM);
             }
+            this.updateCanvas();
             return;
         }
 
         // scroll to channel position
         const scrollTarget =
-            (mChannelLayoutMargin + mChannelLayoutHeight) * (channelPosition - VERTICAL_SCROLL_TOP_PADDING_ITEM);
+            (this.mChannelLayoutMargin + this.mChannelLayoutHeight) *
+            (channelPosition - TVGuide.VERTICAL_SCROLL_TOP_PADDING_ITEM);
         if (!withAnimation) {
-            setScrollY(scrollTarget);
+            this.scrollY = scrollTarget;
+            this.updateCanvas();
             return;
         }
 
-        const scrollDistance = scrollTarget - scrollY;
-        const scrollDelta = scrollDistance / (mChannelLayoutHeight / 5);
-        cancelScrollAnimation();
-        scrollAnimationId.current = requestAnimationFrame(() => {
-            animateScroll(scrollDelta, scrollTarget);
+        const scrollDistance = scrollTarget - this.scrollY;
+        const scrollDelta = scrollDistance / (this.mChannelLayoutHeight / 5);
+        this.cancelScrollAnimation();
+        this.scrollAnimationId = requestAnimationFrame(() => {
+            this.animateScroll(scrollDelta, scrollTarget);
         });
-        //console.log("Scrolled to y=%d, position=%d", scrollY, channelPosition);
-    };
+        //console.log("Scrolled to y=%d, position=%d", this.scrollY, this.channelPosition);
+        //this.updateCanvas();
+    }
 
-    const cancelScrollAnimation = () => {
-        scrollAnimationId.current && cancelAnimationFrame(scrollAnimationId.current);
-    };
+    cancelScrollAnimation() {
+        this.scrollAnimationId && cancelAnimationFrame(this.scrollAnimationId);
+    }
 
-    const animateScroll = (scrollDelta: number, scrollTarget: number) => {
-        if (scrollDelta < 0 && scrollY <= scrollTarget) {
+    animateScroll(scrollDelta: number, scrollTarget: number) {
+        if (scrollDelta < 0 && this.scrollY <= scrollTarget) {
             //this.scrollY = scrollTarget;
-            cancelScrollAnimation();
+            this.cancelScrollAnimation();
             return;
         }
-        if (scrollDelta > 0 && scrollY >= scrollTarget) {
+        if (scrollDelta > 0 && this.scrollY >= scrollTarget) {
             //this.scrollY = scrollTarget;
-            cancelScrollAnimation();
+            this.cancelScrollAnimation();
             return;
         }
         //console.log("scrolldelta=%d, scrolltarget=%d, scrollY=%d", scrollDelta, scrollTarget, this.scrollY);
-        setScrollY(scrollY + scrollDelta);
-        scrollAnimationId.current = requestAnimationFrame(() => {
-            animateScroll(scrollDelta, scrollTarget);
+        this.scrollY += scrollDelta;
+        this.updateCanvas();
+        this.scrollAnimationId = requestAnimationFrame(() => {
+            this.animateScroll(scrollDelta, scrollTarget);
         });
-    };
+    }
 
-    useEffect(() => {
-        recalculateAndRedraw(false);
-        focusEPG();
+    componentDidMount() {
+        //this.updateCanvas();
+        //this.resetBoundaries();
+        this.recalculateAndRedraw(false);
+        this.focusEPG();
+    }
 
-        return () => {
-            // clear timeout in case component is unmounted
-            cancelScrollAnimation();
-        };
-    }, []);
+    componentDidUpdate() {
+        //this.updateCanvas();
+    }
 
-    useEffect(() => {
-        const targetEvent = epgData.getEvent(focusedChannelPosition, focusedEventPosition);
-        targetEvent && setTimePosition(targetEvent.getStart() + 1);
-    }, [focusedChannelPosition, focusedEventPosition]);
-
-    useEffect(() => {
-        const newFocusedEventPosition = getEventPosition(focusedChannelPosition, timePosition);
-        const newFocusedEvent = epgData.getEvent(focusedChannelPosition, newFocusedEventPosition);
-        setFocusedEventPosition(newFocusedEventPosition);
-        setFocusedEvent(newFocusedEvent);
-    }, [timePosition]);
-
-    useEffect(() => {
-        resetBoundaries();
-        setScrollX(getXFrom(timePosition - HOURS_IN_VIEWPORT_MILLIS / 2));
-    }, [focusedEvent]);
-
-    useEffect(() => {
-        updateCanvas();
-    }, [scrollX, scrollY]);
-
-    const updateCanvas = () => {
-        if (canvas.current) {
-            const ctx = canvas.current.getContext('2d');
-
-            // clear
-            ctx && ctx.clearRect(0, 0, getWidth(), getHeight());
+    updateCanvas() {
+        if (this.canvas.current) {
+            this.ctx = this.canvas.current.getContext('2d');
 
             // draw child elements
-            ctx && onDraw(ctx);
+            this.ctx && this.onDraw(this.ctx);
         }
-    };
+    }
 
-    const focusEPG = () => {
-        epgWrapper.current?.focus();
-    };
+    focusEPG() {
+        this.epgWrapper.current?.focus();
+    }
 
-    return (
-        <div id="epg-wrapper" ref={epgWrapper} tabIndex={-1} onKeyDown={handleKeyPress} className="epg">
-            <div className="programguide-contents" ref={programguideContents}>
-                <canvas ref={canvas} width={getWidth()} height={getHeight()} style={{ display: 'block' }} />
+    render() {
+        return (
+            <div id="epg-wrapper" ref={this.epgWrapper} tabIndex={-1} onKeyDown={this.handleKeyPress} className="epg">
+                <div className="programguide-contents">
+                    <canvas
+                        ref={this.canvas}
+                        width={this.getWidth()}
+                        height={this.getHeight()}
+                        style={{ display: 'block' }}
+                    />
+                </div>
             </div>
-        </div>
-    );
-};
-
-export default TVGuide;
+        );
+    }
+}

@@ -1,24 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
+import AppContent from './App';
 import kind from '@enact/core/kind';
 import MoonstoneDecorator from '@enact/moonstone/MoonstoneDecorator';
-import { AppContextProvider } from './AppContext';
 
 const AppBase = kind({
     name: 'App',
-    render: () => (
-        <AppContextProvider>
-            <App />
-        </AppContextProvider>
-    )
+    render: () => <AppContent />
 });
 
-const DecoratedApp = MoonstoneDecorator(AppBase);
+const App = MoonstoneDecorator(AppBase);
 
 ReactDOM.render(
     <React.StrictMode>
-        <DecoratedApp />
+        <App />
     </React.StrictMode>,
     document.getElementById('root')
 );

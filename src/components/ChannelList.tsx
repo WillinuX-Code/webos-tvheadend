@@ -327,20 +327,22 @@ const ChannelList = (props: { unmount: () => void }) => {
         switch (keyCode) {
             case 33: // programm up
             case 38: // arrow up
-                // channel down
-                setChannelPosition(channelPosition - 1);
-                // if we reached < 0 we scroll to end of list
-                if (channelPosition < 0) {
+                // if we reached 0 we scroll to end of list
+                if (channelPosition === 0) {
                     setChannelPosition(epgData.getChannelCount() - 1);
+                } else {
+                    // channel down
+                    setChannelPosition(channelPosition - 1);
                 }
                 break;
             case 34: // programm down
             case 40: // arrow down
-                // channel up
-                setChannelPosition(channelPosition + 1);
                 // when channel position increased channelcount we scroll to beginning
-                if (channelPosition > epgData.getChannelCount() - 1) {
+                if (channelPosition === epgData.getChannelCount() - 1) {
                     setChannelPosition(0);
+                } else {
+                    // channel up
+                    setChannelPosition(channelPosition + 1);
                 }
                 break;
             case 404: // TODO yellow button + back button
@@ -394,7 +396,6 @@ const ChannelList = (props: { unmount: () => void }) => {
 
     const onDraw = (canvas: CanvasRenderingContext2D) => {
         if (epgData && epgData.hasData()) {
-            console.log('DRAW');
             drawChannelListItems(canvas);
         }
     };

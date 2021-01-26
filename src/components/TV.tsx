@@ -158,9 +158,7 @@ const TV = () => {
         if (newChannelPosition === currentChannelPosition) {
             return;
         }
-
         setCurrentChannelPosition(newChannelPosition);
-        setInfoState(true);
 
         // store last used channel
         localStorage.setItem(STORAGE_KEY_LAST_CHANNEL, newChannelPosition.toString());
@@ -203,7 +201,6 @@ const TV = () => {
     };
 
     const changeSource = (dataUrl: URL) => {
-        console.log('change source');
         const videoElement = getMediaElement();
         if (!videoElement) return;
 
@@ -233,7 +230,7 @@ const TV = () => {
         videoElement.appendChild(source);
 
         // Auto-play video with some (unused) error handling
-        videoElement.play().then().catch();
+        videoElement.play().then().catch(() => console.log('channel switched before it could be played'));
     };
 
     const getWidth = () => window.innerWidth;
@@ -266,18 +263,19 @@ const TV = () => {
     }, []);
 
     useEffect(() => {
-        // change channel in case we have channels retrieved and channel position changed or we don't have a channel active
-        const videoElement = getMediaElement();
-        if (epgData.getChannelCount() > 0 && !videoElement?.hasChildNodes()) {
+        // change channel in case we have channels retrieved and channel position changed
+        if (epgData.getChannelCount() > 0) {
             const currentChannel = getCurrentChannel();
-            currentChannel && changeSource(currentChannel.getStreamUrl());
+            if (currentChannel && currentChannel.getChannelID() !== currentChannelPosition) {
+                changeSource(currentChannel.getStreamUrl());
+
+                // show the channel info, if the channel was changed
+                setInfoState(true);
+
+                // also show the current channel number
+                showCurrentChannelNumber();
+            }
         }
-
-        // show the channel info, if the channel was changed
-        setInfoState(true);
-
-        // also show the current channel number
-        showCurrentChannelNumber();
     }, [currentChannelPosition]);
 
     useEffect(() => {

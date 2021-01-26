@@ -10,8 +10,8 @@ const ChannelSettings = (props: {
 }) => {
     const [selectedAudioTrack, setSelectedAudioTrack] = useState(0);
     const [selectedTextTrack, setSelectedTextTrack] = useState(0);
-    const [textTracksDisplay, setTextTracksDisplay] = useState<string[]>([]);
-    const [audioTracksDisplay, setAudioTracksDisplay] = useState<string[]>([]);
+    const textTracksDisplay: string[] = [];
+    const audioTracksDisplay: string[] = [];
     const timeoutReference = useRef<NodeJS.Timeout | null>(null);
 
     const handleTextChange = (event: any) => {
@@ -62,7 +62,6 @@ const ChannelSettings = (props: {
             for (let i = 0; i < props.audioTracks.length; i++) {
                 const audioTrack = props.audioTracks[i];
                 audioTracksDisplay.push(audioTrack.language);
-                setAudioTracksDisplay((audioTracksDisplay) => [...audioTracksDisplay, audioTrack.language]);
                 audioTrack.enabled && setSelectedAudioTrack(i);
             }
         }
@@ -70,7 +69,7 @@ const ChannelSettings = (props: {
         if (props.textTracks) {
             for (let i = 0; i < props.textTracks.length; i++) {
                 const textTrack = props.textTracks[i];
-                setTextTracksDisplay((textTracksDisplay) => [...textTracksDisplay, textTrack.language]);
+                textTracksDisplay.push(textTrack.language);
                 // textTrack.enabled && setSelectedTextTrack(i);
             }
         }

@@ -24,15 +24,10 @@ const App = () => {
 
             // retrieve channel infos etc
             const channels = await tvhDataService.retrieveM3UChannels();
-            console.log('channels retrieved');
-            console.log(channels);
             epgData.updateChannels(channels);
 
             // preload images
             preloadImages(channels);
-
-            // force update to load/preload video already
-            // this.forceUpdate();
 
             // retrieve epg and update channels
             tvhDataService.retrieveTVHEPG(0, (channels) => epgData.updateChannels(channels));
@@ -41,9 +36,6 @@ const App = () => {
             tvhDataService.retrieveUpcomingRecordings((recordings) => epgData.updateRecordings(recordings));
         } else {
             setSettingsVisible(true);
-            /*this.setState({
-                isSettingsVisible: true
-            });*/
         }
     };
 

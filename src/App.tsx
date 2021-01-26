@@ -34,6 +34,8 @@ const App = () => {
 
             // retrieve recordings and update channels
             tvhDataService.retrieveUpcomingRecordings((recordings) => epgData.updateRecordings(recordings));
+
+            setSettingsVisible(false);
         } else {
             setSettingsVisible(true);
         }
@@ -93,7 +95,7 @@ const App = () => {
 
     useEffect(() => {
         reloadData();
-    }, [isSettingsVisible, tvhDataService]);
+    }, [tvhDataService]);
 
     return (
         <div className="app" onKeyDown={handleKeyPress}>

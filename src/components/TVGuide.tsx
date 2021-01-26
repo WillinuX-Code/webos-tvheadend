@@ -909,6 +909,7 @@ const TVGuide = (props: { unmount: () => void }) => {
     useEffect(() => {
         const targetEvent = epgData.getEvent(focusedChannelPosition, focusedEventPosition);
         targetEvent && setTimePosition(targetEvent.getStart() + 1);
+        targetEvent && setFocusedEvent(targetEvent);
     }, [focusedChannelPosition, focusedEventPosition]);
 
     useEffect(() => {

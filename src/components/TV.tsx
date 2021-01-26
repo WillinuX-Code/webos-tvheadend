@@ -226,10 +226,10 @@ const TV = () => {
         const source = document.createElement('source');
 
         // Add attributes to the created source element for media content.
-        //source.setAttribute('src', dataUrl.toString());
-        //source.setAttribute('type', 'video/mp2t;mediaOption=' + mediaOption);
-        source.setAttribute('src', 'https://www.w3schools.com/html/mov_bbb.mp4');
-        source.setAttribute('type', 'video/mp4');
+        source.setAttribute('src', dataUrl.toString());
+        source.setAttribute('type', 'video/mp2t;mediaOption=' + mediaOption);
+        //source.setAttribute('src', 'https://www.w3schools.com/html/mov_bbb.mp4');
+        //source.setAttribute('type', 'video/mp4');
         videoElement.appendChild(source);
 
         // Auto-play video with some (unused) error handling

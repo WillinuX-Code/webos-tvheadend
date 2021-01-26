@@ -412,6 +412,7 @@ const ChannelList = (props: { unmount: () => void }) => {
 
     useEffect(() => {
         scrollToChannelPosition(channelPosition, true);
+        updateCanvas();
     }, [channelPosition]);
 
     return (

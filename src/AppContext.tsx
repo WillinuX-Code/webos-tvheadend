@@ -5,8 +5,6 @@ import TVHDataService from './services/TVHDataService';
 type AppContext = {
     locale: string;
     setLocale: (value: string) => void;
-    isSettingsVisible: boolean;
-    setSettingsVisible: (value: boolean) => void;
     tvhDataService?: TVHDataService;
     setTvhDataService: (value?: TVHDataService) => void;
     epgData: EPGData;
@@ -19,7 +17,6 @@ const AppContext = createContext({} as AppContext);
 
 export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
     const [locale, setLocale] = useState('en-US');
-    const [isSettingsVisible, setSettingsVisible] = useState(false);
     const [tvhDataService, setTvhDataService] = useState<TVHDataService>();
     const [epgData] = useState(new EPGData());
     const [imageCache] = useState(new Map<URL, HTMLImageElement>());
@@ -28,8 +25,6 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
     const appContext: AppContext = {
         locale: locale,
         setLocale: (value: string) => setLocale(value),
-        isSettingsVisible: isSettingsVisible,
-        setSettingsVisible: (value: boolean) => setSettingsVisible(value),
         tvhDataService: tvhDataService,
         setTvhDataService: (value?: TVHDataService) => setTvhDataService(value),
         epgData: epgData,

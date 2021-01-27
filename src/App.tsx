@@ -7,16 +7,9 @@ import AppContext from './AppContext';
 import EPGChannel from './models/EPGChannel';
 
 const App = () => {
-    const {
-        setLocale,
-        isSettingsVisible,
-        setSettingsVisible,
-        tvhDataService,
-        setTvhDataService,
-        epgData,
-        imageCache
-    } = useContext(AppContext);
+    const { setLocale, tvhDataService, setTvhDataService, epgData, imageCache } = useContext(AppContext);
 
+    const [isSettingsVisible, setSettingsVisible] = useState(false);
     const [isEpgDataLoaded, setEpgDataLoaded] = useState(false);
 
     const reloadData = () => {
@@ -94,21 +87,12 @@ const App = () => {
         }
     };
 
-    const setupTvhService = () => {
+    useEffect(() => {
+        console.log('app component mounted');
         const settingsString = localStorage.getItem(STORAGE_TVH_SETTING_KEY);
         const service = settingsString ? new TVHDataService(JSON.parse(settingsString)) : undefined;
         setTvhDataService(service);
-    };
-
-    useEffect(() => {
-        console.log('app component mounted');
-        setupTvhService();
     }, []);
-
-    useEffect(() => {
-        console.log('app settings closed');
-        setupTvhService();
-    }, [isSettingsVisible]);
 
     useEffect(() => {
         reloadData();
@@ -116,7 +100,7 @@ const App = () => {
 
     return (
         <div className="app" onKeyDown={handleKeyPress}>
-            {isSettingsVisible && <TVHSettings />}
+            {isSettingsVisible && <TVHSettings unmount={() => setSettingsVisible(false)} />}
             {!isSettingsVisible && isEpgDataLoaded && <TV />}
         </div>
     );

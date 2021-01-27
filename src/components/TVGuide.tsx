@@ -190,11 +190,11 @@ const TVGuide = (props: { unmount: () => void }) => {
 
     const getScrollX = (neglect = true) => (neglect ? 0 : scrollX.current);
 
-    const setScrollX = (value: number) => scrollX.current = value;
+    const setScrollX = (value: number) => (scrollX.current = value);
 
     const getScrollY = (neglect = true) => (neglect ? 0 : scrollY.current);
 
-    const setScrollY = (value: number) => scrollY.current = value;
+    const setScrollY = (value: number) => (scrollY.current = value);
 
     const getWidth = () => {
         return window.innerWidth;
@@ -899,6 +899,7 @@ const TVGuide = (props: { unmount: () => void }) => {
     useEffect(() => {
         recalculateAndRedraw(false);
         focusEPG();
+        scrollToEventPosition(focusedEventPosition);
 
         return () => {
             // clear timeout in case component is unmounted
@@ -906,25 +907,35 @@ const TVGuide = (props: { unmount: () => void }) => {
         };
     }, []);
 
-    useEffect(() => {
-        const targetEvent = epgData.getEvent(focusedChannelPosition, focusedEventPosition);
-        targetEvent && setTimePosition(targetEvent.getStart() + 1);
-        targetEvent && setFocusedEvent(targetEvent);
-    }, [focusedChannelPosition, focusedEventPosition]);
-
-    useEffect(() => {
-        const newFocusedEventPosition = getEventPosition(focusedChannelPosition, timePosition);
-        const newFocusedEvent = epgData.getEvent(focusedChannelPosition, newFocusedEventPosition);
-        setFocusedEventPosition(newFocusedEventPosition);
-        setFocusedEvent(newFocusedEvent);
-    }, [timePosition]);
-
-    useEffect(() => {
+    const changeFocusedEvent = (isSameChannel = true) => {
         resetBoundaries();
-        setScrollX(getXFrom(timePosition - HOURS_IN_VIEWPORT_MILLIS / 2));
-        console.log('updated event');
+
+        if (isSameChannel) {
+            const targetEvent = epgData.getEvent(focusedChannelPosition, focusedEventPosition);
+            targetEvent && setFocusedEvent(targetEvent);
+            targetEvent && setTimePosition(targetEvent.getStart() + 1);
+            targetEvent && setScrollX(getXFrom(targetEvent.getStart() + 1 - HOURS_IN_VIEWPORT_MILLIS / 2));
+        } else {
+            const targetEvent = epgData.getEventAtTimestamp(
+                focusedChannelPosition,
+                timePosition + (focusedEvent ? (focusedEvent.getEnd() - focusedEvent.getStart()) / 2 : 0)
+            );
+            targetEvent && setFocusedEvent(targetEvent);
+            targetEvent && setTimePosition(targetEvent.getStart() + 1);
+        }
+    };
+
+    useEffect(() => {
+        changeFocusedEvent(false);
+    }, [focusedChannelPosition]);
+
+    useEffect(() => {
+        changeFocusedEvent();
+    }, [focusedEventPosition]);
+
+    useEffect(() => {
         updateCanvas();
-    }, [focusedEvent]);
+    }, [focusedEvent, timePosition]);
 
     const updateCanvas = () => {
         if (canvas.current) {

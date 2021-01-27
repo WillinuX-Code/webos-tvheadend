@@ -66,48 +66,19 @@ const TVHSettings = () => {
         const service = getDataService();
         const tester = new TVHSettingsTest(service);
 
-        try {
-            // TODO: reimplement this
-            // retrieve server info
-            const severalResults = await tester.testSeveral();
-            setTestResults({
-                ...testResults,
-                serverInfo: severalResults[0],
-                playlist: severalResults[1],
-                stream: severalResults[2],
-                epg: await tester.testEpg(),
-                dvr: await tester.testDvr()
-            });
+        const severalResults = await tester.testSeveral();
+        setTestResults({
+            ...testResults,
+            serverInfo: severalResults[0],
+            playlist: severalResults[1],
+            stream: severalResults[2],
+            epg: await tester.testEpg(),
+            dvr: await tester.testDvr()
+        });
 
-            // retrieve server info
-            //let serverInfoResult = await service.retrieveServerInfo();
-            //this.testResult = 'Version: ' + serverInfoResult.result.sw_version + ' - API Version: ' + serverInfoResult.result.api_version;
-            getConnectionInfo(service);
-
-            // TODO profile is not required anymore (already inlcuded in m3u list)
-            // let profilesResult = await service.retrieveProfileList();
-            // let profiles: string[] = [];
-            // profilesResult.entries.forEach((entry: any) => {
-            //     profiles.push(entry.val);
-            // });
-            // move "pass" profile to beginning of array
-            // if (profiles.indexOf('pass') > 0) {
-            //     profiles.splice(profiles.indexOf('pass'), 1);
-            //     profiles.unshift('pass');
-            // }
-            // retrieve channel tags
-            //let tvChannelTagUuid = await service.retrieveTvChannelTag();
-            // retrieve the default dvr config
-
-            //setDvrUuid(await service.retrieveDVRConfig());
-            setServiceParms({ ...serviceParms, dvrUuid: await service.retrieveDVRConfig() });
-            setConnectButtonEnabled(true);
-            setLoading(false);
-        } catch (error) {
-            // this.testResult = 'Failed to connect: ' + (error.errorText ? error.errorText : error);
-            setLoading(false);
-            setValid(false);
-        }
+        setServiceParms({ ...serviceParms, dvrUuid: testResults?.dvr.payload });
+        setConnectButtonEnabled(true);
+        setLoading(false);
     };
 
     const isValidSetup = () => {
@@ -115,21 +86,6 @@ const TVHSettings = () => {
             (testResults?.serverInfo.accessible && testResults.playlist.accessible && testResults.stream.accessible) ||
             false
         );
-    };
-
-    const getConnectionInfo = async (service: TVHDataService) => {
-        try {
-            const serverInfoResult = await service.retrieveServerInfo();
-            setConnectionStatus(
-                'Version: ' + serverInfoResult.sw_version + ' - API Version: ' + serverInfoResult.api_version
-            );
-            setLoading(false);
-            setValid(true);
-        } catch (error) {
-            setConnectionStatus('Failed to connect: ' + (error.errorText ? error.errorText : error));
-            setLoading(false);
-            setValid(false);
-        }
     };
 
     useEffect(() => {
@@ -190,32 +146,16 @@ const TVHSettings = () => {
                     </Button>
                 )}
                 {isLoading && <Spinner component={Panel} size="medium" />}
-                <br /> <br />
-                <Heading spacing="auto">Connection Status</Heading>
-                {connectionStatus.length === 0 && <Icon>question</Icon>}
-                {connectionStatus.length > 0 && (
-                    <>
-                        {isValid && <Icon>check</Icon>}
-                        {!isValid && <Icon>warning</Icon>}
-                        {connectionStatus}
-                    </>
-                )}
-                {/*this.state.profiles.length > 0 &&
-                        <>
-                            <br /> <br />
-                            <Heading spacing="auto">Stream profile</Heading>
-                            <Picker defaultValue={this.state.profiles.indexOf(this.state.selectedProfile)} onChange={this.handleProfileChange} width="medium">
-                                {this.state.profiles}
-                            </Picker>
-                        </>
-                    */}
-                <br /> <br />
                 <Button disabled={!isValid} backgroundOpacity="lightTranslucent" onClick={handleSave}>
                     Save
                 </Button>
                 <br /> <br />
-                {connectionStatus.length > 0 && testResults && <Heading spacing="auto">Connection Test Results</Heading>}
-                {connectionStatus.length > 0 && testResults && <TestResult {...testResults} />}
+                {testResults && (
+                    <>
+                        <Heading spacing="auto">Connection Test Results</Heading>
+                        <TestResult {...testResults} />
+                    </>
+                )}
             </Panel>
         </div>
     );

@@ -131,7 +131,7 @@ const TVHSettings = () => {
                 <Input
                     className="password"
                     value={serviceParms.password}
-                    type="text"
+                    type="password"
                     onChange={handlePasswordChange}
                     placeholder="Password (Optional)"
                 />

@@ -98,11 +98,11 @@ const App = () => {
         console.log('app component mounted');
         const settingsString = localStorage.getItem(STORAGE_TVH_SETTING_KEY);
         const service = settingsString ? new TVHDataService(JSON.parse(settingsString)) : undefined;
-        service && setTvhDataService(service);
+        setTvhDataService(service);
     }, []);
 
     useEffect(() => {
-        tvhDataService && reloadData();
+        reloadData();
     }, [tvhDataService]);
 
     return (

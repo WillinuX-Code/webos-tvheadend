@@ -90,12 +90,8 @@ const TVHSettings = () => {
 
     useEffect(() => {
         // read state from storage if exists
-        const settings = JSON.parse(localStorage.getItem(STORAGE_TVH_SETTING_KEY) || '') as TVHDataServiceParms;
+        const settings = JSON.parse(localStorage.getItem(STORAGE_TVH_SETTING_KEY) || '{}') as TVHDataServiceParms;
 
-        //setTvhUrl(settings.tvhUrl);
-        //setPassword(settings.password);
-        //setUser(settings.user);
-        //setDvrUuid(settings.dvrUuid);
         setServiceParms(settings);
 
         focus();

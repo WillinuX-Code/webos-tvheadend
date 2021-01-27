@@ -8,7 +8,7 @@ type AppContext = {
     isSettingsVisible: boolean;
     setSettingsVisible: (value: boolean) => void;
     tvhDataService?: TVHDataService;
-    setTvhDataService: (value: TVHDataService) => void;
+    setTvhDataService: (value?: TVHDataService) => void;
     epgData: EPGData;
     imageCache: Map<URL, HTMLImageElement>;
     currentChannelPosition: number;
@@ -31,7 +31,7 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
         isSettingsVisible: isSettingsVisible,
         setSettingsVisible: (value: boolean) => setSettingsVisible(value),
         tvhDataService: tvhDataService,
-        setTvhDataService: (value: TVHDataService) => setTvhDataService(value),
+        setTvhDataService: (value?: TVHDataService) => setTvhDataService(value),
         epgData: epgData,
         imageCache: imageCache,
         currentChannelPosition: currentChannelPosition,

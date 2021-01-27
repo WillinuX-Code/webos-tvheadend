@@ -99,6 +99,11 @@ const TV = () => {
         }
     };
 
+    const handleScrollWheel = () => {
+        setChannelListState(true);
+        setInfoState(false);
+    };
+
     const getMediaElement = () => video.current;
 
     const toggleRecording = () => {
@@ -230,7 +235,10 @@ const TV = () => {
         videoElement.appendChild(source);
 
         // Auto-play video with some (unused) error handling
-        videoElement.play().then().catch(() => console.log('channel switched before it could be played'));
+        videoElement
+            .play()
+            .then()
+            .catch(() => console.log('channel switched before it could be played'));
     };
 
     const getWidth = () => window.innerWidth;
@@ -291,7 +299,14 @@ const TV = () => {
     }, [isInfoState, isEpgState, isChannelListState, isChannelSettingsState]);
 
     return (
-        <div id="tv-wrapper" ref={tvWrapper} tabIndex={-1} onKeyDown={handleKeyPress} className="tv">
+        <div
+            id="tv-wrapper"
+            ref={tvWrapper}
+            tabIndex={-1}
+            onKeyDown={handleKeyPress}
+            onWheel={handleScrollWheel}
+            className="tv"
+        >
             {channelNumberText !== '' && (
                 <ChannelHeader channelNumberText={channelNumberText} unmount={() => setChannelNumberText('')} />
             )}

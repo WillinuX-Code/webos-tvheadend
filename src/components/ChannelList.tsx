@@ -327,23 +327,11 @@ const ChannelList = (props: { unmount: () => void }) => {
         switch (keyCode) {
             case 33: // programm up
             case 38: // arrow up
-                // if we reached 0 we scroll to end of list
-                if (channelPosition === 0) {
-                    setChannelPosition(epgData.getChannelCount() - 1);
-                } else {
-                    // channel down
-                    setChannelPosition(channelPosition - 1);
-                }
+                scrollUp();
                 break;
             case 34: // programm down
             case 40: // arrow down
-                // when channel position increased channelcount we scroll to beginning
-                if (channelPosition === epgData.getChannelCount() - 1) {
-                    setChannelPosition(0);
-                } else {
-                    // channel up
-                    setChannelPosition(channelPosition + 1);
-                }
+                scrollDown();
                 break;
             case 404: // TODO yellow button + back button
             case 67: // keyboard 'c'
@@ -380,6 +368,30 @@ const ChannelList = (props: { unmount: () => void }) => {
                 break;
             default:
                 console.log('ChannelList-keyPressed:', keyCode);
+        }
+    };
+
+    const handleScrollWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+        event.deltaY < 0 ? scrollUp() : scrollDown();
+    };
+
+    const scrollUp = () => {
+        // if we reached 0 we scroll to end of list
+        if (channelPosition === 0) {
+            setChannelPosition(epgData.getChannelCount() - 1);
+        } else {
+            // channel down
+            setChannelPosition(channelPosition - 1);
+        }
+    };
+
+    const scrollDown = () => {
+        // when channel position increased channelcount we scroll to beginning
+        if (channelPosition === epgData.getChannelCount() - 1) {
+            setChannelPosition(0);
+        } else {
+            // channel up
+            setChannelPosition(channelPosition + 1);
         }
     };
 
@@ -421,6 +433,7 @@ const ChannelList = (props: { unmount: () => void }) => {
             ref={listWrapper}
             tabIndex={-1}
             onKeyDown={handleKeyPress}
+            onWheel={handleScrollWheel}
             className="channelList"
         >
             <canvas ref={canvas} width={getWidth()} height={getHeight()} style={{ display: 'block' }} />

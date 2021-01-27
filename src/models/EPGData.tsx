@@ -52,7 +52,7 @@ export default class EPGData {
         const events = channel.getEvents();
 
         // find the last event that begins before the timestamp
-        let eventAtTimestamp = events[0];
+        let eventAtTimestamp = events.length > 0 ? events[0] : null;
         events.forEach((event) => {
             if (event.getStart() <= timestamp) {
                 eventAtTimestamp = event;

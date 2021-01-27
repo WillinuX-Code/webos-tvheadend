@@ -917,7 +917,7 @@ const TVGuide = (props: { unmount: () => void }) => {
             targetEvent && setScrollX(getXFrom(targetEvent.getStart() + 1 - HOURS_IN_VIEWPORT_MILLIS / 2));
         } else {
             const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition, timePosition);
-            targetEvent && setFocusedEvent(targetEvent);
+            setFocusedEvent(targetEvent);
         }
     };
 

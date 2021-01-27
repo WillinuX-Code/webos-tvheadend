@@ -35,7 +35,7 @@ const TVHSettings = (props: { unmount: () => void }) => {
     };
 
     const handleUserChange = (input: HTMLInputElement) => {
-          setServiceParms({ ...serviceParms, user: input.value });
+        setServiceParms({ ...serviceParms, user: input.value });
         setValid(false);
         setConnectButtonEnabled(input.value.length > 0);
     };

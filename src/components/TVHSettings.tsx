@@ -6,15 +6,13 @@ import Heading from '@enact/moonstone/Heading';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import TVHDataService, { TVHDataServiceParms } from '../services/TVHDataService';
 import TVHSettingsTest, { TestResults } from './TVHSettingsTest';
-import Icon from '@enact/moonstone/Icon';
 import AppContext from '../AppContext';
 import TestResult from './TestResult';
 
 export const STORAGE_TVH_SETTING_KEY = 'TVH_SETTINGS';
 
-const TVHSettings = () => {
-    const { tvhDataService, setSettingsVisible } = useContext(AppContext);
-    const [connectionStatus, setConnectionStatus] = useState('');
+const TVHSettings = (props: { unmount: () => void }) => {
+    const { tvhDataService, setTvhDataService } = useContext(AppContext);
     const [isValid, setValid] = useState(false);
     const [isConnectButtonEnabled, setConnectButtonEnabled] = useState(false);
     const [isLoading, setLoading] = useState(false);
@@ -32,26 +30,26 @@ const TVHSettings = () => {
     const handleSave = () => {
         // put to storage
         localStorage.setItem(STORAGE_TVH_SETTING_KEY, JSON.stringify(serviceParms));
-        setSettingsVisible(false);
+        setTvhDataService(new TVHDataService(serviceParms));
+        props.unmount();
     };
 
-    const handleUserChange = (event: any) => {
-        setServiceParms({ ...serviceParms, user: event.value });
+    const handleUserChange = (input: HTMLInputElement) => {
+          setServiceParms({ ...serviceParms, user: input.value });
         setValid(false);
-        setConnectButtonEnabled(event.value.length > 0);
+        setConnectButtonEnabled(input.value.length > 0);
     };
 
-    const handlePasswordChange = (event: any) => {
-        setServiceParms({ ...serviceParms, password: event.value });
+    const handlePasswordChange = (input: HTMLInputElement) => {
+        setServiceParms({ ...serviceParms, password: input.value });
         setValid(false);
-        setConnectButtonEnabled(event.value.length > 0);
+        setConnectButtonEnabled(input.value.length > 0);
     };
 
-    const handleUrlChange = (event: any) => {
-        setConnectionStatus('');
-        setServiceParms({ ...serviceParms, tvhUrl: event.value });
+    const handleUrlChange = (input: HTMLInputElement) => {
+        setServiceParms({ ...serviceParms, tvhUrl: input.value });
         setValid(false);
-        setConnectButtonEnabled(event.value.length > 0);
+        setConnectButtonEnabled(input.value.length > 0);
     };
 
     const getDataService = () => {
@@ -90,9 +88,7 @@ const TVHSettings = () => {
     useEffect(() => {
         // read state from storage if exists
         const settings = JSON.parse(localStorage.getItem(STORAGE_TVH_SETTING_KEY) || '{}') as TVHDataServiceParms;
-
         setServiceParms(settings);
-
         focus();
     }, []);
 

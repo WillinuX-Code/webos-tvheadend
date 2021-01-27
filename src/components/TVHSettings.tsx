@@ -32,7 +32,6 @@ const TVHSettings = () => {
     const handleSave = () => {
         // put to storage
         localStorage.setItem(STORAGE_TVH_SETTING_KEY, JSON.stringify(serviceParms));
-
         setSettingsVisible(false);
     };
 

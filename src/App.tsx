@@ -94,12 +94,21 @@ const App = () => {
         }
     };
 
-    useEffect(() => {
-        console.log('app component mounted');
+    const setupTvhService = () => {
         const settingsString = localStorage.getItem(STORAGE_TVH_SETTING_KEY);
         const service = settingsString ? new TVHDataService(JSON.parse(settingsString)) : undefined;
         setTvhDataService(service);
+    };
+
+    useEffect(() => {
+        console.log('app component mounted');
+        setupTvhService();
     }, []);
+
+    useEffect(() => {
+        console.log('app settings closed');
+        setupTvhService();
+    }, [isSettingsVisible]);
 
     useEffect(() => {
         reloadData();

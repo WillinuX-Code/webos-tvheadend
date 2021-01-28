@@ -373,6 +373,7 @@ const ChannelList = (props: { unmount: () => void }) => {
 
     const handleScrollWheel = (event: React.WheelEvent<HTMLDivElement>) => {
         event.deltaY < 0 ? scrollUp() : scrollDown();
+        focus();
     };
 
     const handleClick = () => {

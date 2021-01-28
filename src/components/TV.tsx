@@ -104,6 +104,10 @@ const TV = () => {
         setInfoState(false);
     };
 
+    const handleClick = () => {
+        setInfoState(!isInfoState);
+    };
+
     const getMediaElement = () => video.current;
 
     const toggleRecording = () => {
@@ -305,6 +309,7 @@ const TV = () => {
             tabIndex={-1}
             onKeyDown={handleKeyPress}
             onWheel={handleScrollWheel}
+            onClick={handleClick}
             className="tv"
         >
             {channelNumberText !== '' && (

@@ -375,6 +375,11 @@ const ChannelList = (props: { unmount: () => void }) => {
         event.deltaY < 0 ? scrollUp() : scrollDown();
     };
 
+    const handleClick = () => {
+        setCurrentChannelPosition(channelPosition);
+        props.unmount();
+    };
+
     const scrollUp = () => {
         // if we reached 0 we scroll to end of list
         if (channelPosition === 0) {
@@ -434,6 +439,7 @@ const ChannelList = (props: { unmount: () => void }) => {
             tabIndex={-1}
             onKeyDown={handleKeyPress}
             onWheel={handleScrollWheel}
+            onClick={handleClick}
             className="channelList"
         >
             <canvas ref={canvas} width={getWidth()} height={getHeight()} style={{ display: 'block' }} />

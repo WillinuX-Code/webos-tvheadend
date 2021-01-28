@@ -1,18 +1,14 @@
-import { TestResults } from '../components/TVHSettingsTest';
 import LunaServiceAdapter from '../luna/LunaServiceAdapter';
 //import MockServiceAdapter from '../mock/MockServiceAdapter';
 import EPGChannel from '../models/EPGChannel';
 import EPGEvent from '../models/EPGEvent';
 import M3UParser from '../utils/M3UParser';
 
-export interface TVHSettingsOptions {
+export interface TVHDataServiceParms {
     tvhUrl: string;
-    user?: string;
-    password?: string;
-    dvrUuid: string;
-    isValid: boolean;
-    isLoading: boolean;
-    testResults?: TestResults;
+    user: string;
+    password: string;
+    dvrUuid: number;
 }
 
 interface TVHServerInfo {
@@ -87,17 +83,16 @@ export default class TVHDataService {
     //private serviceAdapter = new MockServiceAdapter();
     private maxTotalEpgEntries = 10000;
     private channels: EPGChannel[] = [];
-    private channelMap = new Map();
-    private url: string;
+    private url?: string;
     // private profile: string;
-    private dvrUuid: string;
+    private dvrUuid?: number;
     private user?: string;
     private password?: string;
 
-    constructor(settings: TVHSettingsOptions) {
+    constructor(settings: TVHDataServiceParms) {
         this.url = settings.tvhUrl;
         // append trailing slash if it doesn't exist
-        if (!this.url.endsWith('/')) {
+        if (!this.url?.endsWith('/')) {
             this.url += '/';
         }
         this.dvrUuid = settings.dvrUuid;
@@ -129,7 +124,7 @@ export default class TVHDataService {
 
     createRec(event: EPGEvent, callback: DVRCallback) {
         // now create rec by event
-        this.serviceAdapter
+        return this.serviceAdapter
             .call({
                 url:
                     this.url +
@@ -228,7 +223,7 @@ export default class TVHDataService {
 
     async retrieveDVRConfig() {
         // retrieve the default dvr config
-        await this.serviceAdapter
+        return this.serviceAdapter
             .call({
                 url: this.url + TVHDataService.API_DVR_CONFIG,
                 user: this.user,
@@ -297,7 +292,6 @@ export default class TVHDataService {
                         item.channelId,
                         new URL(item.streamUrl)
                     );
-                    this.channelMap.set(channel.getUUID(), channel);
                     this.channels.push(channel);
                 });
             }
@@ -327,7 +321,7 @@ export default class TVHDataService {
     retrieveTVHEPG(start: number, callback: EPGCallback) {
         let totalCount = 0;
 
-        this.serviceAdapter
+        return this.serviceAdapter
             .call({
                 url: this.url + TVHDataService.API_EPG + start,
                 user: this.user,
@@ -340,14 +334,15 @@ export default class TVHDataService {
                     totalCount = response.totalCount;
                     response.entries.forEach((tvhEvent) => {
                         start++;
-                        const channel = this.channelMap.get(tvhEvent.channelUuid);
-                        if (channel) {
-                            channel.addEvent(this.toEpgEvent(tvhEvent));
-                        }
+                        this.channels
+                            .find((channel) => channel.getUUID() == tvhEvent.channelUuid)
+                            ?.addEvent(this.toEpgEvent(tvhEvent));
                     });
                 }
+
                 // notify calling component
                 callback(this.channels);
+
                 // retrieve next increment
                 if (start < this.maxTotalEpgEntries && totalCount > start) {
                     this.retrieveTVHEPG(start, callback);

@@ -321,7 +321,6 @@ const TV = () => {
 
     useEffect(() => {
         if (isAppFocused) {
-            setState(State.TV)
             focus();
         }
     }, [isAppFocused]);

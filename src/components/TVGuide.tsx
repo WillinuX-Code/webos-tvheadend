@@ -776,6 +776,16 @@ const TVGuide = (props: { unmount: () => void }) => {
         }
     };
 
+    const handleScrollWheel = (event: React.WheelEvent) => {
+        event.stopPropagation();
+        // TODO: do something useful
+    };
+
+    const handleClick = (event: React.MouseEvent) => {
+        event.stopPropagation();
+        // TODO: select event directly
+    };
+
     const toggleRecording = (channelPosition: number, eventPosition: number) => {
         // red button to trigger or cancel recording
         // get current event
@@ -950,7 +960,15 @@ const TVGuide = (props: { unmount: () => void }) => {
     };
 
     return (
-        <div id="epg-wrapper" ref={epgWrapper} tabIndex={-1} onKeyDown={handleKeyPress} className="epg">
+        <div
+            id="epg-wrapper"
+            ref={epgWrapper}
+            tabIndex={-1}
+            onKeyDown={handleKeyPress}
+            onWheel={handleScrollWheel}
+            onClick={handleClick}
+            className="epg"
+        >
             <div className="programguide-contents" ref={programguideContents}>
                 <canvas ref={canvas} width={getWidth()} height={getHeight()} style={{ display: 'block' }} />
             </div>

@@ -58,7 +58,7 @@ service.register('proxy', function (message) {
     message.payload.url = "http://userver.fritz.box:9981/api/serverinfo";
     message.payload.user = "webos";
     message.payload.password = "webos3583";
-    */
+     */
     var url = message.payload.url,
         user = message.payload.user,
         password = message.payload.password;
@@ -198,7 +198,10 @@ function digestAuth(options, user, password, tokens) {
         case 'SHA-256': mappedAlgorithm = 'sha256'; break;
         case 'SHA-512': mappedAlgorithm = 'sha512'; break;
         case 'SHA-512-256': mappedAlgorithm = 'sha256'; break; // not yet supported 512-256
-        default: mappedAlgorithm = 'md5';
+        default: {
+            mappedAlgorithm = 'md5';
+            algorithm = 'MD5';
+        }
     }
 
     var cnonce = genNonce(20); // opaque random string value provided by the client

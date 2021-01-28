@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import TVHDataService from './services/TVHDataService';
 import TV from './components/TV';
 import TVHSettings, { STORAGE_TVH_SETTING_KEY } from './components/TVHSettings';
@@ -7,35 +7,38 @@ import AppContext from './AppContext';
 import EPGChannel from './models/EPGChannel';
 
 const App = () => {
-    const {
-        setLocale,
-        isSettingsVisible,
-        setSettingsVisible,
-        tvhDataService,
-        setTvhDataService,
-        epgData,
-        imageCache
-    } = useContext(AppContext);
+    const { setIsAppFocused, setLocale, tvhDataService, setTvhDataService, epgData, imageCache } = useContext(AppContext);
 
-    const reloadData = async () => {
+    const [isSettingsVisible, setIsSettingsVisible] = useState(false);
+    const [isEpgDataLoaded, setIsEpgDataLoaded] = useState(false);
+
+    const reloadData = () => {
         if (tvhDataService) {
             // load locale
             loadLocale(tvhDataService);
 
             // retrieve channel infos etc
-            const channels = await tvhDataService.retrieveM3UChannels();
-            epgData.updateChannels(channels);
+            tvhDataService.retrieveM3UChannels().then((channels) => {
+                epgData.updateChannels(channels);
+                setIsEpgDataLoaded(true);
 
-            // preload images
-            preloadImages(channels);
+                // preload images
+                preloadImages(channels);
 
-            // retrieve epg and update channels
-            tvhDataService.retrieveTVHEPG(0, (channels) => epgData.updateChannels(channels));
+                // retrieve epg and update channels
+                tvhDataService.retrieveTVHEPG(0, (channels) => {
+                    epgData.updateChannels(channels);
+                });
 
-            // retrieve recordings and update channels
-            tvhDataService.retrieveUpcomingRecordings((recordings) => epgData.updateRecordings(recordings));
+                // retrieve recordings and update channels
+                tvhDataService.retrieveUpcomingRecordings((recordings) => {
+                    epgData.updateRecordings(recordings);
+                });
+            });
+
+            setIsSettingsVisible(false);
         } else {
-            setSettingsVisible(true);
+            setIsSettingsVisible(true);
         }
     };
 
@@ -77,7 +80,7 @@ const App = () => {
             case 404: // green button
             case 71: //'g'
                 event.stopPropagation();
-                setSettingsVisible(true);
+                setIsSettingsVisible(!isSettingsVisible);
                 break;
             default:
                 console.log('App-keyPressed:', keyCode);
@@ -88,17 +91,31 @@ const App = () => {
         console.log('app component mounted');
         const settingsString = localStorage.getItem(STORAGE_TVH_SETTING_KEY);
         const service = settingsString ? new TVHDataService(JSON.parse(settingsString)) : undefined;
-        service && setTvhDataService(service);
+        setTvhDataService(service);
+
+        // add global event listeners for blur and focus of the app
+        window.addEventListener('blur', handleBlur, false);
+        window.addEventListener('focus', handleFocus, false);
     }, []);
+
+    const handleBlur = () => {
+        console.log('blurred');
+        setIsAppFocused(false);
+    };
+
+    const handleFocus = () => {
+        console.log('focused');
+        setIsAppFocused(true);
+    };
 
     useEffect(() => {
         reloadData();
-    }, [isSettingsVisible, tvhDataService]);
+    }, [tvhDataService]);
 
     return (
         <div className="app" onKeyDown={handleKeyPress}>
-            {isSettingsVisible && <TVHSettings />}
-            {!isSettingsVisible && epgData && <TV />}
+            {isSettingsVisible && <TVHSettings unmount={() => setIsSettingsVisible(false)} />}
+            {!isSettingsVisible && isEpgDataLoaded && <TV />}
         </div>
     );
 };

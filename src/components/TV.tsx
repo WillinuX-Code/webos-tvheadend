@@ -10,8 +10,17 @@ import '../styles/app.css';
 
 const STORAGE_KEY_LAST_CHANNEL = 'lastChannel';
 
+export enum State {
+    TV = 'tv',
+    EPG = 'epg',
+    CHANNEL_LIST = 'channleList',
+    CHANNEL_INFO = 'channelInfo'
+}
+
 const TV = () => {
-    const { tvhDataService, epgData, currentChannelPosition, setCurrentChannelPosition } = useContext(AppContext);
+    const { isAppFocused, tvhDataService, epgData, currentChannelPosition, setCurrentChannelPosition } = useContext(
+        AppContext
+    );
 
     const tvWrapper = useRef<HTMLDivElement>(null);
     const video = useRef<HTMLVideoElement>(null);
@@ -20,10 +29,8 @@ const TV = () => {
     const [audioTracks, setAudioTracks] = useState<AudioTrackList>();
     const [textTracks, setTextTracks] = useState<TextTrackList>();
     const [channelNumberText, setChannelNumberText] = useState('');
-    const [isEpgState, setEpgState] = useState(false);
-    const [isInfoState, setInfoState] = useState(false);
-    const [isChannelListState, setChannelListState] = useState(false);
-    const [isChannelSettingsState, setChannelSettingsState] = useState(false);
+    const [isState, setState] = useState<State>(State.CHANNEL_INFO);
+    const [isChannelSettingsState, setIsChannelSettingsState] = useState(false);
     const epgUtils = new EPGUtils();
 
     const focus = () => tvWrapper.current?.focus();
@@ -55,8 +62,7 @@ const TV = () => {
                 break;
             case 40: // arrow down
                 event.stopPropagation();
-                setChannelListState(true);
-                setInfoState(false);
+                setState(State.CHANNEL_LIST);
                 break;
             case 33: // programm up
                 event.stopPropagation();
@@ -69,26 +75,27 @@ const TV = () => {
             case 67: // 'c'
             case 38: // arrow up
                 event.stopPropagation();
-                setChannelListState(true);
-                setInfoState(false);
+                setState(State.CHANNEL_LIST);
                 break;
             case 406: // blue button show epg
             case 66: // keyboard 'b'
                 event.stopPropagation();
-                setEpgState(true);
+                setState(State.EPG);
                 break;
-            case 13: // ok button ->show/disable channel info
+            case 13: {
+                // ok button ->show/disable channel info
                 event.stopPropagation();
                 // in channel settings state we dont process the ok - the channel settings component handles it
                 if (isChannelSettingsState) {
                     break;
                 }
-                setInfoState(!isInfoState);
+                handleChannelInfoSwitch();
                 break;
+            }
             case 405: // yellow button
             case 89: //'y'
                 event.stopPropagation();
-                setChannelSettingsState(!isChannelSettingsState);
+                setIsChannelSettingsState(!isChannelSettingsState);
                 break;
             case 403: // red button to trigger or cancel recording
                 event.stopPropagation();
@@ -97,6 +104,25 @@ const TV = () => {
             default:
                 console.log('TV-keyPressed:', keyCode);
         }
+    };
+
+    const handleChannelInfoSwitch = () => {
+        switch (isState) {
+            case State.TV:
+                setState(State.CHANNEL_INFO);
+                break;
+            case State.CHANNEL_INFO:
+                setState(State.TV);
+                break;
+        }
+    };
+
+    const handleScrollWheel = () => {
+        setState(State.CHANNEL_LIST);
+    };
+
+    const handleClick = () => {
+        handleChannelInfoSwitch();
     };
 
     const getMediaElement = () => video.current;
@@ -158,9 +184,7 @@ const TV = () => {
         if (newChannelPosition === currentChannelPosition) {
             return;
         }
-
         setCurrentChannelPosition(newChannelPosition);
-        setInfoState(true);
 
         // store last used channel
         localStorage.setItem(STORAGE_KEY_LAST_CHANNEL, newChannelPosition.toString());
@@ -203,7 +227,6 @@ const TV = () => {
     };
 
     const changeSource = (dataUrl: URL) => {
-        console.log('change source');
         const videoElement = getMediaElement();
         if (!videoElement) return;
 
@@ -233,7 +256,10 @@ const TV = () => {
         videoElement.appendChild(source);
 
         // Auto-play video with some (unused) error handling
-        videoElement.play().then().catch();
+        videoElement
+            .play()
+            .then()
+            .catch(() => console.log('channel switched before it could be played'));
     };
 
     const getWidth = () => window.innerWidth;
@@ -266,34 +292,50 @@ const TV = () => {
     }, []);
 
     useEffect(() => {
-        // change channel in case we have channels retrieved and channel position changed or we don't have a channel active
-        const videoElement = getMediaElement();
-        if (epgData.getChannelCount() > 0 && !videoElement?.hasChildNodes()) {
+        // change channel in case we have channels retrieved and channel position changed
+        if (epgData.getChannelCount() > 0) {
             const currentChannel = getCurrentChannel();
-            currentChannel && changeSource(currentChannel.getStreamUrl());
+            if (currentChannel && currentChannel.getChannelID() !== currentChannelPosition) {
+                changeSource(currentChannel.getStreamUrl());
+
+                // show the channel info, if the channel was changed
+                setState(State.CHANNEL_INFO);
+
+                // also show the current channel number
+                showCurrentChannelNumber();
+            }
         }
-
-        // show the channel info, if the channel was changed
-        setInfoState(true);
-
-        // also show the current channel number
-        showCurrentChannelNumber();
     }, [currentChannelPosition]);
 
     useEffect(() => {
         // if the channel info is shown, also show the current channel number
-        if (isInfoState) {
+        if (isState === State.CHANNEL_INFO) {
             showCurrentChannelNumber();
         }
 
         // request focus if none of the other components are active
-        if (!isInfoState && !isEpgState && !isChannelListState && !isChannelSettingsState) {
+        if (isState === State.TV && !isChannelSettingsState) {
             focus();
         }
-    }, [isInfoState, isEpgState, isChannelListState, isChannelSettingsState]);
+    }, [isState, isChannelSettingsState]);
+
+    useEffect(() => {
+        if (isAppFocused) {
+            setState(State.TV)
+            focus();
+        }
+    }, [isAppFocused]);
 
     return (
-        <div id="tv-wrapper" ref={tvWrapper} tabIndex={-1} onKeyDown={handleKeyPress} className="tv">
+        <div
+            id="tv-wrapper"
+            ref={tvWrapper}
+            tabIndex={-1}
+            onKeyDown={handleKeyPress}
+            onWheel={handleScrollWheel}
+            onClick={handleClick}
+            className="tv"
+        >
             {channelNumberText !== '' && (
                 <ChannelHeader channelNumberText={channelNumberText} unmount={() => setChannelNumberText('')} />
             )}
@@ -303,22 +345,22 @@ const TV = () => {
                     channelName={getCurrentChannel()?.getName() || ''}
                     audioTracks={audioTracks}
                     textTracks={textTracks}
-                    unmount={() => setChannelSettingsState(false)}
+                    unmount={() => setIsChannelSettingsState(false)}
                 />
             )}
 
-            {isInfoState && (
+            {isState === State.CHANNEL_INFO && (
                 <ChannelInfo
                     unmount={() => {
-                        setInfoState(false);
+                        setState(State.TV);
                         setChannelNumberText('');
                     }}
                 />
             )}
 
-            {isChannelListState && <ChannelList unmount={() => setChannelListState(false)} />}
+            {isState === State.CHANNEL_LIST && <ChannelList unmount={() => setState(State.CHANNEL_INFO)} />}
 
-            {isEpgState && <TVGuide unmount={() => setEpgState(false)} />}
+            {isState === State.EPG && <TVGuide unmount={() => setState(State.CHANNEL_INFO)} />}
 
             <video id="myVideo" ref={video} width={getWidth()} height={getHeight()} preload="none"></video>
         </div>

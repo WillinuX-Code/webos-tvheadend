@@ -37,8 +37,6 @@ const TVGuide = (props: { unmount: () => void }) => {
     const canvasUtils = new CanvasUtils();
     const epgUtils = new EPGUtils();
 
-    const [scrollX, setScrollX] = useState(0);
-    const [scrollY, setScrollY] = useState(0);
     const [timePosition, setTimePosition] = useState(epgUtils.getNow());
     const [focusedChannelPosition, setFocusedChannelPosition] = useState(currentChannelPosition);
     const [focusedEventPosition, setFocusedEventPosition] = useState(-1);
@@ -50,6 +48,8 @@ const TVGuide = (props: { unmount: () => void }) => {
     const timeUpperBoundary = useRef(0);
     const maxHorizontalScroll = useRef(0);
     const maxVerticalScroll = useRef(0);
+    const scrollX = useRef(0);
+    const scrollY = useRef(0);
 
     const mDrawingRect = new Rect();
     const mMeasuringRect = new Rect();
@@ -188,19 +188,13 @@ const TVGuide = (props: { unmount: () => void }) => {
         return false;
     };
 
-    const getScrollX = (neglect = true) => {
-        if (neglect) {
-            return 0;
-        }
-        return scrollX;
-    };
+    const getScrollX = (neglect = true) => (neglect ? 0 : scrollX.current);
 
-    const getScrollY = (neglect = true) => {
-        if (neglect) {
-            return 0;
-        }
-        return scrollY;
-    };
+    const setScrollX = (value: number) => (scrollX.current = value);
+
+    const getScrollY = (neglect = true) => (neglect ? 0 : scrollY.current);
+
+    const setScrollY = (value: number) => (scrollY.current = value);
 
     const getWidth = () => {
         return window.innerWidth;
@@ -782,6 +776,16 @@ const TVGuide = (props: { unmount: () => void }) => {
         }
     };
 
+    const handleScrollWheel = (event: React.WheelEvent) => {
+        event.stopPropagation();
+        // TODO: do something useful
+    };
+
+    const handleClick = (event: React.MouseEvent) => {
+        event.stopPropagation();
+        // TODO: select event directly
+    };
+
     const toggleRecording = (channelPosition: number, eventPosition: number) => {
         // red button to trigger or cancel recording
         // get current event
@@ -852,7 +856,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         const maxPosition = epgData.getChannelCount() - 1 - VERTICAL_SCROLL_TOP_PADDING_ITEM;
         if (channelPosition >= maxPosition) {
             // fix scroll to channel in case it is within bottom padding
-            if (scrollY === 0) {
+            if (getScrollY() === 0) {
                 setScrollY(
                     mChannelLayoutMargin * VISIBLE_CHANNEL_COUNT -
                         1 +
@@ -868,15 +872,15 @@ const TVGuide = (props: { unmount: () => void }) => {
         if (!withAnimation) {
             setScrollY(scrollTarget);
             return;
+        } else {
+            const scrollDistance = scrollTarget - getScrollY();
+            const scrollDelta = scrollDistance / (mChannelLayoutHeight / 5);
+            cancelScrollAnimation();
+            scrollAnimationId.current = requestAnimationFrame(() => {
+                animateScroll(scrollDelta, scrollTarget);
+            });
+            //console.log("Scrolled to y=%d, position=%d", scrollY, channelPosition);
         }
-
-        const scrollDistance = scrollTarget - scrollY;
-        const scrollDelta = scrollDistance / (mChannelLayoutHeight / 5);
-        cancelScrollAnimation();
-        scrollAnimationId.current = requestAnimationFrame(() => {
-            animateScroll(scrollDelta, scrollTarget);
-        });
-        //console.log("Scrolled to y=%d, position=%d", scrollY, channelPosition);
     };
 
     const cancelScrollAnimation = () => {
@@ -884,26 +888,28 @@ const TVGuide = (props: { unmount: () => void }) => {
     };
 
     const animateScroll = (scrollDelta: number, scrollTarget: number) => {
-        if (scrollDelta < 0 && scrollY <= scrollTarget) {
+        if (scrollDelta < 0 && getScrollY() <= scrollTarget) {
             //this.scrollY = scrollTarget;
             cancelScrollAnimation();
             return;
         }
-        if (scrollDelta > 0 && scrollY >= scrollTarget) {
+        if (scrollDelta > 0 && getScrollY() >= scrollTarget) {
             //this.scrollY = scrollTarget;
             cancelScrollAnimation();
             return;
         }
         //console.log("scrolldelta=%d, scrolltarget=%d, scrollY=%d", scrollDelta, scrollTarget, this.scrollY);
-        setScrollY(scrollY + scrollDelta);
+        setScrollY(getScrollY() + scrollDelta);
         scrollAnimationId.current = requestAnimationFrame(() => {
             animateScroll(scrollDelta, scrollTarget);
         });
+        updateCanvas();
     };
 
     useEffect(() => {
         recalculateAndRedraw(false);
         focusEPG();
+        scrollToEventPosition(focusedEventPosition);
 
         return () => {
             // clear timeout in case component is unmounted
@@ -911,26 +917,31 @@ const TVGuide = (props: { unmount: () => void }) => {
         };
     }, []);
 
-    useEffect(() => {
-        const targetEvent = epgData.getEvent(focusedChannelPosition, focusedEventPosition);
-        targetEvent && setTimePosition(targetEvent.getStart() + 1);
-    }, [focusedChannelPosition, focusedEventPosition]);
-
-    useEffect(() => {
-        const newFocusedEventPosition = getEventPosition(focusedChannelPosition, timePosition);
-        const newFocusedEvent = epgData.getEvent(focusedChannelPosition, newFocusedEventPosition);
-        setFocusedEventPosition(newFocusedEventPosition);
-        setFocusedEvent(newFocusedEvent);
-    }, [timePosition]);
-
-    useEffect(() => {
+    const changeFocusedEvent = (isSameChannel = true) => {
         resetBoundaries();
-        setScrollX(getXFrom(timePosition - HOURS_IN_VIEWPORT_MILLIS / 2));
-    }, [focusedEvent]);
+
+        if (isSameChannel) {
+            const targetEvent = epgData.getEvent(focusedChannelPosition, focusedEventPosition);
+            targetEvent && setFocusedEvent(targetEvent);
+            targetEvent && setTimePosition(targetEvent.getStart() + 1);
+            targetEvent && setScrollX(getXFrom(targetEvent.getStart() + 1 - HOURS_IN_VIEWPORT_MILLIS / 2));
+        } else {
+            const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition, timePosition);
+            setFocusedEvent(targetEvent);
+        }
+    };
+
+    useEffect(() => {
+        changeFocusedEvent(false);
+    }, [focusedChannelPosition]);
+
+    useEffect(() => {
+        changeFocusedEvent();
+    }, [focusedEventPosition]);
 
     useEffect(() => {
         updateCanvas();
-    }, [scrollX, scrollY]);
+    }, [focusedEvent, timePosition]);
 
     const updateCanvas = () => {
         if (canvas.current) {
@@ -949,7 +960,15 @@ const TVGuide = (props: { unmount: () => void }) => {
     };
 
     return (
-        <div id="epg-wrapper" ref={epgWrapper} tabIndex={-1} onKeyDown={handleKeyPress} className="epg">
+        <div
+            id="epg-wrapper"
+            ref={epgWrapper}
+            tabIndex={-1}
+            onKeyDown={handleKeyPress}
+            onWheel={handleScrollWheel}
+            onClick={handleClick}
+            className="epg"
+        >
             <div className="programguide-contents" ref={programguideContents}>
                 <canvas ref={canvas} width={getWidth()} height={getHeight()} style={{ display: 'block' }} />
             </div>

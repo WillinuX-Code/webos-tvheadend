@@ -41,34 +41,36 @@ export default class EPGData {
         return this.getEvents(channelPosition).length;
     }
 
-    getEvent(channelPosition: number, programPosition: number): EPGEvent {
+    getEvent(channelPosition: number, eventPosition: number) {
         const channel = this.channels[channelPosition];
         const events = channel.getEvents();
-        return events[programPosition];
+        return events[eventPosition];
     }
 
-    isRecording(epgEvent: EPGEvent): boolean {
-        return this.getRecording(epgEvent) ? true : false;
-    }
+    getEventAtTimestamp(channelPosition: number, timestamp: number) {
+        const channel = this.channels[channelPosition];
+        const events = channel.getEvents();
 
-    getRecording(epgEvent: EPGEvent): EPGEvent | null {
-        let result: EPGEvent | null = null;
-        this.recordings.forEach((recEvent) => {
-            if (epgEvent.isMatchingRecording(recEvent)) {
-                result = recEvent;
-                return;
+        // find the last event that begins before the timestamp
+        let eventAtTimestamp = events.length > 0 ? events[0] : null;
+        events.forEach((event) => {
+            if (event.getStart() <= timestamp) {
+                eventAtTimestamp = event;
             }
         });
-        return result;
+        return eventAtTimestamp;
     }
 
-    getEventPosition(channelPosition: number, event: EPGEvent): number | undefined {
-        const events = this.channels[channelPosition].getEvents();
-        for (let i = 0; i < events.length; i++) {
-            if (this.isEventSame(event, events[i])) {
-                return i;
-            }
-        }
+    isRecording(epgEvent: EPGEvent) {
+        return !!this.getRecording(epgEvent);
+    }
+
+    getRecording(epgEvent: EPGEvent) {
+        return this.recordings.find((recEvent) => epgEvent.isMatchingRecording(recEvent));
+    }
+
+    getEventPosition(channelPosition: number, eventToFind: EPGEvent) {
+        return this.channels[channelPosition].getEvents().findIndex((event) => this.isEventSame(event, eventToFind));
     }
 
     getChannelCount(): number {
@@ -79,10 +81,7 @@ export default class EPGData {
     }
 
     isEventSame(event1: EPGEvent, event2: EPGEvent): boolean {
-        if (event1.getStart() === event2.getStart() && event1.getEnd() === event2.getEnd()) {
-            return true;
-        }
-        return false;
+        return event1.getId() === event2.getId();
     }
 
     hasData(): boolean {

@@ -12,7 +12,7 @@ const ChannelList = (props: { unmount: () => void }) => {
     const canvas = useRef<HTMLCanvasElement>(null);
     const listWrapper = useRef<HTMLDivElement>(null);
     const scrollAnimationId = useRef(0);
-    const [scrollY, setScrollY] = useState(0);
+    const scrollY = useRef(0);
     const [channelPosition, setChannelPosition] = useState(currentChannelPosition);
 
     const canvasUtils = new CanvasUtils();
@@ -30,13 +30,13 @@ const ChannelList = (props: { unmount: () => void }) => {
 
     const getTopFrom = (position: number) => {
         const y = position * mChannelLayoutHeight; //+ this.mChannelLayoutMargin;
-        return y - scrollY;
+        return y - scrollY.current;
     };
 
     const scrollToChannelPosition = (channelPosition: number, withAnimation: boolean) => {
         // start scrolling after padding position top
         if (channelPosition < VERTICAL_SCROLL_TOP_PADDING_ITEM) {
-            setScrollY(0);
+            scrollY.current = 0;
             return;
         }
 
@@ -44,8 +44,8 @@ const ChannelList = (props: { unmount: () => void }) => {
         const maxPosition = epgData.getChannelCount() - VERTICAL_SCROLL_TOP_PADDING_ITEM;
         if (channelPosition >= maxPosition) {
             // fix scroll to channel in case it is within bottom padding
-            if (scrollY === 0) {
-                setScrollY(mChannelLayoutHeight * (maxPosition - VERTICAL_SCROLL_TOP_PADDING_ITEM));
+            if (scrollY.current === 0) {
+                scrollY.current = mChannelLayoutHeight * (maxPosition - VERTICAL_SCROLL_TOP_PADDING_ITEM);
             }
             return;
         }
@@ -53,11 +53,11 @@ const ChannelList = (props: { unmount: () => void }) => {
         // scroll to channel position
         const scrollTarget = mChannelLayoutHeight * (channelPosition - VERTICAL_SCROLL_TOP_PADDING_ITEM);
         if (!withAnimation) {
-            setScrollY(scrollTarget);
+            scrollY.current = scrollTarget;
             return;
         }
 
-        const scrollDistance = scrollTarget - scrollY;
+        const scrollDistance = scrollTarget - scrollY.current;
         const scrollDelta = scrollDistance / (mChannelLayoutHeight / 5);
         // stop existing animation if we have a new request
         cancelAnimationFrame(scrollAnimationId.current);
@@ -67,21 +67,22 @@ const ChannelList = (props: { unmount: () => void }) => {
     };
 
     const animateScroll = (scrollDelta: number, scrollTarget: number) => {
-        if (scrollDelta < 0 && scrollY <= scrollTarget) {
+        if (scrollDelta < 0 && scrollY.current <= scrollTarget) {
             //this.scrollY = scrollTarget;
             cancelAnimationFrame(scrollAnimationId.current);
             return;
         }
-        if (scrollDelta > 0 && scrollY >= scrollTarget) {
+        if (scrollDelta > 0 && scrollY.current >= scrollTarget) {
             //this.scrollY = scrollTarget;
             cancelAnimationFrame(scrollAnimationId.current);
             return;
         }
         //console.log("scrolldelta=%d, scrolltarget=%d, scrollY=%d", scrollDelta, scrollTarget, this.scrollY);
-        setScrollY(scrollY + scrollDelta);
+        scrollY.current = scrollY.current + scrollDelta;
         scrollAnimationId.current = requestAnimationFrame(() => {
             animateScroll(scrollDelta, scrollTarget);
         });
+        updateCanvas();
     };
 
     const drawChannelListItems = (canvas: CanvasRenderingContext2D) => {
@@ -272,7 +273,7 @@ const ChannelList = (props: { unmount: () => void }) => {
      * get first visible channel position
      */
     const getFirstVisibleChannelPosition = () => {
-        const y = scrollY;
+        const y = scrollY.current;
         let position = Math.floor(y / mChannelLayoutHeight);
 
         if (position < 0) {
@@ -283,7 +284,7 @@ const ChannelList = (props: { unmount: () => void }) => {
     };
 
     const getLastVisibleChannelPosition = () => {
-        const y = scrollY;
+        const y = scrollY.current;
         const screenHeight = getHeight();
         let position = Math.floor((y + screenHeight) / mChannelLayoutHeight);
 
@@ -315,20 +316,6 @@ const ChannelList = (props: { unmount: () => void }) => {
         return window.innerHeight;
     };
 
-    useEffect(() => {
-        recalculateAndRedraw(false);
-        focus();
-
-        return () => {
-            // stop animation when unmounting
-            cancelAnimationFrame(scrollAnimationId.current);
-        };
-    }, []);
-
-    useEffect(() => {
-        updateCanvas();
-    }, [scrollY, channelPosition]);
-
     const focus = () => {
         listWrapper.current?.focus();
     };
@@ -340,24 +327,11 @@ const ChannelList = (props: { unmount: () => void }) => {
         switch (keyCode) {
             case 33: // programm up
             case 38: // arrow up
-                // channel down
-                setChannelPosition(channelPosition - 1);
-                // if we reached < 0 we scroll to end of list
-                if (channelPosition < 0) {
-                    setChannelPosition(epgData.getChannelCount() - 1);
-                }
-
-                scrollToChannelPosition(channelPosition, true);
+                scrollUp();
                 break;
             case 34: // programm down
             case 40: // arrow down
-                // channel up
-                setChannelPosition(channelPosition + 1);
-                // when channel position increased channelcount we scroll to beginning
-                if (channelPosition > epgData.getChannelCount() - 1) {
-                    setChannelPosition(0);
-                }
-                scrollToChannelPosition(channelPosition, true);
+                scrollDown();
                 break;
             case 404: // TODO yellow button + back button
             case 67: // keyboard 'c'
@@ -397,6 +371,35 @@ const ChannelList = (props: { unmount: () => void }) => {
         }
     };
 
+    const handleScrollWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+        event.deltaY < 0 ? scrollUp() : scrollDown();
+    };
+
+    const handleClick = () => {
+        setCurrentChannelPosition(channelPosition);
+        props.unmount();
+    };
+
+    const scrollUp = () => {
+        // if we reached 0 we scroll to end of list
+        if (channelPosition === 0) {
+            setChannelPosition(epgData.getChannelCount() - 1);
+        } else {
+            // channel down
+            setChannelPosition(channelPosition - 1);
+        }
+    };
+
+    const scrollDown = () => {
+        // when channel position increased channelcount we scroll to beginning
+        if (channelPosition === epgData.getChannelCount() - 1) {
+            setChannelPosition(0);
+        } else {
+            // channel up
+            setChannelPosition(channelPosition + 1);
+        }
+    };
+
     const updateCanvas = () => {
         if (canvas.current) {
             const ctx = canvas.current.getContext('2d');
@@ -409,10 +412,25 @@ const ChannelList = (props: { unmount: () => void }) => {
     };
 
     const onDraw = (canvas: CanvasRenderingContext2D) => {
-        if (epgData !== null && epgData.hasData()) {
+        if (epgData && epgData.hasData()) {
             drawChannelListItems(canvas);
         }
     };
+
+    useEffect(() => {
+        recalculateAndRedraw(false);
+        focus();
+
+        return () => {
+            // stop animation when unmounting
+            cancelAnimationFrame(scrollAnimationId.current);
+        };
+    }, []);
+
+    useEffect(() => {
+        scrollToChannelPosition(channelPosition, true);
+        updateCanvas();
+    }, [channelPosition]);
 
     return (
         <div
@@ -420,6 +438,8 @@ const ChannelList = (props: { unmount: () => void }) => {
             ref={listWrapper}
             tabIndex={-1}
             onKeyDown={handleKeyPress}
+            onWheel={handleScrollWheel}
+            onClick={handleClick}
             className="channelList"
         >
             <canvas ref={canvas} width={getWidth()} height={getHeight()} style={{ display: 'block' }} />

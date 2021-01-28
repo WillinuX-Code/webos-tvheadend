@@ -5,8 +5,9 @@ import ChannelHeader from './ChannelHeader';
 import ChannelList from './ChannelList';
 import ChannelSettings from './ChannelSettings';
 import EPGUtils from '../utils/EPGUtils';
-import AppContext from '../AppContext';
+import AppContext, { AppState } from '../AppContext';
 import '../styles/app.css';
+import App from '../App';
 
 const STORAGE_KEY_LAST_CHANNEL = 'lastChannel';
 
@@ -18,7 +19,7 @@ export enum State {
 }
 
 const TV = () => {
-    const { isAppFocused, tvhDataService, epgData, currentChannelPosition, setCurrentChannelPosition } = useContext(
+    const { appState, tvhDataService, epgData, currentChannelPosition, setCurrentChannelPosition } = useContext(
         AppContext
     );
 
@@ -226,10 +227,7 @@ const TV = () => {
         });
     };
 
-    const changeSource = (dataUrl: URL) => {
-        const videoElement = getMediaElement();
-        if (!videoElement) return;
-
+    const resetPlayer = (videoElement: HTMLVideoElement) => {
         // Remove all source elements
         while (videoElement.firstChild) {
             videoElement.removeChild(videoElement.firstChild);
@@ -237,6 +235,13 @@ const TV = () => {
 
         // Reset video
         videoElement.load();
+    };
+
+    const changeSource = (dataUrl: URL) => {
+        const videoElement = getMediaElement();
+        if (!videoElement) return;
+
+        resetPlayer(videoElement);
 
         const options = {
             mediaTransportType: 'URI'
@@ -281,13 +286,9 @@ const TV = () => {
         focus();
 
         return () => {
-            // Anything in here is fired on component unmount.
             const videoElement = getMediaElement();
-
-            // Remove all source elements
-            while (videoElement?.firstChild) {
-                videoElement.removeChild(videoElement.firstChild);
-            }
+            if (!videoElement) return;
+            resetPlayer(videoElement);
         };
     }, []);
 
@@ -297,10 +298,8 @@ const TV = () => {
             const currentChannel = getCurrentChannel();
             if (currentChannel && currentChannel.getChannelID() !== currentChannelPosition) {
                 changeSource(currentChannel.getStreamUrl());
-
                 // show the channel info, if the channel was changed
                 setState(State.CHANNEL_INFO);
-
                 // also show the current channel number
                 showCurrentChannelNumber();
             }
@@ -319,12 +318,33 @@ const TV = () => {
         }
     }, [isState, isChannelSettingsState]);
 
+    /**
+     * handle app state changes
+     */
     useEffect(() => {
-        if (isAppFocused) {
+        // state changed to focus -> refocus
+        if (appState === AppState.FOCUSED) {
             setState(State.CHANNEL_INFO);
             focus();
         }
-    }, [isAppFocused]);
+        // state changed to background -> stop playback
+        if (appState === AppState.BACKGROUND) {
+            const videoElement = getMediaElement();
+            if (!videoElement) return;
+            resetPlayer(videoElement);
+        }
+        // state changed to foreground -> start playback
+        if (appState === AppState.FOREGROUND) {
+            const currentChannel = getCurrentChannel();
+            if (currentChannel) {
+                changeSource(currentChannel.getStreamUrl());
+                // show the channel info, if the channel was changed
+                setState(State.CHANNEL_INFO);
+                // also show the current channel number
+                showCurrentChannelNumber();
+            }
+        }
+    }, [appState]);
 
     return (
         <div

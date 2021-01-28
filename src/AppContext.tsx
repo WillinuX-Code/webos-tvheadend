@@ -2,6 +2,13 @@ import React, { createContext, useState } from 'react';
 import EPGData from './models/EPGData';
 import TVHDataService from './services/TVHDataService';
 
+export enum AppState {
+    FOCUSED = 'focused',
+    BLURRED = 'blurred',
+    BACKGROUND = 'background',
+    FOREGROUND = 'foreground'
+}
+
 type AppContext = {
     locale: string;
     setLocale: (value: string) => void;
@@ -11,8 +18,8 @@ type AppContext = {
     imageCache: Map<URL, HTMLImageElement>;
     currentChannelPosition: number;
     setCurrentChannelPosition: (value: number) => void;
-    isAppFocused: boolean;
-    setIsAppFocused: (value: boolean) => void;
+    appState: AppState;
+    setAppState: (value: AppState) => void;
 };
 
 const AppContext = createContext({} as AppContext);
@@ -23,7 +30,7 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
     const [epgData] = useState(new EPGData());
     const [imageCache] = useState(new Map<URL, HTMLImageElement>());
     const [currentChannelPosition, setCurrentChannelPosition] = useState(0);
-    const [isAppFocused, setIsAppFocused] = useState(false);
+    const [appState, setAppState] = useState(AppState.FOREGROUND);
 
     const appContext: AppContext = {
         locale: locale,
@@ -34,8 +41,8 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
         imageCache: imageCache,
         currentChannelPosition: currentChannelPosition,
         setCurrentChannelPosition: (value: number) => setCurrentChannelPosition(value),
-        isAppFocused: isAppFocused,
-        setIsAppFocused: (value: boolean) => setIsAppFocused(value)
+        appState: appState,
+        setAppState: (value: AppState) => setAppState(value)
     };
 
     return <AppContext.Provider value={appContext}>{children}</AppContext.Provider>;

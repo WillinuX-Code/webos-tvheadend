@@ -43,6 +43,17 @@ function unq(quotedString) {
     }
 }
 
+// keep service alive 
+var keepAlive;
+service.activityManager.create("keepAlive", function (activity) {
+    keepAlive = activity;
+});
+
+// When you're done, complete the activity 
+// service.activityManager.complete(keepAlive, function (activity) {
+//     console.log("completed activity");
+// });
+
 /**
  * backend proxy for requests to tvheadend as they are
  * not possible from browser due to cors restrictions

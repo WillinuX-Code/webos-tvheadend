@@ -3,11 +3,11 @@ import TVHDataService from './services/TVHDataService';
 import TV from './components/TV';
 import TVHSettings, { STORAGE_TVH_SETTING_KEY } from './components/TVHSettings';
 import './styles/app.css';
-import AppContext from './AppContext';
+import AppContext, { AppState } from './AppContext';
 import EPGChannel from './models/EPGChannel';
 
 const App = () => {
-    const { setIsAppFocused, setLocale, tvhDataService, setTvhDataService, epgData, imageCache } = useContext(AppContext);
+    const { setAppState, setLocale, tvhDataService, setTvhDataService, epgData, imageCache } = useContext(AppContext);
 
     const [isSettingsVisible, setIsSettingsVisible] = useState(false);
     const [isEpgDataLoaded, setIsEpgDataLoaded] = useState(false);
@@ -96,16 +96,30 @@ const App = () => {
         // add global event listeners for blur and focus of the app
         window.addEventListener('blur', handleBlur, false);
         window.addEventListener('focus', handleFocus, false);
+
+        document.addEventListener(
+            'visibilitychange',
+            function () {
+                if (document['hidden']) {
+                    console.log('background');
+                    setAppState(AppState.BACKGROUND);
+                } else {
+                    console.log('foreground');
+                    setAppState(AppState.FOREGROUND);
+                }
+            },
+            true
+        );
     }, []);
 
     const handleBlur = () => {
         console.log('blurred');
-        setIsAppFocused(false);
+        setAppState(AppState.BLURRED);
     };
 
     const handleFocus = () => {
         console.log('focused');
-        setIsAppFocused(true);
+        setAppState(AppState.FOCUSED);
     };
 
     useEffect(() => {

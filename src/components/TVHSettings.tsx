@@ -13,9 +13,9 @@ export const STORAGE_TVH_SETTING_KEY = 'TVH_SETTINGS';
 
 const TVHSettings = (props: { unmount: () => void }) => {
     const { tvhDataService, setTvhDataService } = useContext(AppContext);
-    const [isValid, setValid] = useState(false);
+    const [isValid, setIsValid] = useState(false);
     const [isConnectButtonEnabled, setConnectButtonEnabled] = useState(false);
-    const [isLoading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [testResults, setTestResults] = useState<TestResults>();
     const [serviceParms, setServiceParms] = useState<TVHDataServiceParms>({
         tvhUrl: '',
@@ -36,19 +36,19 @@ const TVHSettings = (props: { unmount: () => void }) => {
 
     const handleUserChange = (input: HTMLInputElement) => {
         setServiceParms({ ...serviceParms, user: input.value });
-        setValid(false);
+        setIsValid(false);
         setConnectButtonEnabled(input.value.length > 0);
     };
 
     const handlePasswordChange = (input: HTMLInputElement) => {
         setServiceParms({ ...serviceParms, password: input.value });
-        setValid(false);
+        setIsValid(false);
         setConnectButtonEnabled(input.value.length > 0);
     };
 
     const handleUrlChange = (input: HTMLInputElement) => {
         setServiceParms({ ...serviceParms, tvhUrl: input.value });
-        setValid(false);
+        setIsValid(false);
         setConnectButtonEnabled(input.value.length > 0);
     };
 
@@ -57,7 +57,7 @@ const TVHSettings = (props: { unmount: () => void }) => {
     };
 
     const handleConnectionTest = async () => {
-        setLoading(true);
+        setIsLoading(true);
 
         //test url verify if it works
         const service = getDataService();
@@ -75,7 +75,7 @@ const TVHSettings = (props: { unmount: () => void }) => {
 
         setServiceParms({ ...serviceParms, dvrUuid: testResults?.dvr.payload });
         setConnectButtonEnabled(true);
-        setLoading(false);
+        setIsLoading(false);
     };
 
     const isValidSetup = () => {
@@ -98,7 +98,7 @@ const TVHSettings = (props: { unmount: () => void }) => {
     }, [serviceParms]);
 
     useEffect(() => {
-        setValid(isValidSetup());
+        setIsValid(isValidSetup());
     }, [testResults]);
 
     return (

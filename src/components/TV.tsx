@@ -18,7 +18,9 @@ export enum State {
 }
 
 const TV = () => {
-    const { tvhDataService, epgData, currentChannelPosition, setCurrentChannelPosition } = useContext(AppContext);
+    const { isAppFocused, tvhDataService, epgData, currentChannelPosition, setCurrentChannelPosition } = useContext(
+        AppContext
+    );
 
     const tvWrapper = useRef<HTMLDivElement>(null);
     const video = useRef<HTMLVideoElement>(null);
@@ -28,7 +30,7 @@ const TV = () => {
     const [textTracks, setTextTracks] = useState<TextTrackList>();
     const [channelNumberText, setChannelNumberText] = useState('');
     const [isState, setState] = useState<State>(State.CHANNEL_INFO);
-    const [isChannelSettingsState, setChannelSettingsState] = useState(false);
+    const [isChannelSettingsState, setIsChannelSettingsState] = useState(false);
     const epgUtils = new EPGUtils();
 
     const focus = () => tvWrapper.current?.focus();
@@ -93,7 +95,7 @@ const TV = () => {
             case 405: // yellow button
             case 89: //'y'
                 event.stopPropagation();
-                setChannelSettingsState(!isChannelSettingsState);
+                setIsChannelSettingsState(!isChannelSettingsState);
                 break;
             case 403: // red button to trigger or cancel recording
                 event.stopPropagation();
@@ -317,6 +319,13 @@ const TV = () => {
         }
     }, [isState, isChannelSettingsState]);
 
+    useEffect(() => {
+        if (isAppFocused) {
+            setState(State.TV)
+            focus();
+        }
+    }, [isAppFocused]);
+
     return (
         <div
             id="tv-wrapper"
@@ -336,7 +345,7 @@ const TV = () => {
                     channelName={getCurrentChannel()?.getName() || ''}
                     audioTracks={audioTracks}
                     textTracks={textTracks}
-                    unmount={() => setChannelSettingsState(false)}
+                    unmount={() => setIsChannelSettingsState(false)}
                 />
             )}
 

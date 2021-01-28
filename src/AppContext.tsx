@@ -11,6 +11,8 @@ type AppContext = {
     imageCache: Map<URL, HTMLImageElement>;
     currentChannelPosition: number;
     setCurrentChannelPosition: (value: number) => void;
+    isAppFocused: boolean;
+    setIsAppFocused: (value: boolean) => void;
 };
 
 const AppContext = createContext({} as AppContext);
@@ -21,6 +23,7 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
     const [epgData] = useState(new EPGData());
     const [imageCache] = useState(new Map<URL, HTMLImageElement>());
     const [currentChannelPosition, setCurrentChannelPosition] = useState(0);
+    const [isAppFocused, setIsAppFocused] = useState(false);
 
     const appContext: AppContext = {
         locale: locale,
@@ -30,7 +33,9 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
         epgData: epgData,
         imageCache: imageCache,
         currentChannelPosition: currentChannelPosition,
-        setCurrentChannelPosition: (value: number) => setCurrentChannelPosition(value)
+        setCurrentChannelPosition: (value: number) => setCurrentChannelPosition(value),
+        isAppFocused: isAppFocused,
+        setIsAppFocused: (value: boolean) => setIsAppFocused(value)
     };
 
     return <AppContext.Provider value={appContext}>{children}</AppContext.Provider>;

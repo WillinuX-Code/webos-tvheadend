@@ -7,10 +7,10 @@ import AppContext from './AppContext';
 import EPGChannel from './models/EPGChannel';
 
 const App = () => {
-    const { setLocale, tvhDataService, setTvhDataService, epgData, imageCache } = useContext(AppContext);
+    const { setIsAppFocused, setLocale, tvhDataService, setTvhDataService, epgData, imageCache } = useContext(AppContext);
 
-    const [isSettingsVisible, setSettingsVisible] = useState(false);
-    const [isEpgDataLoaded, setEpgDataLoaded] = useState(false);
+    const [isSettingsVisible, setIsSettingsVisible] = useState(false);
+    const [isEpgDataLoaded, setIsEpgDataLoaded] = useState(false);
 
     const reloadData = () => {
         if (tvhDataService) {
@@ -20,7 +20,7 @@ const App = () => {
             // retrieve channel infos etc
             tvhDataService.retrieveM3UChannels().then((channels) => {
                 epgData.updateChannels(channels);
-                setEpgDataLoaded(true);
+                setIsEpgDataLoaded(true);
 
                 // preload images
                 preloadImages(channels);
@@ -36,9 +36,9 @@ const App = () => {
                 });
             });
 
-            setSettingsVisible(false);
+            setIsSettingsVisible(false);
         } else {
-            setSettingsVisible(true);
+            setIsSettingsVisible(true);
         }
     };
 
@@ -80,7 +80,7 @@ const App = () => {
             case 404: // green button
             case 71: //'g'
                 event.stopPropagation();
-                setSettingsVisible(!isSettingsVisible);
+                setIsSettingsVisible(!isSettingsVisible);
                 break;
             default:
                 console.log('App-keyPressed:', keyCode);
@@ -92,7 +92,21 @@ const App = () => {
         const settingsString = localStorage.getItem(STORAGE_TVH_SETTING_KEY);
         const service = settingsString ? new TVHDataService(JSON.parse(settingsString)) : undefined;
         setTvhDataService(service);
+
+        // add global event listeners for blur and focus of the app
+        window.addEventListener('blur', handleBlur, false);
+        window.addEventListener('focus', handleFocus, false);
     }, []);
+
+    const handleBlur = () => {
+        console.log('blurred');
+        setIsAppFocused(false);
+    };
+
+    const handleFocus = () => {
+        console.log('focused');
+        setIsAppFocused(true);
+    };
 
     useEffect(() => {
         reloadData();
@@ -100,7 +114,7 @@ const App = () => {
 
     return (
         <div className="app" onKeyDown={handleKeyPress}>
-            {isSettingsVisible && <TVHSettings unmount={() => setSettingsVisible(false)} />}
+            {isSettingsVisible && <TVHSettings unmount={() => setIsSettingsVisible(false)} />}
             {!isSettingsVisible && isEpgDataLoaded && <TV />}
         </div>
     );

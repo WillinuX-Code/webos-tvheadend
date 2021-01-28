@@ -323,26 +323,30 @@ const ChannelList = (props: { unmount: () => void }) => {
     const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
         const keyCode = event.keyCode;
 
-        event.stopPropagation();
         switch (keyCode) {
             case 33: // programm up
             case 38: // arrow up
+                event.stopPropagation();
                 scrollUp();
                 break;
             case 34: // programm down
             case 40: // arrow down
+                event.stopPropagation();
                 scrollDown();
                 break;
             case 404: // TODO yellow button + back button
             case 67: // keyboard 'c'
             case 461: // back button
+                event.stopPropagation();
                 props.unmount();
                 break;
             case 13: // ok button -> switch to focused channel
+                event.stopPropagation();
                 setCurrentChannelPosition(channelPosition);
                 props.unmount();
                 break;
             case 403: // red button trigger recording
+                event.stopPropagation();
                 // add current viewing channel to records
                 // red button to trigger or cancel recording
                 // get current event
@@ -369,6 +373,9 @@ const ChannelList = (props: { unmount: () => void }) => {
             default:
                 console.log('ChannelList-keyPressed:', keyCode);
         }
+
+        // pass unhandled events to parent
+        if (!event.isPropagationStopped) return event;
     };
 
     const handleScrollWheel = (event: React.WheelEvent<HTMLDivElement>) => {

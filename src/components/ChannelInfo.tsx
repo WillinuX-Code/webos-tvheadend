@@ -36,6 +36,9 @@ const ChannelInfo = (props: { unmount: () => void }) => {
                 props.unmount();
                 break;
         }
+
+        // pass unhandled events to parent
+        if (!event.isPropagationStopped) return event;
     };
 
     const drawChannelInfo = (canvas: CanvasRenderingContext2D) => {

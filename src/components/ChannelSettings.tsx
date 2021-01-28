@@ -61,7 +61,6 @@ const ChannelSettings = (props: {
         if (props.audioTracks) {
             for (let i = 0; i < props.audioTracks.length; i++) {
                 const audioTrack = props.audioTracks[i];
-                audioTracksDisplay.push(audioTrack.language);
                 setAudioTracksDisplay((audioTracksDisplay) => [...audioTracksDisplay, audioTrack.language]);
                 audioTrack.enabled && setSelectedAudioTrack(i);
             }

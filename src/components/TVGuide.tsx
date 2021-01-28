@@ -909,7 +909,13 @@ const TVGuide = (props: { unmount: () => void }) => {
     useEffect(() => {
         recalculateAndRedraw(false);
         focusEPG();
-        scrollToEventPosition(focusedEventPosition);
+
+        // set current time and event when mounted
+        const targetTimePosition = epgUtils.getNow();
+        const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition, targetTimePosition);
+        targetEvent && setFocusedEvent(targetEvent);
+        targetEvent && setScrollX(getXFrom(targetTimePosition + 1 - HOURS_IN_VIEWPORT_MILLIS / 2));
+        setTimePosition(targetTimePosition);
 
         return () => {
             // clear timeout in case component is unmounted

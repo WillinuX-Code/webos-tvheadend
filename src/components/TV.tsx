@@ -7,7 +7,6 @@ import ChannelSettings from './ChannelSettings';
 import EPGUtils from '../utils/EPGUtils';
 import AppContext, { AppState } from '../AppContext';
 import '../styles/app.css';
-import App from '../App';
 
 const STORAGE_KEY_LAST_CHANNEL = 'lastChannel';
 

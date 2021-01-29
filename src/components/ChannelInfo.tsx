@@ -275,6 +275,8 @@ const ChannelInfo = (props: { unmount: () => void }) => {
     };
 
     useEffect(() => {
+        focus();
+
         return () => {
             timeoutReference.current && clearTimeout(timeoutReference.current);
             intervalReference.current && clearInterval(intervalReference.current);
@@ -285,7 +287,6 @@ const ChannelInfo = (props: { unmount: () => void }) => {
         // update the canvas in short intervals, to display the remaining time live
         intervalReference.current && clearInterval(intervalReference.current);
         intervalReference.current = setInterval(() => {
-            focus();
             updateCanvas();
         }, 500);
 

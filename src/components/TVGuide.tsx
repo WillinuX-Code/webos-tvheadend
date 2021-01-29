@@ -46,11 +46,8 @@ const TVGuide = (props: { unmount: () => void }) => {
     const timeOffset = useRef(0);
     const timeLowerBoundary = useRef(0);
     const timeUpperBoundary = useRef(0);
-    const maxHorizontalScroll = useRef(0);
-    const maxVerticalScroll = useRef(0);
     const scrollX = useRef(0);
     const scrollY = useRef(0);
-    //const timePosition = useRef(epgUtils.getNow());
 
     const mDrawingRect = new Rect();
     const mMeasuringRect = new Rect();
@@ -89,17 +86,6 @@ const TVGuide = (props: { unmount: () => void }) => {
         timeOffset.current = calculatedBaseLine();
         timeLowerBoundary.current = getTimeFrom(0);
         timeUpperBoundary.current = getTimeFrom(getWidth());
-    };
-
-    const calculateMaxHorizontalScroll = () => {
-        maxHorizontalScroll.current = Math.floor(
-            (DAYS_BACK_MILLIS + DAYS_FORWARD_MILLIS - HOURS_IN_VIEWPORT_MILLIS) / millisPerPixel.current
-        );
-    };
-
-    const calculateMaxVerticalScroll = () => {
-        const scrollTop = getTopFrom(epgData.getChannelCount() - 1) + mChannelLayoutHeight;
-        maxVerticalScroll.current = scrollTop < getChannelListHeight() ? 0 : scrollTop - getChannelListHeight();
     };
 
     const calculateMillisPerPixel = () => {
@@ -695,10 +681,6 @@ const TVGuide = (props: { unmount: () => void }) => {
     const recalculateAndRedraw = (withAnimation: boolean) => {
         if (epgData !== null && epgData.hasData()) {
             resetBoundaries();
-            calculateMaxVerticalScroll();
-            calculateMaxHorizontalScroll();
-
-            //scrollX = this.getScrollX() + this.getXPositionStart() - this.getScrollX();
             scrollToChannelPosition(focusedChannelPosition, withAnimation);
         }
     };
@@ -814,22 +796,12 @@ const TVGuide = (props: { unmount: () => void }) => {
         }
 
         // stop scrolling before padding position bottom
-        const maxPosition = epgData.getChannelCount() - 1 - VERTICAL_SCROLL_TOP_PADDING_ITEM;
-        if (channelPosition >= maxPosition) {
-            // fix scroll to channel in case it is within bottom padding
-            if (getScrollY() === 0) {
-                setScrollY(
-                    mChannelLayoutMargin * VISIBLE_CHANNEL_COUNT -
-                        1 +
-                        mChannelLayoutHeight * (maxPosition - VERTICAL_SCROLL_TOP_PADDING_ITEM)
-                );
-            }
-            return;
-        }
+        const maxPosition = epgData.getChannelCount() - (VISIBLE_CHANNEL_COUNT - VERTICAL_SCROLL_TOP_PADDING_ITEM);
 
-        // scroll to channel position
+        // scroll to channel position or max position
         const scrollTarget =
-            (mChannelLayoutMargin + mChannelLayoutHeight) * (channelPosition - VERTICAL_SCROLL_TOP_PADDING_ITEM);
+            (mChannelLayoutMargin + mChannelLayoutHeight) * (Math.min(maxPosition, channelPosition) - VERTICAL_SCROLL_TOP_PADDING_ITEM);
+        
         if (!withAnimation) {
             setScrollY(scrollTarget);
             return;

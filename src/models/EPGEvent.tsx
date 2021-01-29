@@ -34,6 +34,10 @@ export default class EPGEvent {
         return this.end;
     }
 
+    getDuration() {
+        return this.end - this.start;
+    }
+
     getDoneFactor() {
         const now = this.epgUtils.getNow();
         if (now > this.end) {
@@ -41,8 +45,7 @@ export default class EPGEvent {
         } else if (now < this.start) {
             return 0;
         } else {
-            const duration = this.end - this.start;
-            return (now - this.start) / duration;
+            return (now - this.start) / this.getDuration();
         }
     }
 

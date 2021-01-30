@@ -39,7 +39,7 @@ const TVGuide = (props: { unmount: () => void }) => {
 
     const [timePosition, setTimePosition] = useState(epgUtils.getNow());
     const [focusedChannelPosition, setFocusedChannelPosition] = useState(currentChannelPosition);
-    const [focusedEvent, setFocusedEvent] = useState<EPGEvent | null>(null);
+    const [focusedEventPosition, setFocusedEventPosition] = useState(-1);
 
     const millisPerPixel = useRef(0);
     const timeOffset = useRef(0);
@@ -300,6 +300,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         drawingRect.right = getWidth();
         drawingRect.bottom = getHeight();
 
+        const focusedEvent = epgData.getEvent(focusedChannelPosition, focusedEventPosition);
         if (focusedEvent) {
             // rect event details
             drawingRect.left += mDetailsLayoutMargin;
@@ -518,10 +519,10 @@ const TVGuide = (props: { unmount: () => void }) => {
         event: EPGEvent,
         drawingRect: Rect
     ) => {
-        setEventDrawingRectangle(channelPosition, event.getStart(), event.getEnd(), drawingRect);
+        const focusedEvent = epgData.getEvent(focusedChannelPosition, focusedEventPosition);
 
-        // canvas.drawRect(drawingRect, mPaint);
         // set starting minimal behind channel list
+        setEventDrawingRectangle(channelPosition, event.getStart(), event.getEnd(), drawingRect);
         if (drawingRect.left < getScrollX() + mChannelLayoutWidth + mChannelLayoutMargin) {
             drawingRect.left = getScrollX() + mChannelLayoutWidth + mChannelLayoutMargin;
         }
@@ -622,7 +623,7 @@ const TVGuide = (props: { unmount: () => void }) => {
                 */
 
         // Set background of focused channel
-        if (focusedChannelPosition == position) {
+        if (focusedChannelPosition === position) {
             canvas.fillStyle = mChannelLayoutBackgroundFocus;
             canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
         }
@@ -688,20 +689,20 @@ const TVGuide = (props: { unmount: () => void }) => {
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
         const keyCode = event.keyCode;
-        let eventPosition = focusedEvent && epgData.getEventPosition(focusedChannelPosition, focusedEvent);
+        let eventPosition = focusedEventPosition;
         let channelPosition = focusedChannelPosition;
 
         // do not pass this event to parents
         switch (keyCode) {
             case 39: // right arrow
                 event.stopPropagation();
-                if (eventPosition === null) break;
+                if (eventPosition < 0) break;
                 eventPosition += 1;
                 scrollToEventPosition(eventPosition);
                 break;
             case 37: // left arrow
                 event.stopPropagation();
-                if (eventPosition === null) break;
+                if (eventPosition < 0) break;
                 eventPosition -= 1;
                 scrollToEventPosition(eventPosition);
                 break;
@@ -723,7 +724,7 @@ const TVGuide = (props: { unmount: () => void }) => {
                 return;
             case 403:
                 event.stopPropagation();
-                if (eventPosition === null) break;
+                if (eventPosition < 0) break;
                 toggleRecording(channelPosition, eventPosition);
                 break;
             case 461:
@@ -756,24 +757,25 @@ const TVGuide = (props: { unmount: () => void }) => {
         // red button to trigger or cancel recording
         // get current event
         const currentEvent = epgData.getEvent(channelPosition, eventPosition);
-        setFocusedEvent(currentEvent);
+
         if (currentEvent.isPastDated(epgUtils.getNow())) {
             // past dated do nothing
             return;
         }
+
         // check if event is already marked for recording
         const recEvent = epgData.getRecording(currentEvent);
         if (recEvent) {
             // cancel recording
             tvhDataService?.cancelRec(recEvent, (recordings: EPGEvent[]) => {
                 epgData.updateRecordings(recordings);
-                updateCanvas(); // TODO is still still needed?
+                updateCanvas();
             });
         } else {
             // creat new recording from event
             tvhDataService?.createRec(currentEvent, (recordings: EPGEvent[]) => {
                 epgData.updateRecordings(recordings);
-                updateCanvas(); // TODO is still still needed?
+                updateCanvas();
             });
         }
     };
@@ -789,14 +791,15 @@ const TVGuide = (props: { unmount: () => void }) => {
 
         const targetEvent = epgData.getEvent(focusedChannelPosition, eventPosition);
         if (targetEvent) {
-            const targetTimePosition = targetEvent.getStart() + targetEvent.getDuration() * targetEvent.getDoneFactor();
+            const targetTimePosition = targetEvent.getStart() + 1;
 
             resetBoundaries();
             setTimePosition(targetTimePosition);
             setScrollX(getXFrom(targetTimePosition - HOURS_IN_VIEWPORT_MILLIS / 2));
+            setFocusedEventPosition(eventPosition);
+        } else {
+            setFocusedEventPosition(-1);
         }
-
-        setFocusedEvent(targetEvent);
     };
 
     const scrollToChannelPosition = (channelPosition: number, withAnimation: boolean) => {
@@ -868,13 +871,12 @@ const TVGuide = (props: { unmount: () => void }) => {
     useEffect(() => {
         resetBoundaries();
         const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition, timePosition);
-        setFocusedEvent(targetEvent);
-        //targetEvent && setFocusedEventPosition(epgData.getEventPosition(focusedChannelPosition, targetEvent));
+        setFocusedEventPosition(targetEvent ? epgData.getEventPosition(focusedChannelPosition, targetEvent) : -1);
     }, [focusedChannelPosition]);
 
     useEffect(() => {
         updateCanvas();
-    }, [focusedChannelPosition, focusedEvent, timePosition]);
+    }, [focusedChannelPosition, focusedEventPosition, timePosition]);
 
     const updateCanvas = () => {
         if (canvas.current) {

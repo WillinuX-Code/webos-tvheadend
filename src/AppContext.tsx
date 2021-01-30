@@ -30,7 +30,7 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
     const [epgData] = useState(new EPGData());
     const [imageCache] = useState(new Map<URL, HTMLImageElement>());
     const [currentChannelPosition, setCurrentChannelPosition] = useState(0);
-    const [appState, setAppState] = useState(AppState.FOREGROUND);
+    const [appState, setAppState] = useState(AppState.FOCUSED);
 
     const appContext: AppContext = {
         locale: locale,

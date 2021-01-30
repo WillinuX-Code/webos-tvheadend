@@ -94,32 +94,34 @@ const App = () => {
         setTvhDataService(service);
 
         // add global event listeners for blur and focus of the app
-        window.addEventListener('blur', handleBlur, false);
-        window.addEventListener('focus', handleFocus, false);
+        window.addEventListener('blur', handleBlur);
+        window.addEventListener('focus', handleFocus);
 
-        document.addEventListener(
-            'visibilitychange',
-            function () {
-                if (document['hidden']) {
-                    console.log('background');
-                    setAppState(AppState.BACKGROUND);
-                } else {
-                    console.log('foreground');
-                    setAppState(AppState.FOREGROUND);
-                }
-            },
-            true
-        );
+        // add global event listener for visibility change of the app
+        document.addEventListener('visibilitychange', handleVisibilityChange);
     }, []);
 
-    const handleBlur = () => {
-        console.log('blurred');
+    const handleBlur = (event: FocusEvent) => {
+        event.stopPropagation();
+        console.log('app is blurred');
         setAppState(AppState.BLURRED);
     };
 
-    const handleFocus = () => {
-        console.log('focused');
+    const handleFocus = (event: FocusEvent) => {
+        event.stopPropagation();
+        console.log('app is focused');
         setAppState(AppState.FOCUSED);
+    };
+
+    const handleVisibilityChange = (event: Event) => {
+        event.stopPropagation();
+        if (document.hidden) {
+            console.log('app is in background');
+            setAppState(AppState.BACKGROUND);
+        } else {
+            console.log('app is in foreground');
+            setAppState(AppState.FOREGROUND);
+        }
     };
 
     useEffect(() => {

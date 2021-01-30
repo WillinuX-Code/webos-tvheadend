@@ -192,7 +192,6 @@ const TV = () => {
 
     const initVideoElement = () => {
         const videoElement = getMediaElement();
-
         videoElement?.addEventListener('loadedmetadata', () => {
             if (!videoElement) return;
             console.log('Audio Tracks: ', videoElement.audioTracks);
@@ -324,14 +323,17 @@ const TV = () => {
         // state changed to focus -> refocus
         if (appState === AppState.FOCUSED) {
             setState(State.CHANNEL_INFO);
+            showCurrentChannelNumber();
             focus();
         }
+
         // state changed to background -> stop playback
         if (appState === AppState.BACKGROUND) {
             const videoElement = getMediaElement();
             if (!videoElement) return;
             resetPlayer(videoElement);
         }
+
         // state changed to foreground -> start playback
         if (appState === AppState.FOREGROUND) {
             const currentChannel = getCurrentChannel();
@@ -342,6 +344,7 @@ const TV = () => {
                 // also show the current channel number
                 showCurrentChannelNumber();
             }
+            focus();
         }
     }, [appState]);
 

@@ -11,7 +11,7 @@ import AppContext from '../AppContext';
 import '../styles/app.css';
 
 const DAYS_BACK_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
-const DAYS_FORWARD_MILLIS = 1 * 24 * 60 * 60 * 1000; // 1 days
+// const DAYS_FORWARD_MILLIS = 1 * 24 * 60 * 60 * 1000; // 1 days
 const HOURS_IN_VIEWPORT_MILLIS = 2 * 60 * 60 * 1000; // 2 hours
 const TIME_LABEL_SPACING_MILLIS = 30 * 60 * 1000; // 30 minutes
 
@@ -39,7 +39,6 @@ const TVGuide = (props: { unmount: () => void }) => {
 
     const [timePosition, setTimePosition] = useState(epgUtils.getNow());
     const [focusedChannelPosition, setFocusedChannelPosition] = useState(currentChannelPosition);
-    const [focusedEventPosition, setFocusedEventPosition] = useState(-1);
     const [focusedEvent, setFocusedEvent] = useState<EPGEvent | null>(null);
 
     const millisPerPixel = useRef(0);
@@ -58,6 +57,7 @@ const TVGuide = (props: { unmount: () => void }) => {
     const mChannelLayoutHeight = 75;
     const mChannelLayoutWidth = 120;
     const mChannelLayoutBackground = '#323232';
+    const mChannelLayoutBackgroundFocus = 'rgb(50,85,110)';
 
     const mEventLayoutBackground = '#234054';
     const mEventLayoutBackgroundCurrent = 'rgb(50,85,110)';
@@ -99,14 +99,8 @@ const TVGuide = (props: { unmount: () => void }) => {
 
     const getFirstVisibleChannelPosition = () => {
         const y = getScrollY(false);
-
-        let position =
-            Math.round((y - mChannelLayoutMargin - mTimeBarHeight) / (mChannelLayoutHeight + mChannelLayoutMargin)) + 1;
-
-        if (position < 0) {
-            position = 0;
-        }
-
+        const position =
+            Math.ceil((y - mChannelLayoutMargin - mTimeBarHeight) / (mChannelLayoutHeight + mChannelLayoutMargin)) + 0;
         return position;
     };
 
@@ -116,8 +110,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         const position = Math.floor(
             (y + screenHeight - mTimeBarHeight - mChannelLayoutMargin) / (mChannelLayoutHeight + mChannelLayoutMargin)
         );
-
-        return position + 1;
+        return position;
     };
 
     const getXFrom = (time: number) => {
@@ -201,7 +194,7 @@ const TVGuide = (props: { unmount: () => void }) => {
     };
 
     /**
-     * draw background and usee cache for future
+     * draw background and use cache for future
      *
      * @param canvas
      * @param drawingRect
@@ -288,7 +281,6 @@ const TVGuide = (props: { unmount: () => void }) => {
         drawingRect.bottom = getHeight();
 
         const channel = epgData.getChannel(focusedChannelPosition);
-        const event = epgData.getEvent(focusedChannelPosition, focusedEventPosition);
         const imageURL = channel?.getImageURL();
         const image = imageURL && imageCache.get(imageURL);
         if (image) {
@@ -308,24 +300,24 @@ const TVGuide = (props: { unmount: () => void }) => {
         drawingRect.right = getWidth();
         drawingRect.bottom = getHeight();
 
-        if (event !== undefined) {
+        if (focusedEvent) {
             // rect event details
             drawingRect.left += mDetailsLayoutMargin;
             drawingRect.top += mDetailsLayoutTitleTextSize + mDetailsLayoutMargin;
             drawingRect.right -= mDetailsLayoutMargin;
             drawingRect.bottom -= mDetailsLayoutMargin;
             // draw title, description etc
-            canvasUtils.writeText(canvas, event.getTitle(), drawingRect.left, drawingRect.top, {
+            canvasUtils.writeText(canvas, focusedEvent.getTitle(), drawingRect.left, drawingRect.top, {
                 fontSize: mDetailsLayoutTitleTextSize,
                 isBold: true,
                 fillStyle: mDetailsLayoutTextColor
             });
-            if (event.getSubTitle() !== undefined) {
-                drawDetailsSubtitle(event.getSubTitle(), canvas, drawingRect);
+            if (focusedEvent.getSubTitle() !== undefined) {
+                drawDetailsSubtitle(focusedEvent.getSubTitle(), canvas, drawingRect);
             }
-            drawDetailsTimeInfo(event, canvas, drawingRect);
-            if (event.getDescription() !== undefined) {
-                drawDetailsDescription(event.getDescription(), canvas, drawingRect);
+            drawDetailsTimeInfo(focusedEvent, canvas, drawingRect);
+            if (focusedEvent.getDescription() !== undefined) {
+                drawDetailsDescription(focusedEvent.getDescription(), canvas, drawingRect);
             }
         }
     };
@@ -487,7 +479,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         //let transparentTop = firstPos + 3;
         //let transparentBottom = lastPos - 3;
         // canvas.globalAlpha = 0.0;
-        for (let pos = firstPos; pos < lastPos; pos++) {
+        for (let pos = firstPos; pos <= lastPos; pos++) {
             // if (pos <= transparentTop) {
             //     canvas.globalAlpha += 0.25;
             // } else if (pos >= transparentBottom) {
@@ -590,7 +582,7 @@ const TVGuide = (props: { unmount: () => void }) => {
 
         //console.log("Channel: First: " + firstPos + " Last: " + lastPos);
 
-        for (let pos = firstPos; pos < lastPos; pos++) {
+        for (let pos = firstPos; pos <= lastPos; pos++) {
             drawChannelItem(canvas, pos, drawingRect);
         }
     };
@@ -616,6 +608,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         drawingRect.top = getTopFrom(position);
         drawingRect.right = drawingRect.left + mChannelLayoutWidth;
         drawingRect.bottom = drawingRect.top + mChannelLayoutHeight;
+
         /*
                 canvas.font = mEventLayoutTextSize + "px Arial";
                 canvas.fillStyle = mEventLayoutTextColor;
@@ -627,10 +620,18 @@ const TVGuide = (props: { unmount: () => void }) => {
                 canvas.fillText(canvasUtils.getShortenedText(canvas, epgData.getChannel(position).getName(), drawingRect),
                      drawingRect.left, drawingRect.top + mChannelLayoutHeight/2 + mEventLayoutTextSize/2 );
                 */
+
+        // Set background of focused channel
+        if (focusedChannelPosition == position) {
+            canvas.fillStyle = mChannelLayoutBackgroundFocus;
+            canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
+        }
+
         // Loading channel image into target for
         const channel = epgData.getChannel(position);
         const imageURL = channel?.getImageURL();
         const image = imageURL && imageCache.get(imageURL);
+
         if (image) {
             drawingRect = getDrawingRectForChannelImage(drawingRect, image);
             canvas.drawImage(image, drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
@@ -687,18 +688,20 @@ const TVGuide = (props: { unmount: () => void }) => {
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
         const keyCode = event.keyCode;
-        let eventPosition = focusedEventPosition;
+        let eventPosition = focusedEvent && epgData.getEventPosition(focusedChannelPosition, focusedEvent);
         let channelPosition = focusedChannelPosition;
 
         // do not pass this event to parents
         switch (keyCode) {
             case 39: // right arrow
                 event.stopPropagation();
+                if (eventPosition === null) break;
                 eventPosition += 1;
                 scrollToEventPosition(eventPosition);
                 break;
             case 37: // left arrow
                 event.stopPropagation();
+                if (eventPosition === null) break;
                 eventPosition -= 1;
                 scrollToEventPosition(eventPosition);
                 break;
@@ -720,6 +723,7 @@ const TVGuide = (props: { unmount: () => void }) => {
                 return;
             case 403:
                 event.stopPropagation();
+                if (eventPosition === null) break;
                 toggleRecording(channelPosition, eventPosition);
                 break;
             case 461:
@@ -783,7 +787,16 @@ const TVGuide = (props: { unmount: () => void }) => {
             eventPosition = eventCount - 1;
         }
 
-        setFocusedEventPosition(eventPosition);
+        const targetEvent = epgData.getEvent(focusedChannelPosition, eventPosition);
+        if (targetEvent) {
+            const targetTimePosition = targetEvent.getStart() + targetEvent.getDuration() * targetEvent.getDoneFactor();
+
+            resetBoundaries();
+            setTimePosition(targetTimePosition);
+            setScrollX(getXFrom(targetTimePosition - HOURS_IN_VIEWPORT_MILLIS / 2));
+        }
+
+        setFocusedEvent(targetEvent);
     };
 
     const scrollToChannelPosition = (channelPosition: number, withAnimation: boolean) => {
@@ -800,8 +813,9 @@ const TVGuide = (props: { unmount: () => void }) => {
 
         // scroll to channel position or max position
         const scrollTarget =
-            (mChannelLayoutMargin + mChannelLayoutHeight) * (Math.min(maxPosition, channelPosition) - VERTICAL_SCROLL_TOP_PADDING_ITEM);
-        
+            (mChannelLayoutMargin + mChannelLayoutHeight) *
+            (Math.min(maxPosition, channelPosition) - VERTICAL_SCROLL_TOP_PADDING_ITEM);
+
         if (!withAnimation) {
             setScrollY(scrollTarget);
             return;
@@ -837,32 +851,13 @@ const TVGuide = (props: { unmount: () => void }) => {
         updateCanvas();
     };
 
-    const changeFocusedEvent = (isSameChannel = true) => {
-        resetBoundaries();
-
-        if (isSameChannel) {
-            const targetEvent = epgData.getEvent(focusedChannelPosition, focusedEventPosition);
-            setFocusedEvent(targetEvent);
-
-            if (targetEvent) {
-                const targetTimePosition =
-                    targetEvent.getStart() + targetEvent.getDuration() * targetEvent.getDoneFactor();
-                setTimePosition(targetTimePosition);
-                setScrollX(getXFrom(targetTimePosition - HOURS_IN_VIEWPORT_MILLIS / 2));
-            }
-        } else {
-            const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition, timePosition);
-            setFocusedEvent(targetEvent);
-        }
-    };
-
     useEffect(() => {
         recalculateAndRedraw(false);
         focusEPG();
 
         // set current time and event when mounted
         const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition, timePosition);
-        targetEvent && setFocusedEventPosition(epgData.getEventPosition(currentChannelPosition, targetEvent));
+        targetEvent && scrollToEventPosition(epgData.getEventPosition(currentChannelPosition, targetEvent));
 
         return () => {
             // clear timeout in case component is unmounted
@@ -871,16 +866,15 @@ const TVGuide = (props: { unmount: () => void }) => {
     }, []);
 
     useEffect(() => {
-        changeFocusedEvent(false);
+        resetBoundaries();
+        const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition, timePosition);
+        setFocusedEvent(targetEvent);
+        //targetEvent && setFocusedEventPosition(epgData.getEventPosition(focusedChannelPosition, targetEvent));
     }, [focusedChannelPosition]);
 
     useEffect(() => {
-        changeFocusedEvent();
-    }, [focusedEventPosition]);
-
-    useEffect(() => {
         updateCanvas();
-    }, [focusedEvent, timePosition]);
+    }, [focusedChannelPosition, focusedEvent, timePosition]);
 
     const updateCanvas = () => {
         if (canvas.current) {

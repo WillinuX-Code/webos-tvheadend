@@ -856,7 +856,7 @@ const TVGuide = (props: { unmount: () => void }) => {
 
     useEffect(() => {
         recalculateAndRedraw(false);
-        focusEPG();
+        focus();
 
         // set current time and event when mounted
         const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition, timePosition);
@@ -890,7 +890,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         }
     };
 
-    const focusEPG = () => {
+    const focus = () => {
         epgWrapper.current?.focus();
     };
 

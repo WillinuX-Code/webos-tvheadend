@@ -13,7 +13,8 @@ export enum State {
     TV = 'tv',
     EPG = 'epg',
     CHANNEL_LIST = 'channleList',
-    CHANNEL_INFO = 'channelInfo'
+    CHANNEL_INFO = 'channelInfo',
+    CHANNEL_SETTINGS = 'channelSettings'
 }
 
 const TV = () => {
@@ -28,8 +29,7 @@ const TV = () => {
     const [audioTracks, setAudioTracks] = useState<AudioTrackList>();
     const [textTracks, setTextTracks] = useState<TextTrackList>();
     const [channelNumberText, setChannelNumberText] = useState('');
-    const [isState, setState] = useState<State>(State.CHANNEL_INFO);
-    const [isChannelSettingsState, setIsChannelSettingsState] = useState(false);
+    const [state, setState] = useState<State>(State.CHANNEL_INFO);
 
     const epgUtils = new EPGUtils();
 
@@ -85,17 +85,13 @@ const TV = () => {
             case 13: {
                 // ok button ->show/disable channel info
                 event.stopPropagation();
-                // in channel settings state we dont process the ok - the channel settings component handles it
-                if (isChannelSettingsState) {
-                    break;
-                }
-                handleChannelInfoSwitch();
+                setState(State.CHANNEL_INFO);
                 break;
             }
             case 405: // yellow button
             case 89: //'y'
                 event.stopPropagation();
-                setIsChannelSettingsState(!isChannelSettingsState);
+                setState(State.CHANNEL_SETTINGS);
                 break;
             case 403: // red button to trigger or cancel recording
                 event.stopPropagation();
@@ -106,23 +102,12 @@ const TV = () => {
         }
     };
 
-    const handleChannelInfoSwitch = () => {
-        switch (isState) {
-            case State.TV:
-                setState(State.CHANNEL_INFO);
-                break;
-            case State.CHANNEL_INFO:
-                setState(State.TV);
-                break;
-        }
-    };
-
     const handleScrollWheel = () => {
         setState(State.CHANNEL_LIST);
     };
 
     const handleClick = () => {
-        handleChannelInfoSwitch();
+        setState(State.CHANNEL_INFO);
     };
 
     const getMediaElement = () => video.current;
@@ -291,15 +276,15 @@ const TV = () => {
 
     useEffect(() => {
         // if the channel info is shown, also show the current channel number
-        if (isState === State.CHANNEL_INFO) {
+        if (state === State.CHANNEL_INFO) {
             showCurrentChannelNumber();
         }
 
         // request focus if none of the other components are active
-        if (isState === State.TV && !isChannelSettingsState) {
+        if (state === State.TV) {
             focus();
         }
-    }, [isState, isChannelSettingsState]);
+    }, [state]);
 
     /**
      * handle app state changes
@@ -348,16 +333,16 @@ const TV = () => {
                 <ChannelHeader channelNumberText={channelNumberText} unmount={() => setChannelNumberText('')} />
             )}
 
-            {isChannelSettingsState && (
+            {state === State.CHANNEL_SETTINGS && (
                 <ChannelSettings
                     channelName={getCurrentChannel()?.getName() || ''}
                     audioTracks={audioTracks}
                     textTracks={textTracks}
-                    unmount={() => setIsChannelSettingsState(false)}
+                    unmount={() => setState(State.TV)}
                 />
             )}
 
-            {isState === State.CHANNEL_INFO && (
+            {state === State.CHANNEL_INFO && (
                 <ChannelInfo
                     unmount={() => {
                         setState(State.TV);
@@ -366,9 +351,9 @@ const TV = () => {
                 />
             )}
 
-            {isState === State.CHANNEL_LIST && <ChannelList unmount={() => setState(State.CHANNEL_INFO)} />}
+            {state === State.CHANNEL_LIST && <ChannelList unmount={() => setState(State.CHANNEL_INFO)} />}
 
-            {isState === State.EPG && <TVGuide unmount={() => setState(State.CHANNEL_INFO)} />}
+            {state === State.EPG && <TVGuide unmount={() => setState(State.CHANNEL_INFO)} />}
 
             <video
                 id="myVideo"

@@ -9,13 +9,15 @@ const ChannelSettings = (props: {
     audioTracks: AudioTrackList | undefined;
     unmount: () => void;
 }) => {
+    const channelSettingsWrapper = useRef<HTMLDivElement>(null);
+
     const [selectedAudioTrack, setSelectedAudioTrack] = useState(0);
     const [selectedTextTrack, setSelectedTextTrack] = useState(0);
     const [textTracksDisplay, setTextTracksDisplay] = useState<string[]>([]);
     const [audioTracksDisplay, setAudioTracksDisplay] = useState<string[]>([]);
     const timeoutReference = useRef<NodeJS.Timeout | null>(null);
 
-    const handleTextChange = (event: any) => {
+    const handleTextChange = (event: {value: number}) => {
         updateAutomaticUnmount();
 
         // enable new track
@@ -34,14 +36,14 @@ const ChannelSettings = (props: {
         return false;
     };
 
-    const handleAudioChange = (event: any) => {
+    const handleAudioChange = (event: {value: number}) => {
         updateAutomaticUnmount();
 
         // enable new track
         if (props.audioTracks) {
             for (let i = 0; i < props.audioTracks.length; i++) {
                 const audioTrack = props.audioTracks[i];
-                audioTrack.enabled = event.value === i;
+                audioTrack.enabled = (event.value === i);
             }
         }
         setSelectedAudioTrack(event.value);
@@ -53,12 +55,39 @@ const ChannelSettings = (props: {
         return false;
     };
 
+    const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        const keyCode = event.keyCode;
+
+        switch (keyCode) {
+            case 13: // ok button
+                // do not pass this event to parent
+                event.stopPropagation();
+                break;
+            case 461: // back button
+            case 405: // yellow button
+            case 89: //'y'
+                // do not pass this event to parent
+                event.stopPropagation();
+                props.unmount();
+                break;
+        }
+
+        // pass unhandled events to parent
+        if (!event.isPropagationStopped) return event;
+    };
+
     const updateAutomaticUnmount = () => {
         timeoutReference.current && clearTimeout(timeoutReference.current);
         timeoutReference.current = setTimeout(() => props.unmount(), 7000);
     };
 
+    const focus = () => {
+        channelSettingsWrapper.current?.focus();
+    };
+
     useEffect(() => {
+        focus();
+
         if (props.audioTracks) {
             for (let i = 0; i < props.audioTracks.length; i++) {
                 const audioTrack = props.audioTracks[i];
@@ -85,7 +114,13 @@ const ChannelSettings = (props: {
     }, []);
 
     return (
-        <div id="channel-settings" tabIndex={-1} className="channelSettings">
+        <div
+            id="channel-settings"
+            ref={channelSettingsWrapper}
+            tabIndex={-1}
+            className="channelSettings"
+            onKeyDown={handleKeyPress}
+        >
             {audioTracksDisplay.length > 0 && (
                 <>
                     <Icon>audio</Icon>

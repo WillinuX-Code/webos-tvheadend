@@ -94,11 +94,11 @@ const App = () => {
         setTvhDataService(service);
 
         // add global event listeners for blur and focus of the app
-        window.addEventListener('blur', handleBlur);
-        window.addEventListener('focus', handleFocus);
+        window.onblur = handleBlur;
+        window.onfocus = handleFocus;
 
         // add global event listener for visibility change of the app
-        document.addEventListener('visibilitychange', handleVisibilityChange);
+        document.onvisibilitychange = handleVisibilityChange;
     }, []);
 
     const handleBlur = (event: FocusEvent) => {

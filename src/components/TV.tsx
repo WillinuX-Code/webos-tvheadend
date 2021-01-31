@@ -25,11 +25,11 @@ const TV = () => {
     const tvWrapper = useRef<HTMLDivElement>(null);
     const video = useRef<HTMLVideoElement>(null);
     const timeoutChangeChannel = useRef<NodeJS.Timeout | null>(null);
+    const audioTracksRef = useRef<AudioTrackList>();
+    const textTracksRef = useRef<TextTrackList>();
 
-    const [audioTracks, setAudioTracks] = useState<AudioTrackList>();
-    const [textTracks, setTextTracks] = useState<TextTrackList>();
-    const [channelNumberText, setChannelNumberText] = useState('');
     const [state, setState] = useState<State>(State.CHANNEL_INFO);
+    const [channelNumberText, setChannelNumberText] = useState('');
 
     const epgUtils = new EPGUtils();
 
@@ -85,21 +85,38 @@ const TV = () => {
             case 13: {
                 // ok button ->show/disable channel info
                 event.stopPropagation();
-                setState(State.CHANNEL_INFO);
+                handleChannelInfoSwitch();
                 break;
             }
             case 405: // yellow button
             case 89: //'y'
                 event.stopPropagation();
-                setState(State.CHANNEL_SETTINGS);
+                handleChannelSettingsSwitch();
                 break;
             case 403: // red button to trigger or cancel recording
                 event.stopPropagation();
                 toggleRecording();
                 break;
+            case 461: // backbutton
+                event.stopPropagation();
+                setState(State.TV);
+                break;
             default:
                 console.log('TV-keyPressed:', keyCode);
         }
+    };
+
+    const handleChannelInfoSwitch = () => {
+        state !== State.CHANNEL_INFO ? setState(State.CHANNEL_INFO) : setState(State.TV);
+    };
+
+    const handleChannelSettingsSwitch = () => {
+        // if we don't have any audio tracks or text tracks we don't get into channel settings state
+        if (!audioTracksRef.current && !textTracksRef.current) {
+            return;
+        }
+
+        state !== State.CHANNEL_SETTINGS ? setState(State.CHANNEL_SETTINGS) : setState(State.TV);
     };
 
     const handleScrollWheel = () => {
@@ -197,7 +214,18 @@ const TV = () => {
         setTextTracks(textTracks);
     };
 
+    const setAudioTracks = (audioTracks: AudioTrackList | undefined) => {
+        audioTracksRef.current = audioTracks;
+    };
+
+    const setTextTracks = (textTracks: TextTrackList | undefined) => {
+        textTracksRef.current = textTracks;
+    };
+
     const resetPlayer = (videoElement: HTMLVideoElement) => {
+        setAudioTracks(undefined);
+        setTextTracks(undefined);
+
         // Remove all source elements
         while (videoElement.firstChild) {
             videoElement.removeChild(videoElement.firstChild);
@@ -247,9 +275,11 @@ const TV = () => {
     };
 
     const updateStreamSource = (streamUrl: URL) => {
-        changeSource(streamUrl);
         // show the channel info, if the channel was changed
         setState(State.CHANNEL_INFO);
+
+        changeSource(streamUrl);
+
         // also show the current channel number
         showCurrentChannelNumber();
     };
@@ -336,8 +366,8 @@ const TV = () => {
             {state === State.CHANNEL_SETTINGS && (
                 <ChannelSettings
                     channelName={getCurrentChannel()?.getName() || ''}
-                    audioTracks={audioTracks}
-                    textTracks={textTracks}
+                    audioTracks={audioTracksRef.current}
+                    textTracks={textTracksRef.current}
                     unmount={() => setState(State.TV)}
                 />
             )}

@@ -9,15 +9,15 @@ const ChannelSettings = (props: {
     audioTracks: AudioTrackList | undefined;
     unmount: () => void;
 }) => {
-    const channelSettingsWrapper = useRef<HTMLDivElement>(null);
-
-    const [selectedAudioTrack, setSelectedAudioTrack] = useState(0);
-    const [selectedTextTrack, setSelectedTextTrack] = useState(0);
     const [textTracksDisplay, setTextTracksDisplay] = useState<string[]>([]);
     const [audioTracksDisplay, setAudioTracksDisplay] = useState<string[]>([]);
+
+    const channelSettingsWrapper = useRef<HTMLDivElement>(null);
+    const selectedAudioTrack = useRef(0);
+    const selectedTextTrack = useRef(0);
     const timeoutReference = useRef<NodeJS.Timeout | null>(null);
 
-    const handleTextChange = (event: {value: number}) => {
+    const handleTextChange = (event: { value: number }) => {
         updateAutomaticUnmount();
 
         // enable new track
@@ -36,14 +36,14 @@ const ChannelSettings = (props: {
         return false;
     };
 
-    const handleAudioChange = (event: {value: number}) => {
+    const handleAudioChange = (event: { value: number }) => {
         updateAutomaticUnmount();
 
         // enable new track
         if (props.audioTracks) {
             for (let i = 0; i < props.audioTracks.length; i++) {
                 const audioTrack = props.audioTracks[i];
-                audioTrack.enabled = (event.value === i);
+                audioTrack.enabled = event.value === i;
             }
         }
         setSelectedAudioTrack(event.value);
@@ -74,6 +74,14 @@ const ChannelSettings = (props: {
 
         // pass unhandled events to parent
         if (!event.isPropagationStopped) return event;
+    };
+
+    const setSelectedAudioTrack = (index: number) => {
+        selectedAudioTrack.current = index;
+    };
+
+    const setSelectedTextTrack = (index: number) => {
+        selectedTextTrack.current = index;
     };
 
     const updateAutomaticUnmount = () => {
@@ -124,7 +132,7 @@ const ChannelSettings = (props: {
             {audioTracksDisplay.length > 0 && (
                 <>
                     <Icon>audio</Icon>
-                    <Picker defaultValue={selectedAudioTrack} onChange={handleAudioChange} width="large">
+                    <Picker defaultValue={selectedAudioTrack.current} onChange={handleAudioChange} width="large">
                         {audioTracksDisplay}
                     </Picker>
                 </>
@@ -133,7 +141,7 @@ const ChannelSettings = (props: {
             {textTracksDisplay.length > 0 && (
                 <>
                     <Icon>sub</Icon>
-                    <Picker defaultValue={selectedTextTrack} onChange={handleTextChange} width="large">
+                    <Picker defaultValue={selectedTextTrack.current} onChange={handleTextChange} width="large">
                         {textTracksDisplay}
                     </Picker>
                 </>

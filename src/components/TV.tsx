@@ -192,36 +192,28 @@ const TV = () => {
 
     const initVideoElement = () => {
         const videoElement = getMediaElement();
+        console.log('init video element:', videoElement);
         videoElement?.addEventListener('loadedmetadata', () => {
             if (!videoElement) return;
-            console.log('Audio Tracks: ', videoElement.audioTracks);
-            console.log('Text Tracks: ', videoElement.textTracks);
-
             // restore selected audio channel from storage
+            const audioTracks = videoElement.audioTracks;
+            const textTracks = videoElement.textTracks;
             const currentChannel = getCurrentChannel();
             if (!currentChannel) return;
             const indexStr = localStorage.getItem(currentChannel.getName());
-            if (indexStr) {
-                const index = parseInt(indexStr);
-                console.log('restore index %d for channel %s', index, getCurrentChannel()?.getName());
+            const index = indexStr && parseInt(indexStr);
 
-                if (index < videoElement.audioTracks.length) {
-                    for (let i = 0; i < videoElement.audioTracks.length; i++) {
-                        if (videoElement.audioTracks[i].enabled === true && i === index) {
-                            break;
-                        }
-                        if (index === i) {
-                            console.log('enabeling audio index %d', index);
-                            videoElement.audioTracks[i].enabled = true;
-                        } else {
-                            videoElement.audioTracks[i].enabled = false;
-                        }
-                    }
+            if (index && index < audioTracks.length) {
+                console.log('restore index %d for channel %s', index, currentChannel.getName());
+                for (let i = 0; i < audioTracks.length; i++) {
+                    // stored track index is already enabled
+                    if (audioTracks[i].enabled === true && i === index) break;
+                    // disabling not required - enabling is enough
+                    index === i && (audioTracks[i].enabled = true);
                 }
             }
-
-            setAudioTracks(videoElement.audioTracks);
-            setTextTracks(videoElement.textTracks);
+            setAudioTracks(audioTracks);
+            setTextTracks(textTracks);
         });
     };
 
@@ -262,7 +254,7 @@ const TV = () => {
         videoElement
             .play()
             .then()
-            .catch(() => console.log('channel switched before it could be played'));
+            .catch((error) => console.log('channel switched before it could be played', error));
     };
 
     const getWidth = () => window.innerWidth;
@@ -278,7 +270,6 @@ const TV = () => {
         // read last channel position from storage
         const lastChannelPosition = parseInt(localStorage.getItem(STORAGE_KEY_LAST_CHANNEL) || '0');
         changeChannelPosition(lastChannelPosition);
-
         // init video element
         initVideoElement();
         focus();
@@ -322,6 +313,7 @@ const TV = () => {
     useEffect(() => {
         // state changed to focus -> refocus
         if (appState === AppState.FOCUSED) {
+            console.log('TV: changed to focused');
             setState(State.CHANNEL_INFO);
             showCurrentChannelNumber();
             focus();
@@ -329,6 +321,7 @@ const TV = () => {
 
         // state changed to background -> stop playback
         if (appState === AppState.BACKGROUND) {
+            console.log('TV: changed to background');
             const videoElement = getMediaElement();
             if (!videoElement) return;
             resetPlayer(videoElement);
@@ -336,6 +329,7 @@ const TV = () => {
 
         // state changed to foreground -> start playback
         if (appState === AppState.FOREGROUND) {
+            console.log('TV: changed to foreground');
             const currentChannel = getCurrentChannel();
             if (currentChannel) {
                 changeSource(currentChannel.getStreamUrl());

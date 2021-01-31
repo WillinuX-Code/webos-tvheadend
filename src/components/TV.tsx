@@ -190,31 +190,28 @@ const TV = () => {
         localStorage.setItem(STORAGE_KEY_LAST_CHANNEL, newChannelPosition.toString());
     };
 
-    const initVideoElement = () => {
+    const handleLoadedMetaData = () => {
         const videoElement = getMediaElement();
-        console.log('init video element:', videoElement);
-        videoElement?.addEventListener('loadedmetadata', () => {
-            if (!videoElement) return;
-            // restore selected audio channel from storage
-            const audioTracks = videoElement.audioTracks;
-            const textTracks = videoElement.textTracks;
-            const currentChannel = getCurrentChannel();
-            if (!currentChannel) return;
-            const indexStr = localStorage.getItem(currentChannel.getName());
-            const index = indexStr && parseInt(indexStr);
+        if (!videoElement) return;
 
-            if (index && index < audioTracks.length) {
-                console.log('restore index %d for channel %s', index, currentChannel.getName());
-                for (let i = 0; i < audioTracks.length; i++) {
-                    // stored track index is already enabled
-                    if (audioTracks[i].enabled === true && i === index) break;
-                    // disabling not required - enabling is enough
-                    index === i && (audioTracks[i].enabled = true);
-                }
+        // restore selected audio channel from storage
+        const audioTracks = videoElement.audioTracks;
+        const textTracks = videoElement.textTracks;
+        const currentChannel = getCurrentChannel();
+        if (!currentChannel) return;
+        const indexStr = localStorage.getItem(currentChannel.getName());
+        const index = indexStr && parseInt(indexStr);
+
+        if (index && index < audioTracks.length) {
+            console.log('restore index %d for channel %s', index, currentChannel.getName());
+            for (let i = 0; i < audioTracks.length; i++) {
+                // stored track index is already enabled
+                audioTracks[i].enabled = (i === index);
             }
-            setAudioTracks(audioTracks);
-            setTextTracks(textTracks);
-        });
+        }
+
+        setAudioTracks(audioTracks);
+        setTextTracks(textTracks);
     };
 
     const resetPlayer = (videoElement: HTMLVideoElement) => {
@@ -270,8 +267,6 @@ const TV = () => {
         // read last channel position from storage
         const lastChannelPosition = parseInt(localStorage.getItem(STORAGE_KEY_LAST_CHANNEL) || '0');
         changeChannelPosition(lastChannelPosition);
-        // init video element
-        initVideoElement();
         focus();
 
         return () => {
@@ -378,7 +373,14 @@ const TV = () => {
 
             {isState === State.EPG && <TVGuide unmount={() => setState(State.CHANNEL_INFO)} />}
 
-            <video id="myVideo" ref={video} width={getWidth()} height={getHeight()} preload="none"></video>
+            <video
+                id="myVideo"
+                ref={video}
+                width={getWidth()}
+                height={getHeight()}
+                preload="none"
+                onLoadedMetadata={handleLoadedMetaData}
+            ></video>
         </div>
     );
 };

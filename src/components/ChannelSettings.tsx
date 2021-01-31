@@ -1,6 +1,7 @@
 import Icon from '@enact/moonstone/Icon';
 import Picker from '@enact/moonstone/Picker';
 import React, { useEffect, useRef, useState } from 'react';
+import StorageHelper from '../utils/StorageHelper';
 
 const ChannelSettings = (props: {
     channelName: string;
@@ -46,7 +47,7 @@ const ChannelSettings = (props: {
         setSelectedAudioTrack(event.value);
 
         // save selected audio track index for channel
-        localStorage.setItem(props.channelName, event.value);
+        StorageHelper.setLastAudioTrackIndex(props.channelName, event.value);
 
         // do not pass this event further
         return false;

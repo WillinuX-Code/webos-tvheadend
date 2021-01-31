@@ -7,8 +7,7 @@ import ChannelSettings from './ChannelSettings';
 import EPGUtils from '../utils/EPGUtils';
 import AppContext, { AppState } from '../AppContext';
 import '../styles/app.css';
-
-const STORAGE_KEY_LAST_CHANNEL = 'lastChannel';
+import StorageHelper from '../utils/StorageHelper';
 
 export enum State {
     TV = 'tv',
@@ -31,6 +30,7 @@ const TV = () => {
     const [channelNumberText, setChannelNumberText] = useState('');
     const [isState, setState] = useState<State>(State.CHANNEL_INFO);
     const [isChannelSettingsState, setIsChannelSettingsState] = useState(false);
+
     const epgUtils = new EPGUtils();
 
     const focus = () => tvWrapper.current?.focus();
@@ -187,7 +187,7 @@ const TV = () => {
         setCurrentChannelPosition(newChannelPosition);
 
         // store last used channel
-        localStorage.setItem(STORAGE_KEY_LAST_CHANNEL, newChannelPosition.toString());
+        StorageHelper.setLastChannelIndex(newChannelPosition);
     };
 
     const handleLoadedMetaData = () => {
@@ -199,14 +199,12 @@ const TV = () => {
         const textTracks = videoElement.textTracks;
         const currentChannel = getCurrentChannel();
         if (!currentChannel) return;
-        const indexStr = localStorage.getItem(currentChannel.getName());
-        const index = indexStr && parseInt(indexStr);
-
+        const index = StorageHelper.getLastAudioTrackIndex(currentChannel.getName());
         if (index && index < audioTracks.length) {
             console.log('restore index %d for channel %s', index, currentChannel.getName());
             for (let i = 0; i < audioTracks.length; i++) {
                 // stored track index is already enabled
-                audioTracks[i].enabled = (i === index);
+                audioTracks[i].enabled = i === index;
             }
         }
 
@@ -263,10 +261,15 @@ const TV = () => {
         setChannelNumberText(channel?.getChannelID().toString() || '');
     };
 
+    const updateStreamSource = (streamUrl: URL) => {
+        changeSource(streamUrl);
+        // show the channel info, if the channel was changed
+        setState(State.CHANNEL_INFO);
+        // also show the current channel number
+        showCurrentChannelNumber();
+    };
+
     useEffect(() => {
-        // read last channel position from storage
-        const lastChannelPosition = parseInt(localStorage.getItem(STORAGE_KEY_LAST_CHANNEL) || '0');
-        changeChannelPosition(lastChannelPosition);
         focus();
 
         return () => {
@@ -281,11 +284,7 @@ const TV = () => {
         if (epgData.getChannelCount() > 0) {
             const currentChannel = getCurrentChannel();
             if (currentChannel && currentChannel.getChannelID() !== currentChannelPosition) {
-                changeSource(currentChannel.getStreamUrl());
-                // show the channel info, if the channel was changed
-                setState(State.CHANNEL_INFO);
-                // also show the current channel number
-                showCurrentChannelNumber();
+                updateStreamSource(currentChannel.getStreamUrl());
             }
         }
     }, [currentChannelPosition]);
@@ -326,13 +325,11 @@ const TV = () => {
         if (appState === AppState.FOREGROUND) {
             console.log('TV: changed to foreground');
             const currentChannel = getCurrentChannel();
-            if (currentChannel) {
-                changeSource(currentChannel.getStreamUrl());
-                // show the channel info, if the channel was changed
-                setState(State.CHANNEL_INFO);
-                // also show the current channel number
-                showCurrentChannelNumber();
-            }
+            // manually call update because we want to start the channel as we
+            // have in the context -> no context change -> no effect
+            // also we only do it if video has no source attached because on
+            // first mount the source gets attached by currentChannelPosition effect
+            currentChannel && !video.current?.firstChild && updateStreamSource(currentChannel.getStreamUrl());
             focus();
         }
     }, [appState]);

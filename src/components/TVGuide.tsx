@@ -689,7 +689,7 @@ const TVGuide = (props: { unmount: () => void }) => {
     const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
         const keyCode = event.keyCode;
         let eventPosition = focusedEventPosition.current;
-        let channelPosition = focusedChannelPosition.current;
+        const channelPosition = focusedChannelPosition.current;
 
         // do not pass this event to parents
         switch (keyCode) {
@@ -707,19 +707,11 @@ const TVGuide = (props: { unmount: () => void }) => {
                 break;
             case 40: // arrow down
                 event.stopPropagation();
-                channelPosition += 1;
-                if (channelPosition > epgData.getChannelCount() - 1) {
-                    channelPosition = 0;
-                }
-                scrollToChannelPosition(channelPosition, false);
+                scrollDown();
                 return;
             case 38: // arrow up
                 event.stopPropagation();
-                channelPosition -= 1;
-                if (channelPosition < 0) {
-                    channelPosition = epgData.getChannelCount() - 1;
-                }
-                scrollToChannelPosition(channelPosition, false);
+                scrollUp();
                 return;
             case 403:
                 event.stopPropagation();
@@ -742,14 +734,34 @@ const TVGuide = (props: { unmount: () => void }) => {
         }
     };
 
+    const scrollUp = () => {
+        let channelPosition = focusedChannelPosition.current;
+        channelPosition -= 1;
+        if (channelPosition < 0) {
+            channelPosition = epgData.getChannelCount() - 1;
+        }
+        scrollToChannelPosition(channelPosition, false);
+    };
+
+    const scrollDown = () => {
+        let channelPosition = focusedChannelPosition.current;
+        channelPosition += 1;
+        if (channelPosition > epgData.getChannelCount() - 1) {
+            channelPosition = 0;
+        }
+        scrollToChannelPosition(channelPosition, false);
+    };
+
     const handleScrollWheel = (event: React.WheelEvent) => {
         event.stopPropagation();
-        // TODO: do something useful
+        event.deltaY < 0 ? scrollUp() : scrollDown();
+        focus();
     };
 
     const handleClick = (event: React.MouseEvent) => {
         event.stopPropagation();
-        // TODO: select event directly
+        setCurrentChannelPosition(focusedChannelPosition.current);
+        props.unmount();
     };
 
     const toggleRecording = (channelPosition: number, eventPosition: number) => {

@@ -1,8 +1,8 @@
-@password=TODO
+@password=webos3583
 
 # get epg events (50 per page) start page 0 - totalcount / 50
 GET http://userver.fritz.box:9981/api/epg/events/grid?start=10
-Authorization: Digest admin {{password}}
+Authorization: Digest webos {{password}}
 
 ###
 # get recording config (1 or more)

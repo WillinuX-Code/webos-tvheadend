@@ -37,6 +37,7 @@ const ChannelList = (props: { unmount: () => void }) => {
         // start scrolling after padding position top
         if (channelPosition < VERTICAL_SCROLL_TOP_PADDING_ITEM) {
             scrollY.current = 0;
+            updateCanvas();
             return;
         }
 
@@ -47,6 +48,7 @@ const ChannelList = (props: { unmount: () => void }) => {
             if (scrollY.current === 0) {
                 scrollY.current = mChannelLayoutHeight * (maxPosition - VERTICAL_SCROLL_TOP_PADDING_ITEM);
             }
+            updateCanvas();
             return;
         }
 
@@ -54,6 +56,7 @@ const ChannelList = (props: { unmount: () => void }) => {
         const scrollTarget = mChannelLayoutHeight * (channelPosition - VERTICAL_SCROLL_TOP_PADDING_ITEM);
         if (!withAnimation) {
             scrollY.current = scrollTarget;
+            updateCanvas();
             return;
         }
 
@@ -437,7 +440,6 @@ const ChannelList = (props: { unmount: () => void }) => {
 
     useEffect(() => {
         scrollToChannelPosition(channelPosition, true);
-        updateCanvas();
     }, [channelPosition]);
 
     return (

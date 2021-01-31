@@ -1,7 +1,7 @@
 /**
  * Created by satadru on 3/31/17.
  */
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 
 import Rect from '../models/Rect';
 import EPGUtils from '../utils/EPGUtils';
@@ -29,17 +29,16 @@ const TVGuide = (props: { unmount: () => void }) => {
         setCurrentChannelPosition
     } = useContext(AppContext);
 
+    const canvasUtils = new CanvasUtils();
+    const epgUtils = new EPGUtils();
+
     const canvas = useRef<HTMLCanvasElement>(null);
     const epgWrapper = useRef<HTMLDivElement>(null);
     const programguideContents = useRef<HTMLDivElement>(null);
     const scrollAnimationId = useRef(0);
-
-    const canvasUtils = new CanvasUtils();
-    const epgUtils = new EPGUtils();
-
-    const [timePosition, setTimePosition] = useState(epgUtils.getNow());
-    const [focusedChannelPosition, setFocusedChannelPosition] = useState(currentChannelPosition);
-    const [focusedEventPosition, setFocusedEventPosition] = useState(-1);
+    const focusedEventPosition = useRef(-1);
+    const focusedChannelPosition = useRef(currentChannelPosition);
+    const timePosition = useRef(epgUtils.getNow());
 
     const millisPerPixel = useRef(0);
     const timeOffset = useRef(0);
@@ -280,7 +279,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         drawingRect.right = drawingRect.left + 300;
         drawingRect.bottom = getHeight();
 
-        const channel = epgData.getChannel(focusedChannelPosition);
+        const channel = epgData.getChannel(focusedChannelPosition.current);
         const imageURL = channel?.getImageURL();
         const image = imageURL && imageCache.get(imageURL);
         if (image) {
@@ -300,7 +299,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         drawingRect.right = getWidth();
         drawingRect.bottom = getHeight();
 
-        const focusedEvent = epgData.getEvent(focusedChannelPosition, focusedEventPosition);
+        const focusedEvent = epgData.getEvent(focusedChannelPosition.current, focusedEventPosition.current);
         if (focusedEvent) {
             // rect event details
             drawingRect.left += mDetailsLayoutMargin;
@@ -446,7 +445,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         }
 
         // draw current position
-        drawingRect.left = getXFrom(timePosition);
+        drawingRect.left = getXFrom(timePosition.current);
         drawingRect.top = getScrollY() + mTimeBarHeight - mTimeBarTextSize + 10;
         drawingRect.right = drawingRect.left + mTimeBarLineWidth;
         drawingRect.bottom = drawingRect.top + getChannelListHeight();
@@ -457,8 +456,8 @@ const TVGuide = (props: { unmount: () => void }) => {
 
         // draw now time text
         drawingRect.top += mTimeBarNowTextSize / 2;
-        drawingRect.left = getXFrom(timePosition) + mChannelLayoutPadding;
-        const timeText = epgUtils.toTimeString(timePosition, locale);
+        drawingRect.left = getXFrom(timePosition.current) + mChannelLayoutPadding;
+        const timeText = epgUtils.toTimeString(timePosition.current, locale);
         canvasUtils.writeText(canvas, timeText, drawingRect.left, drawingRect.top, {
             fontSize: mTimeBarNowTextSize,
             fillStyle: mTimeBarLinePositionColor,
@@ -519,7 +518,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         event: EPGEvent,
         drawingRect: Rect
     ) => {
-        const focusedEvent = epgData.getEvent(focusedChannelPosition, focusedEventPosition);
+        const focusedEvent = epgData.getEvent(focusedChannelPosition.current, focusedEventPosition.current);
 
         // set starting minimal behind channel list
         setEventDrawingRectangle(channelPosition, event.getStart(), event.getEnd(), drawingRect);
@@ -623,7 +622,7 @@ const TVGuide = (props: { unmount: () => void }) => {
                 */
 
         // Set background of focused channel
-        if (focusedChannelPosition === position) {
+        if (focusedChannelPosition.current === position) {
             canvas.fillStyle = mChannelLayoutBackgroundFocus;
             canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
         }
@@ -683,14 +682,14 @@ const TVGuide = (props: { unmount: () => void }) => {
     const recalculateAndRedraw = (withAnimation: boolean) => {
         if (epgData !== null && epgData.hasData()) {
             resetBoundaries();
-            scrollToChannelPosition(focusedChannelPosition, withAnimation);
+            scrollToChannelPosition(focusedChannelPosition.current, withAnimation);
         }
     };
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
         const keyCode = event.keyCode;
-        let eventPosition = focusedEventPosition;
-        let channelPosition = focusedChannelPosition;
+        let eventPosition = focusedEventPosition.current;
+        let channelPosition = focusedChannelPosition.current;
 
         // do not pass this event to parents
         switch (keyCode) {
@@ -781,7 +780,7 @@ const TVGuide = (props: { unmount: () => void }) => {
     };
 
     const scrollToEventPosition = (eventPosition: number) => {
-        const eventCount = epgData.getEventCount(focusedChannelPosition);
+        const eventCount = epgData.getEventCount(focusedChannelPosition.current);
 
         if (eventPosition < 0) {
             eventPosition = 0;
@@ -789,7 +788,7 @@ const TVGuide = (props: { unmount: () => void }) => {
             eventPosition = eventCount - 1;
         }
 
-        const targetEvent = epgData.getEvent(focusedChannelPosition, eventPosition);
+        const targetEvent = epgData.getEvent(focusedChannelPosition.current, eventPosition);
         if (targetEvent) {
             const targetTimePosition = targetEvent.getStart() + 1;
 
@@ -803,11 +802,10 @@ const TVGuide = (props: { unmount: () => void }) => {
     };
 
     const scrollToChannelPosition = (channelPosition: number, withAnimation: boolean) => {
-        setFocusedChannelPosition(channelPosition);
-
         // start scrolling after padding position top
         if (channelPosition < VERTICAL_SCROLL_TOP_PADDING_ITEM) {
             setScrollY(0);
+            setFocusedChannelPosition(channelPosition);
             return;
         }
 
@@ -821,6 +819,7 @@ const TVGuide = (props: { unmount: () => void }) => {
 
         if (!withAnimation) {
             setScrollY(scrollTarget);
+            setFocusedChannelPosition(channelPosition);
             return;
         } else {
             const scrollDistance = scrollTarget - getScrollY();
@@ -854,12 +853,29 @@ const TVGuide = (props: { unmount: () => void }) => {
         updateCanvas();
     };
 
+    const setFocusedEventPosition = (focusedEventPos: number) => {
+        focusedEventPosition.current = focusedEventPos;
+        updateCanvas();
+    };
+
+    const setFocusedChannelPosition = (focusedChannelPos: number) => {
+        focusedChannelPosition.current = focusedChannelPos;
+        const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition.current, timePosition.current);
+        setFocusedEventPosition(
+            targetEvent ? epgData.getEventPosition(focusedChannelPosition.current, targetEvent) : -1
+        );
+    };
+
+    const setTimePosition = (timePos: number) => {
+        timePosition.current = timePos;
+    };
+
     useEffect(() => {
         recalculateAndRedraw(false);
         focus();
 
         // set current time and event when mounted
-        const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition, timePosition);
+        const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition.current, timePosition.current);
         targetEvent && scrollToEventPosition(epgData.getEventPosition(currentChannelPosition, targetEvent));
         setTimePosition(epgUtils.getNow());
 
@@ -868,16 +884,6 @@ const TVGuide = (props: { unmount: () => void }) => {
             cancelScrollAnimation();
         };
     }, []);
-
-    useEffect(() => {
-        resetBoundaries();
-        const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition, timePosition);
-        setFocusedEventPosition(targetEvent ? epgData.getEventPosition(focusedChannelPosition, targetEvent) : -1);
-    }, [focusedChannelPosition]);
-
-    useEffect(() => {
-        updateCanvas();
-    }, [focusedChannelPosition, focusedEventPosition, timePosition]);
 
     const updateCanvas = () => {
         if (canvas.current) {

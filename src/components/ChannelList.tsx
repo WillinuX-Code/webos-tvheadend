@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import Rect from '../models/Rect';
 import CanvasUtils from '../utils/CanvasUtils';
 import AppContext from '../AppContext';
@@ -13,7 +13,7 @@ const ChannelList = (props: { unmount: () => void }) => {
     const listWrapper = useRef<HTMLDivElement>(null);
     const scrollAnimationId = useRef(0);
     const scrollY = useRef(0);
-    const [channelPosition, setChannelPosition] = useState(currentChannelPosition);
+    const channelPosition = useRef(currentChannelPosition);
 
     const canvasUtils = new CanvasUtils();
 
@@ -138,7 +138,7 @@ const ChannelList = (props: { unmount: () => void }) => {
     };
 
     const drawChannelItem = (canvas: CanvasRenderingContext2D, position: number) => {
-        const isSelectedChannel = position === channelPosition;
+        const isSelectedChannel = position === channelPosition.current;
         const channel = epgData.getChannel(position);
         const drawingRect = new Rect();
 
@@ -307,7 +307,7 @@ const ChannelList = (props: { unmount: () => void }) => {
     const recalculateAndRedraw = (withAnimation: boolean) => {
         if (epgData !== null && epgData.hasData()) {
             // calculateMaxVerticalScroll();
-            scrollToChannelPosition(channelPosition, withAnimation);
+            scrollToChannelPosition(channelPosition.current, withAnimation);
         }
     };
 
@@ -345,7 +345,7 @@ const ChannelList = (props: { unmount: () => void }) => {
                 break;
             case 13: // ok button -> switch to focused channel
                 event.stopPropagation();
-                setCurrentChannelPosition(channelPosition);
+                setCurrentChannelPosition(channelPosition.current);
                 props.unmount();
                 break;
             case 403: // red button trigger recording
@@ -387,27 +387,27 @@ const ChannelList = (props: { unmount: () => void }) => {
     };
 
     const handleClick = () => {
-        setCurrentChannelPosition(channelPosition);
+        setCurrentChannelPosition(channelPosition.current);
         props.unmount();
     };
 
     const scrollUp = () => {
         // if we reached 0 we scroll to end of list
-        if (channelPosition === 0) {
+        if (channelPosition.current === 0) {
             setChannelPosition(epgData.getChannelCount() - 1);
         } else {
             // channel down
-            setChannelPosition(channelPosition - 1);
+            setChannelPosition(channelPosition.current - 1);
         }
     };
 
     const scrollDown = () => {
         // when channel position increased channelcount we scroll to beginning
-        if (channelPosition === epgData.getChannelCount() - 1) {
+        if (channelPosition.current === epgData.getChannelCount() - 1) {
             setChannelPosition(0);
         } else {
             // channel up
-            setChannelPosition(channelPosition + 1);
+            setChannelPosition(channelPosition.current + 1);
         }
     };
 
@@ -428,6 +428,11 @@ const ChannelList = (props: { unmount: () => void }) => {
         }
     };
 
+    const setChannelPosition = (channelPos: number) => {
+        channelPosition.current = channelPos;
+        scrollToChannelPosition(channelPos, true);
+    };
+
     useEffect(() => {
         recalculateAndRedraw(false);
         focus();
@@ -437,10 +442,6 @@ const ChannelList = (props: { unmount: () => void }) => {
             cancelAnimationFrame(scrollAnimationId.current);
         };
     }, []);
-
-    useEffect(() => {
-        scrollToChannelPosition(channelPosition, true);
-    }, [channelPosition]);
 
     return (
         <div

@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import TVHDataService from './services/TVHDataService';
 import TV from './components/TV';
-import TVHSettings, { STORAGE_TVH_SETTING_KEY } from './components/TVHSettings';
+import TVHSettings from './components/TVHSettings';
 import './styles/app.css';
 import AppContext, { AppState } from './AppContext';
 import EPGChannel from './models/EPGChannel';
+import StorageHelper from './utils/StorageHelper';
 
 const App = () => {
     const { setAppState, setLocale, tvhDataService, setTvhDataService, epgData, imageCache } = useContext(AppContext);
@@ -89,8 +90,8 @@ const App = () => {
 
     useEffect(() => {
         console.log('app component mounted');
-        const settingsString = localStorage.getItem(STORAGE_TVH_SETTING_KEY);
-        const service = settingsString ? new TVHDataService(JSON.parse(settingsString)) : undefined;
+        const tvhSettings = StorageHelper.getTvhSettings();
+        const service = tvhSettings ? new TVHDataService(tvhSettings) : undefined;
         setTvhDataService(service);
 
         // add global event listeners for blur and focus of the app

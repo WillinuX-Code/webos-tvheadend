@@ -1,6 +1,18 @@
+import { TVHDataServiceParms } from "../services/TVHDataService";
+
+const STORAGE_TVH_SETTING_KEY = 'TVH_SETTINGS';
 const STORAGE_KEY_LAST_CHANNEL = 'lastChannel';
 
 export default class StorageHelper {
+    static getTvhSettings = () => {
+        const settingsStr = localStorage.getItem(STORAGE_TVH_SETTING_KEY);
+        return settingsStr ? JSON.parse(settingsStr) as TVHDataServiceParms : undefined;
+    };
+
+    static setTvhSettings = (settings: TVHDataServiceParms) => {
+        localStorage.setItem(STORAGE_TVH_SETTING_KEY, settings.toString());
+    };
+
     static getLastChannelIndex = (): number => {
         const indexStr = localStorage.getItem(STORAGE_KEY_LAST_CHANNEL);
         return (indexStr && parseInt(indexStr)) || 0;

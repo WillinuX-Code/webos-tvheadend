@@ -8,8 +8,7 @@ import TVHDataService, { TVHDataServiceParms } from '../services/TVHDataService'
 import TVHSettingsTest, { TestResults } from './TVHSettingsTest';
 import AppContext from '../AppContext';
 import TestResult from './TestResult';
-
-export const STORAGE_TVH_SETTING_KEY = 'TVH_SETTINGS';
+import StorageHelper from '../utils/StorageHelper';
 
 const TVHSettings = (props: { unmount: () => void }) => {
     const { tvhDataService, setTvhDataService } = useContext(AppContext);
@@ -29,7 +28,7 @@ const TVHSettings = (props: { unmount: () => void }) => {
 
     const handleSave = () => {
         // put to storage
-        localStorage.setItem(STORAGE_TVH_SETTING_KEY, JSON.stringify(serviceParms));
+        StorageHelper.setTvhSettings(serviceParms);
         setTvhDataService(new TVHDataService(serviceParms));
         props.unmount();
     };
@@ -87,7 +86,7 @@ const TVHSettings = (props: { unmount: () => void }) => {
 
     useEffect(() => {
         // read state from storage if exists
-        const settings = JSON.parse(localStorage.getItem(STORAGE_TVH_SETTING_KEY) || '{}') as TVHDataServiceParms;
+        const settings = StorageHelper.getTvhSettings() || {} as TVHDataServiceParms;
         setServiceParms(settings);
         focus();
     }, []);

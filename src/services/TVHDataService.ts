@@ -304,13 +304,13 @@ export default class TVHDataService {
     }
 
     /** request 1 epg entry with HEAD mode */
-    async retrieveTVEPGTest() {
-        return await this.retrieveTest(this.url + TVHDataService.API_EPG_TEST, true);
+    retrieveTVEPGTest() {
+        return this.retrieveTest(this.url + TVHDataService.API_EPG_TEST, true);
     }
 
     /** request an url in head mode */
-    async retrieveTest(url: URL | string, withCredentials?: boolean) {
-        return await this.serviceAdapter.call({
+    retrieveTest(url: URL | string, withCredentials?: boolean) {
+        return this.serviceAdapter.call({
             url: url.toString(),
             user: withCredentials ? this.user : '',
             password: withCredentials ? this.password : '',

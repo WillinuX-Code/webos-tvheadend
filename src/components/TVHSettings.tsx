@@ -58,19 +58,19 @@ const TVHSettings = (props: { unmount: () => void }) => {
 
     const handleConnectionTest = async () => {
         setIsLoading(true);
+        setTestResults(undefined);
 
         //test url verify if it works
         const service = getDataService();
         const tester = new TVHSettingsTest(service);
+        const result = await tester.testAll();
 
-        const severalResults = await tester.testSeveral();
         setTestResults({
-            ...testResults,
-            serverInfo: severalResults[0],
-            playlist: severalResults[1],
-            stream: severalResults[2],
-            epg: await tester.testEpg(),
-            dvr: await tester.testDvr()
+            serverInfo: result.serverInfo,
+            playlist: result.playlist,
+            stream: result.stream,
+            epg: result.epg,
+            dvr: result.dvr
         });
 
         setServiceParms({ ...serviceParms, dvrUuid: testResults?.dvr.payload });

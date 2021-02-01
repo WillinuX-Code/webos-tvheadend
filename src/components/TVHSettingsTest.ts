@@ -26,80 +26,106 @@ export default class TVHSettingsTest {
      * test
      * - server info
      * - playlist
-     * - tream
+     * - stream
+     * - epg
+     * - dvr
      */
-    async testSeveral(): Promise<ResultItem[]> {
-        const serverInfoLabel = 'Server Info: ';
-        const playListLabel = 'Playlist: ';
-        const streamLabel = 'Stream: ';
-        let channels;
-        let serverInfo;
-        let serverInfoResult;
-        let playlistResult;
-        let channelStreamResult;
-
+    async testAll(): Promise<TestResults> {
         // test server info
-        try {
-            serverInfo = await this.tvhService.retrieveServerInfo();
-            serverInfoResult = this.toResult(
-                serverInfoLabel,
-                true,
-                'Version: ' + serverInfo.sw_version + ' - API Version: ' + serverInfo.api_version,
-                serverInfo
-            );
-        } catch (error) {
-            serverInfoResult = this.toResult(serverInfoLabel, false, this.getErrorText(error));
-        }
-        // test playlist
-        try {
-            channels = await this.tvhService.retrieveM3UChannels();
-            playlistResult = this.toResult(playListLabel, true, 'loaded ' + channels.length + ' channels');
-        } catch (error) {
-            playlistResult = this.toResult(playListLabel, false, this.getErrorText(error));
-        }
-        // test access to stream
-        // test playlist
-        if (channels && channels.length > 0) {
-            const streamUrl = channels[0].getStreamUrl();
-            try {
-                // stream url is called via frontend (video element) and can therfore not provice any credentials
-                // so our test needs to be without credentials
-                await this.tvhService.retrieveTest(streamUrl, false);
-                channelStreamResult = this.toResult(streamLabel, true, 'verified access to video stream');
-            } catch (error) {
-                channelStreamResult = this.toResult(streamLabel, false, this.getErrorTextStream(error));
-            }
+        const serverInfoResult = this.testServerInfo();
+        const epgResult = this.testEpg();
+        const testDvr = this.testDvr();
+        const playlistAndChannelStreamResult = this.testPlaylistAndChannelStream();
+
+        const testResults: Promise<TestResults> = Promise.all([
+            serverInfoResult,
+            playlistAndChannelStreamResult,
+            epgResult,
+            testDvr
+        ]).then(([serverInfo, { playlist, stream }, epg, dvr]) => {
+            return { serverInfo, playlist, stream, epg, dvr };
+        });
+
+        return testResults;
+    }
+
+    testPlaylistAndChannelStream = async () => {
+        const { playlistResult, streamUrl } = await this.testPlaylist();
+        return this.testChannelStream(streamUrl).then((channelStreamResult) => {
+            return { playlist: playlistResult, stream: channelStreamResult };
+        });
+    };
+
+    testServerInfo = async () => {
+        const serverInfoLabel = 'Server Info: ';
+
+        return this.tvhService
+            .retrieveServerInfo()
+            .then((serverInfo) =>
+                this.toResult(
+                    serverInfoLabel,
+                    true,
+                    'Version: ' + serverInfo.sw_version + ' - API Version: ' + serverInfo.api_version,
+                    serverInfo
+                )
+            )
+            .catch((error) => this.toResult(serverInfoLabel, false, this.getErrorText(error)));
+    };
+
+    testPlaylist = async () => {
+        const playListLabel = 'Playlist: ';
+
+        return this.tvhService
+            .retrieveM3UChannels()
+            .then((channels) => {
+                const streamUrl = channels[0] && channels[0].getStreamUrl();
+                const resultItem = this.toResult(playListLabel, true, 'loaded ' + channels.length + ' channels');
+                return { playlistResult: resultItem, streamUrl };
+            })
+            .catch((error) => {
+                const resultItem = this.toResult(playListLabel, false, this.getErrorText(error));
+                return { playlistResult: resultItem, streamUrl: null };
+            });
+    };
+
+    testChannelStream = async (streamUrl: string | URL | null) => {
+        const streamLabel = 'Stream: ';
+
+        if (streamUrl) {
+            // stream url is called via frontend (video element) and can therfore not provice any credentials
+            // so our test needs to be without credentials
+            return this.tvhService
+                .retrieveTest(streamUrl, false)
+                .then(() => this.toResult(streamLabel, true, 'verified access to video stream'))
+                .catch((error) => this.toResult(streamLabel, false, this.getErrorTextStream(error)));
         } else {
-            channelStreamResult = this.toResult(
+            return this.toResult(
                 streamLabel,
                 false,
                 'No channels available - verification of channel stream not possible'
             );
         }
-        return [serverInfoResult, playlistResult, channelStreamResult];
-    }
+    };
 
-    async testEpg(): Promise<ResultItem> {
-        const label = 'EPG: ';
-        try {
-            await this.tvhService.retrieveTVEPGTest();
-            return this.toResult(label, true, 'verified access to EPG');
-        } catch (error) {
-            return this.toResult(label, false, this.getErrorText(error));
-        }
-    }
+    testEpg = async () => {
+        const epgLabel = 'EPG: ';
 
-    async testDvr(): Promise<ResultItem> {
-        const label = 'DVR: ';
-        try {
-            const dvrConfig = await this.tvhService.retrieveDVRConfig();
-            return this.toResult(label, true, 'verified access to DVR', dvrConfig);
-        } catch (error) {
-            return this.toResult(label, false, this.getErrorText(error));
-        }
-    }
+        return this.tvhService
+            .retrieveTVEPGTest()
+            .then(() => this.toResult(epgLabel, true, 'verified access to EPG'))
+            .catch((error) => this.toResult(epgLabel, false, this.getErrorText(error)));
+    };
 
-    toResult(label: string, accessible: boolean, result: string, payload?: any): ResultItem {
+    testDvr = async () => {
+        const dvrLabel = 'DVR: ';
+
+        return this.tvhService
+            .retrieveDVRConfig()
+            .then(() => this.toResult(dvrLabel, true, 'verified access to DVR'))
+            .catch((error) => this.toResult(dvrLabel, false, this.getErrorText(error)));
+    };
+
+    private toResult(label: string, accessible: boolean, result: string, payload?: any): ResultItem {
         return {
             label: label,
             accessible: accessible,

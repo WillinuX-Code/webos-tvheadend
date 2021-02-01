@@ -179,6 +179,8 @@ const TV = () => {
                     }
                 });
             }, 3000);
+        } else {
+            setChannelNumberText('');
         }
     };
 

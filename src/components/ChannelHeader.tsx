@@ -2,8 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import CanvasUtils from '../utils/CanvasUtils';
 import '../styles/app.css';
 
-const HEADER_HEIGHT = 80;
-const HEADER_TEXT_SIZE = 56;
+const HEADER_HEIGHT = 130;
+const HEADER_TEXT_SIZE = 90;
 
 const ChannelHeader = (props: { channelNumberText: string; unmount: () => void }) => {
     const canvas = useRef<HTMLCanvasElement>(null);

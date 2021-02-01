@@ -28,7 +28,7 @@ ares-inspect -d tv com.willinux.tvh.app --open
 - EPG
 - Channel List
 - Record live tv or plan recordings using EPG
-- User Authentication: basic and digest (md5)
+- User Authentication: basic and digest (md5, sha256)
 
 ## WebOS
 Useful links for video playback using webos

@@ -64,14 +64,7 @@ const TVHSettings = (props: { unmount: () => void }) => {
         const tester = new TVHSettingsTest(service);
         const result = await tester.testAll();
 
-        setTestResults({
-            serverInfo: result.serverInfo,
-            playlist: result.playlist,
-            stream: result.stream,
-            epg: result.epg,
-            dvr: result.dvr
-        });
-
+        setTestResults({ ...result });
         setServiceParms({ ...serviceParms, dvrUuid: testResults?.dvr.payload });
         setConnectButtonEnabled(true);
         setIsLoading(false);
@@ -86,7 +79,7 @@ const TVHSettings = (props: { unmount: () => void }) => {
 
     useEffect(() => {
         // read state from storage if exists
-        const settings = StorageHelper.getTvhSettings() || {} as TVHDataServiceParms;
+        const settings = StorageHelper.getTvhSettings() || ({} as TVHDataServiceParms);
         setServiceParms(settings);
         focus();
     }, []);

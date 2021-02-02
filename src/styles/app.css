@@ -61,6 +61,9 @@ body {
     font-size: larger;
     font-weight: bold;
     padding-top: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .channelListDetails .now {
@@ -80,6 +83,9 @@ body {
 .channelListDetails .subTitle {
     color: #969696;
     padding-top: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .channelListDetails .next {
@@ -128,6 +134,15 @@ body {
     color: rgb(65, 182, 230);
 }
 
+.channelListDetails .rec {
+    height: 15px;
+    width: 15px;
+    margin-right: 10px;
+    background-color: red;
+    border-radius: 50%;
+    display: inline-block;
+}
+
 .channelListDetails .listItemTitle {
     width: auto;
     white-space: nowrap;
@@ -138,8 +153,9 @@ body {
 }
 
 .channelListDetails .desc {
+    height: 62%;
+    white-space: pre-wrap;
     overflow: hidden;
-    text-overflow: ellipsis;
 }
 .channelInfo {
     position: absolute;

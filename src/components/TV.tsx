@@ -8,6 +8,7 @@ import EPGUtils from '../utils/EPGUtils';
 import AppContext, { AppState } from '../AppContext';
 import '../styles/app.css';
 import StorageHelper from '../utils/StorageHelper';
+import EPGEvent from '../models/EPGEvent';
 
 export enum State {
     TV = 'tv',
@@ -93,10 +94,14 @@ const TV = () => {
                 event.stopPropagation();
                 handleChannelSettingsSwitch();
                 break;
-            case 403: // red button to trigger or cancel recording
+            case 403: {
+                // red button to trigger or cancel recording
                 event.stopPropagation();
-                toggleRecording();
+                const channel = getCurrentChannel();
+                const epgEvent = channel?.getEvents().find((event) => event.isCurrent());
+                epgEvent && toggleRecording(epgEvent);
                 break;
+            }
             case 461: // backbutton
                 event.stopPropagation();
                 setState(State.TV);
@@ -129,11 +134,9 @@ const TV = () => {
 
     const getMediaElement = () => video.current;
 
-    const toggleRecording = () => {
+    const toggleRecording = (epgEvent: EPGEvent) => {
         // add current viewing channel to records
         // get current event
-        const channel = getCurrentChannel();
-        const epgEvent = channel?.getEvents().find((channel) => channel.isCurrent());
 
         if (!epgEvent) return;
         if (epgEvent.isPastDated(epgUtils.getNow())) {
@@ -383,7 +386,12 @@ const TV = () => {
                 />
             )}
 
-            {state === State.CHANNEL_LIST && <ChannelList unmount={() => setState(State.CHANNEL_INFO)} />}
+            {state === State.CHANNEL_LIST && (
+                <ChannelList
+                    toggleRecording={(event: EPGEvent) => toggleRecording(event)}
+                    unmount={() => setState(State.CHANNEL_INFO)}
+                />
+            )}
 
             {state === State.EPG && <TVGuide unmount={() => setState(State.CHANNEL_INFO)} />}
 

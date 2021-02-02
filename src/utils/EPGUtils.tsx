@@ -36,6 +36,20 @@ export default class EPGUtils {
     }
 
     /**
+     * format date with locale formatting
+     *
+     * @param {Number} time
+     */
+    toDateString(time: number, locale: string) {
+        const options = {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        };
+        return new Intl.DateTimeFormat(locale, options).format(new Date(time));
+    }
+
+    /**
      * format start - stop with locale formatting
      *
      * @param {Number} start

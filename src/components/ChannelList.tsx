@@ -1,11 +1,20 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import Rect from '../models/Rect';
 import CanvasUtils from '../utils/CanvasUtils';
 import AppContext from '../AppContext';
 import '../styles/app.css';
+import ChannelListDetails from './ChannelListDetails';
+import EPGEvent from '../models/EPGEvent';
+import EPGChannel from '../models/EPGChannel';
+import EPGUtils from '../utils/EPGUtils';
 
 const VERTICAL_SCROLL_TOP_PADDING_ITEM = 5;
 const IS_DEBUG = false;
+
+export enum State {
+    NORMAL = 'normal',
+    DETAILS = 'details'
+}
 
 const ChannelList = (props: { unmount: () => void }) => {
     const { epgData, imageCache, currentChannelPosition, setCurrentChannelPosition } = useContext(AppContext);
@@ -15,7 +24,16 @@ const ChannelList = (props: { unmount: () => void }) => {
     const scrollY = useRef(0);
     const channelPosition = useRef(currentChannelPosition);
 
+    // details refs
+    const [focusedChannel, setFocusedChannel] = useState<EPGChannel>();
+    const [focusedEventOffset, setFocusedEventOffset] = useState(0);
+    const [focusedEvent, setFocusedEvent] = useState<EPGEvent>();
+
+    const nextEvents = useRef<EPGEvent[]>([]);
+    const nextSameEvents = useRef<EPGEvent[]>([]);
+
     const canvasUtils = new CanvasUtils();
+    const epgUtils = new EPGUtils();
 
     const mChannelLayoutTextSize = 32;
     const mChannelLayoutEventTextSize = 26;
@@ -27,6 +45,8 @@ const ChannelList = (props: { unmount: () => void }) => {
     const mChannelLayoutHeight = 90;
     const mChannelLayoutWidth = 900;
     const mChannelLayoutBackgroundFocus = 'rgba(65,182,230,1)';
+
+    const [state, setState] = useState<State>(State.NORMAL);
 
     const getTopFrom = (position: number) => {
         const y = position * mChannelLayoutHeight; //+ this.mChannelLayoutMargin;
@@ -373,6 +393,26 @@ const ChannelList = (props: { unmount: () => void }) => {
                 //   });
                 // }
                 break;
+            case 39: // right arrow
+                event.stopPropagation();
+                if (state === State.DETAILS) {
+                    // switch to next event details
+                    setFocusedEventOffset(focusedEventOffset + 1);
+                } else {
+                    // show channelListDetails
+                    setState(State.DETAILS);
+                }
+                break;
+            case 37: // left arrow
+                event.stopPropagation();
+                if (state === State.DETAILS && focusedEventOffset > 0) {
+                    // switch to previous event details
+                    setFocusedEventOffset(focusedEventOffset - 1);
+                } else {
+                    // hidee channelListDetails
+                    setState(State.NORMAL);
+                }
+                break;
             default:
                 console.log('ChannelList-keyPressed:', keyCode);
         }
@@ -430,7 +470,39 @@ const ChannelList = (props: { unmount: () => void }) => {
 
     const setChannelPosition = (channelPos: number) => {
         channelPosition.current = channelPos;
+        if (state === State.DETAILS) {
+            setDetailsData();
+        }
         scrollToChannelPosition(channelPos, true);
+    };
+
+    const setDetailsData = () => {
+        const channel = epgData.getChannel(channelPosition.current);
+        // get current event
+        const currentEvent = epgData.getEventAtTimestamp(channelPosition.current, epgUtils.getNow()) || undefined;
+        if (currentEvent) {
+            // get next event position with offset
+            const eventPos = epgData.getEventPosition(channelPosition.current, currentEvent) + focusedEventOffset;
+            const nextEventsArray: EPGEvent[] = [];
+            for (let i = eventPos; i < eventPos + 5; i++) {
+                const nextEvent = epgData.getEvent(channelPosition.current, i + 1);
+                nextEvent && nextEventsArray.push(nextEvent);
+            }
+            nextEvents.current = nextEventsArray;
+            // get same
+
+            // set event with offset
+            const newfocusedEvent = epgData.getEvent(channelPosition.current, eventPos);
+            setFocusedEvent(newfocusedEvent);
+        } else {
+            nextEvents.current = [];
+            nextSameEvents.current = [];
+        }
+        // in case channel changed reset offset
+        if (channel?.getChannelID() !== focusedChannel?.getChannelID()) {
+            setFocusedEventOffset(0);
+            setFocusedChannel(channel || undefined);
+        }
     };
 
     useEffect(() => {
@@ -443,6 +515,12 @@ const ChannelList = (props: { unmount: () => void }) => {
         };
     }, []);
 
+    useEffect(() => {
+        if (state === State.DETAILS) {
+            setDetailsData();
+        }
+    }, [state, focusedEventOffset]);
+
     return (
         <div
             id="channellist-wrapper"
@@ -454,6 +532,15 @@ const ChannelList = (props: { unmount: () => void }) => {
             className="channelList"
         >
             <canvas ref={canvas} width={getWidth()} height={getHeight()} style={{ display: 'block' }} />
+
+            {state === State.DETAILS && focusedChannel && (
+                <ChannelListDetails
+                    epgChannel={focusedChannel}
+                    currentEvent={focusedEvent}
+                    nextEvents={nextEvents.current}
+                    nextSameEvents={nextSameEvents.current}
+                />
+            )}
         </div>
     );
 };

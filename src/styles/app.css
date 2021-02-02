@@ -37,6 +37,110 @@ body {
     z-index: 8;
 }
 
+.channelListDetails {
+    width: calc(100% - 900px - 40px); /* minus channel length minus 2xpadding (left + right)*/
+    background-color: /*rgba(30, 38, 43, 0.9);*/ rgba(5, 16, 24, 0.9);
+    /*background-image: linear-gradient(
+        to bottom,
+        rgba(23, 30, 34, 0.9),
+        rgba(14, 57, 85, 0.9),
+        rgba(14, 57, 85, 0.9),
+        rgba(14, 57, 85, 0.9),
+        rgba(23, 30, 34, 0.9)
+    );*/
+    height: 100%;
+    position: absolute;
+    padding-left: 20px;
+    padding-right: 20px;
+    top: 0;
+    right: 0;
+    z-index: 9;
+}
+
+.channelListDetails .title {
+    font-size: larger;
+    font-weight: bold;
+    padding-top: 10px;
+}
+
+.channelListDetails .now {
+    font-size: larger;
+    text-align: right;
+    padding-top: 20px;
+    padding-bottom: 40px;
+}
+
+.channelListDetails .timeframe {
+    font-size: larger;
+    float: left;
+    padding-top: 20px;
+    padding-bottom: 40px;
+}
+
+.channelListDetails .subTitle {
+    color: #969696;
+    padding-top: 10px;
+}
+
+.channelListDetails .next {
+    width: 100%;
+    position: absolute;
+    bottom: 0px;
+}
+
+.channelListDetails .next .list {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+}
+.separator {
+    line-height: 1em;
+    position: relative;
+    outline: 0;
+    border: 0;
+    color: rgb(0, 0, 0);
+    text-align: center;
+    height: 1.5em;
+    opacity: 0.5;
+    width: 100%;
+}
+.separator:after {
+    content: attr(data-content);
+    position: relative;
+    display: inline-block;
+    color: #000;
+    padding: 0 0.5em;
+    line-height: 1.5em;
+    color: #fff;
+    background-color: #012533;
+}
+.separator:before {
+    content: '';
+    background: linear-gradient(90deg, transparent, #fff, transparent);
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 2px;
+}
+
+.channelListDetails .listItemTime {
+    float: left;
+    color: rgb(65, 182, 230);
+}
+
+.channelListDetails .listItemTitle {
+    width: auto;
+    white-space: nowrap;
+    overflow: hidden;
+    padding-left: 10px;
+    padding-right: 10px;
+    text-overflow: ellipsis;
+}
+
+.channelListDetails .desc {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 .channelInfo {
     position: absolute;
     width: 100%;
@@ -50,7 +154,7 @@ body {
     width: 100%;
     top: 0;
     left: 0;
-    z-index: 7;
+    z-index: 12;
 }
 
 .channelSettings {

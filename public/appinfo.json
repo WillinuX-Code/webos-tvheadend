@@ -1,12 +1,13 @@
 {
-  "id": "com.willinux.tvh.app",
-  "version": "1.0.0",
-  "vendor": "My Company",
-  "type": "web",
-  "main": "index.html",
-  "title": "TVheadend",
-  "icon": "icon.png",
-  "largeIcon": "largeIcon.png",
-  "iconColor": "#303030",
-  "disableBackHistoryAPI": true
+    "id": "com.willinux.tvh.app",
+    "version": "1.0.0",
+    "vendor": "My Company",
+    "type": "web",
+    "main": "index.html",
+    "title": "TVheadend",
+    "splashBackground": "splash.png",
+    "icon": "icon.png",
+    "largeIcon": "largeIcon.png",
+    "iconColor": "#303030",
+    "disableBackHistoryAPI": true
 }

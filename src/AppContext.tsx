@@ -3,7 +3,7 @@ import EPGData from './models/EPGData';
 import TVHDataService from './services/TVHDataService';
 import StorageHelper from './utils/StorageHelper';
 
-export enum AppState {
+export enum AppVisibilityState {
     FOCUSED = 'focused',
     BLURRED = 'blurred',
     BACKGROUND = 'background',
@@ -19,8 +19,8 @@ type AppContext = {
     imageCache: Map<URL, HTMLImageElement>;
     currentChannelPosition: number;
     setCurrentChannelPosition: (value: number) => void;
-    appState: AppState;
-    setAppState: (value: AppState) => void;
+    appState: AppVisibilityState;
+    setAppState: (value: AppVisibilityState) => void;
 };
 
 const AppContext = createContext({} as AppContext);
@@ -31,7 +31,7 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
     const [epgData] = useState(new EPGData());
     const [imageCache] = useState(new Map<URL, HTMLImageElement>());
     const [currentChannelPosition, setCurrentChannelPosition] = useState(StorageHelper.getLastChannelIndex());
-    const [appState, setAppState] = useState(AppState.FOCUSED);
+    const [appState, setAppState] = useState(AppVisibilityState.FOCUSED);
 
     const appContext: AppContext = {
         locale: locale,
@@ -43,7 +43,7 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
         currentChannelPosition: currentChannelPosition,
         setCurrentChannelPosition: (value: number) => setCurrentChannelPosition(value),
         appState: appState,
-        setAppState: (value: AppState) => setAppState(value)
+        setAppState: (value: AppVisibilityState) => setAppState(value)
     };
 
     return <AppContext.Provider value={appContext}>{children}</AppContext.Provider>;

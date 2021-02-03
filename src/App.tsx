@@ -3,7 +3,7 @@ import TVHDataService from './services/TVHDataService';
 import TV from './components/TV';
 import TVHSettings from './components/TVHSettings';
 import './styles/app.css';
-import AppContext, { AppState } from './AppContext';
+import AppContext, { AppVisibilityState } from './AppContext';
 import EPGChannel from './models/EPGChannel';
 import StorageHelper from './utils/StorageHelper';
 
@@ -105,23 +105,23 @@ const App = () => {
     const handleBlur = (event: FocusEvent) => {
         event.stopPropagation();
         console.log('app is blurred');
-        setAppState(AppState.BLURRED);
+        setAppState(AppVisibilityState.BLURRED);
     };
 
     const handleFocus = (event: FocusEvent) => {
         event.stopPropagation();
         console.log('app is focused');
-        setAppState(AppState.FOCUSED);
+        setAppState(AppVisibilityState.FOCUSED);
     };
 
     const handleVisibilityChange = (event: Event) => {
         event.stopPropagation();
         if (document.hidden) {
             console.log('app is in background');
-            setAppState(AppState.BACKGROUND);
+            setAppState(AppVisibilityState.BACKGROUND);
         } else {
             console.log('app is in foreground');
-            setAppState(AppState.FOREGROUND);
+            setAppState(AppVisibilityState.FOREGROUND);
         }
     };
 

@@ -5,7 +5,7 @@ import ChannelHeader from './ChannelHeader';
 import ChannelList from './ChannelList';
 import ChannelSettings from './ChannelSettings';
 import EPGUtils from '../utils/EPGUtils';
-import AppContext, { AppState } from '../AppContext';
+import AppContext, { AppVisibilityState } from '../AppContext';
 import '../styles/app.css';
 import StorageHelper from '../utils/StorageHelper';
 import EPGEvent from '../models/EPGEvent';
@@ -330,7 +330,7 @@ const TV = () => {
      */
     useEffect(() => {
         // state changed to focus -> refocus
-        if (appState === AppState.FOCUSED) {
+        if (appState === AppVisibilityState.FOCUSED) {
             console.log('TV: changed to focused');
             setState(State.CHANNEL_INFO);
             showCurrentChannelNumber();
@@ -338,7 +338,7 @@ const TV = () => {
         }
 
         // state changed to background -> stop playback
-        if (appState === AppState.BACKGROUND) {
+        if (appState === AppVisibilityState.BACKGROUND) {
             console.log('TV: changed to background');
             const videoElement = getMediaElement();
             if (!videoElement) return;
@@ -346,7 +346,7 @@ const TV = () => {
         }
 
         // state changed to foreground -> start playback
-        if (appState === AppState.FOREGROUND) {
+        if (appState === AppVisibilityState.FOREGROUND) {
             console.log('TV: changed to foreground');
             const currentChannel = getCurrentChannel();
             // manually call update because we want to start the channel as we

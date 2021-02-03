@@ -246,19 +246,19 @@ const TV = () => {
 
         resetPlayer(videoElement);
 
-        const options = {
-            mediaTransportType: 'URI'
-        };
+        //const options = {
+        //    mediaTransportType: 'URI'
+        //};
 
         // Convert the created object to JSON string and encode it.
-        const mediaOption = encodeURI(JSON.stringify(options));
+        //const mediaOption = encodeURI(JSON.stringify(options));
 
         // Add new source element
         const source = document.createElement('source');
 
         // Add attributes to the created source element for media content.
         source.setAttribute('src', dataUrl.toString());
-        source.setAttribute('type', 'video/mp2t;mediaOption=' + mediaOption);
+        //source.setAttribute('type', 'video/mp2t;mediaOption=' + mediaOption);
         //source.setAttribute('src', 'https://www.w3schools.com/html/mov_bbb.mp4');
         //source.setAttribute('type', 'video/mp4');
         videoElement.appendChild(source);

@@ -6,14 +6,50 @@ import './styles/app.css';
 import AppContext, { AppVisibilityState } from './AppContext';
 import EPGChannel from './models/EPGChannel';
 import StorageHelper from './utils/StorageHelper';
+import Menu, { MenuItem } from './components/Menu';
+
+export enum AppViewState {
+    MENU,
+    TV,
+    SETTINGS,
+    RECORDINGS,
+    HELP,
+    CONTACT
+}
 
 const App = () => {
-    const { setAppVisibilityState, setLocale, tvhDataService, setTvhDataService, epgData, imageCache } = useContext(
-        AppContext
-    );
+    const {
+        appViewState,
+        setAppViewState,
+        setAppVisibilityState,
+        setLocale,
+        tvhDataService,
+        setTvhDataService,
+        epgData,
+        imageCache
+    } = useContext(AppContext);
 
-    const [isSettingsVisible, setIsSettingsVisible] = useState(false);
     const [isEpgDataLoaded, setIsEpgDataLoaded] = useState(false);
+
+    const menu: MenuItem[] = [
+        { icon: 'liveplayback', label: 'TV', action: () => setAppViewState(AppViewState.TV) },
+        {
+            icon: 'recordings',
+            label: 'Recordings',
+            action: () => console.log('not yet available') /*action: () => setAppViewState(AppViewState.RECORDINGS)*/
+        },
+        { icon: 'gear', label: 'Setup', action: () => setAppViewState(AppViewState.SETTINGS) },
+        {
+            icon: 'denselist',
+            label: 'Help',
+            action: () => console.log('not yet available') /*action: () => setAppViewState(AppViewState.HELP)*/
+        },
+        {
+            icon: 'circle',
+            label: 'Contact',
+            action: () => console.log('not yet available') /*action: () => setAppViewState(AppViewState.CONTACT)*/
+        }
+    ];
 
     const reloadData = () => {
         if (tvhDataService) {
@@ -39,9 +75,9 @@ const App = () => {
                 });
             });
 
-            setIsSettingsVisible(false);
+            setAppViewState(AppViewState.TV);
         } else {
-            setIsSettingsVisible(true);
+            setAppViewState(AppViewState.SETTINGS);
         }
     };
 
@@ -83,7 +119,16 @@ const App = () => {
             case 404: // green button
             case 71: //'g'
                 event.stopPropagation();
-                setIsSettingsVisible(!isSettingsVisible);
+                appViewState !== AppViewState.MENU
+                    ? setAppViewState(AppViewState.MENU)
+                    : setAppViewState(AppViewState.TV);
+                break;
+            case 461: // back button
+            case 66: // 'b'
+                event.stopPropagation();
+                if (appViewState === AppViewState.MENU) {
+                    setAppViewState(AppViewState.TV);
+                }
                 break;
             default:
                 console.log('App-keyPressed:', keyCode);
@@ -133,8 +178,11 @@ const App = () => {
 
     return (
         <div className="app" onKeyDown={handleKeyPress}>
-            {isSettingsVisible && <TVHSettings unmount={() => setIsSettingsVisible(false)} />}
-            {!isSettingsVisible && isEpgDataLoaded && <TV />}
+            {appViewState === AppViewState.MENU && (
+                <Menu items={menu} unmount={() => setAppViewState(AppViewState.TV)} />
+            )}
+            {appViewState === AppViewState.SETTINGS && <TVHSettings unmount={() => setAppViewState(AppViewState.TV)} />}
+            {(appViewState === AppViewState.TV || appViewState === AppViewState.MENU) && isEpgDataLoaded && <TV />}
         </div>
     );
 };

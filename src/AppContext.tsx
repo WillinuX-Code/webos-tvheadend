@@ -1,4 +1,5 @@
 import React, { createContext, useState } from 'react';
+import { AppViewState } from './App';
 import EPGData from './models/EPGData';
 import TVHDataService from './services/TVHDataService';
 import StorageHelper from './utils/StorageHelper';
@@ -11,6 +12,8 @@ export enum AppVisibilityState {
 }
 
 type AppContext = {
+    appViewState: AppViewState;
+    setAppViewState: (value: AppViewState) => void;
     locale: string;
     setLocale: (value: string) => void;
     tvhDataService?: TVHDataService;
@@ -26,14 +29,17 @@ type AppContext = {
 const AppContext = createContext({} as AppContext);
 
 export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
+    const [appViewState, setAppViewState] = useState(AppViewState.TV);
     const [locale, setLocale] = useState('en-US');
     const [tvhDataService, setTvhDataService] = useState<TVHDataService>();
     const [epgData] = useState(new EPGData());
     const [imageCache] = useState(new Map<URL, HTMLImageElement>());
     const [currentChannelPosition, setCurrentChannelPosition] = useState(StorageHelper.getLastChannelIndex());
-    const [appVisibilityState, setAppState] = useState(AppVisibilityState.FOCUSED);
+    const [appVisibilityState, setAppVisibilityState] = useState(AppVisibilityState.FOCUSED);
 
     const appContext: AppContext = {
+        appViewState: appViewState,
+        setAppViewState: (value: AppViewState) => setAppViewState(value),
         locale: locale,
         setLocale: (value: string) => setLocale(value),
         tvhDataService: tvhDataService,
@@ -43,7 +49,7 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
         currentChannelPosition: currentChannelPosition,
         setCurrentChannelPosition: (value: number) => setCurrentChannelPosition(value),
         appVisibilityState: appVisibilityState,
-        setAppVisibilityState: (value: AppVisibilityState) => setAppState(value)
+        setAppVisibilityState: (value: AppVisibilityState) => setAppVisibilityState(value)
     };
 
     return <AppContext.Provider value={appContext}>{children}</AppContext.Provider>;

@@ -11,6 +11,7 @@ import StorageHelper from '../utils/StorageHelper';
 import EPGEvent from '../models/EPGEvent';
 import Spinner from '@enact/moonstone/Spinner';
 import { Panel } from '@enact/moonstone/Panels';
+import { AppViewState } from '../App';
 
 export enum State {
     TV = 'tv',
@@ -22,6 +23,7 @@ export enum State {
 
 const TV = () => {
     const {
+        appViewState,
         appVisibilityState,
         tvhDataService,
         epgData,
@@ -44,6 +46,10 @@ const TV = () => {
     const focus = () => tvWrapper.current?.focus();
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        // in case we are in menu state we don't handle any keypress
+        if (appViewState === AppViewState.MENU) {
+            return;
+        }
         const keyCode = event.keyCode;
 
         switch (keyCode) {
@@ -111,6 +117,11 @@ const TV = () => {
             }
             case 461: // backbutton
                 event.stopPropagation();
+                setState(State.TV);
+                break;
+            case 404: // green button
+            case 71: //'g'
+                // note that this key event should be passed to app
                 setState(State.TV);
                 break;
             default:
@@ -329,6 +340,12 @@ const TV = () => {
         }
     }, [state]);
 
+    useEffect(() => {
+        // if the channel info is shown, also show the current channel number
+        if (appViewState === AppViewState.TV) {
+            focus();
+        }
+    }, [appViewState]);
     /**
      * handle app state changes
      */

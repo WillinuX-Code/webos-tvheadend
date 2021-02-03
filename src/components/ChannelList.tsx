@@ -16,7 +16,7 @@ export enum State {
     DETAILS = 'details'
 }
 
-const ChannelList = (props: { unmount: () => void }) => {
+const ChannelList = (props: { toggleRecording: (event: EPGEvent) => void; unmount: () => void }) => {
     const { epgData, imageCache, currentChannelPosition, setCurrentChannelPosition } = useContext(AppContext);
     const canvas = useRef<HTMLCanvasElement>(null);
     const listWrapper = useRef<HTMLDivElement>(null);
@@ -368,31 +368,18 @@ const ChannelList = (props: { unmount: () => void }) => {
                 setCurrentChannelPosition(channelPosition.current);
                 props.unmount();
                 break;
-            case 403: // red button trigger recording
+            case 403: {
+                // red button trigger recording
                 event.stopPropagation();
-                // add current viewing channel to records
-                // red button to trigger or cancel recording
-                // get current event
-                // focusedEvent = epgData.getEvent(channelPosition, programPosition);
-                // if (focusedEvent.isPastDated(getNow())) {
-                //   // past dated do nothing
-                //   return;
-                // }
-                // // check if event is already marked for recording
-                // let recEvent = epgData.getRecording(focusedEvent);
-                // if (recEvent) {
-                //   // cancel recording
-                //   tvhDataService.cancelRec(recEvent, recordings => {
-                //     epgData.updateRecordings(recordings);
-                //     updateCanvas();
-                //   });
-                // } else { // creat new recording from event
-                //   tvhDataService.createRec(focusedEvent, recordings => {
-                //     epgData.updateRecordings(recordings);
-                //     updateCanvas();
-                //   });
-                // }
+                const epgEvent =
+                    focusedEvent ||
+                    epgData
+                        .getChannel(channelPosition.current)
+                        ?.getEvents()
+                        .find((e) => e.isCurrent());
+                epgEvent && props.toggleRecording(epgEvent);
                 break;
+            }
             case 39: // right arrow
                 event.stopPropagation();
                 if (state === State.DETAILS) {
@@ -535,6 +522,9 @@ const ChannelList = (props: { unmount: () => void }) => {
 
             {state === State.DETAILS && focusedChannel && (
                 <ChannelListDetails
+                    isRecording={(event: EPGEvent) => {
+                        return epgData.isRecording(event);
+                    }}
                     epgChannel={focusedChannel}
                     currentEvent={focusedEvent}
                     nextEvents={nextEvents.current}

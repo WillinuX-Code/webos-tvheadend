@@ -7,6 +7,7 @@ import EPGUtils from '../utils/EPGUtils';
 const epgUtils = new EPGUtils();
 
 const ChannelListDetails = (props: {
+    isRecording: (event: EPGEvent) => boolean;
     currentEvent?: EPGEvent;
     epgChannel: EPGChannel;
     nextEvents: EPGEvent[]; // next events in line
@@ -37,7 +38,10 @@ const ChannelListDetails = (props: {
                 <>
                     {withDate && <div className="listItemDate">{formatTime(events[i], true)}</div>}
                     <div className="listItemTime">{formatTime(events[i])}</div>
-                    <div className="listItemTitle">{events[i].getTitle()}</div>
+                    <div className="listItemTitle">
+                        {props.isRecording(events[i]) && <div className="rec"></div>}
+                        {events[i].getTitle()}
+                    </div>
                 </>
             );
         }
@@ -57,7 +61,10 @@ const ChannelListDetails = (props: {
                 <div className="timeframe">{formatTime(props.currentEvent)}</div>
                 <div className="now">{epgUtils.toTimeString(epgUtils.getNow(), locale)}</div>
             </div>
-            <div className="title">{props.currentEvent?.getTitle() || 'No Information'}</div>
+            <div className="title">
+                {props.currentEvent && props.isRecording(props.currentEvent) && <div className="rec"></div>}
+                {props.currentEvent?.getTitle() || 'No Information'}
+            </div>
             <div className="subTitle">{props.currentEvent?.getSubTitle() || ''}</div>
             <div className="desc">{props.currentEvent?.getDescription() || ''}</div>
             <div className="next">

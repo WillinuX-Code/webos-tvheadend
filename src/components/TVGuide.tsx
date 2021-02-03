@@ -890,6 +890,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition.current, timePosition.current);
         targetEvent && scrollToEventPosition(epgData.getEventPosition(currentChannelPosition, targetEvent));
         setTimePosition(epgUtils.getNow());
+        updateCanvas();
 
         return () => {
             // clear timeout in case component is unmounted

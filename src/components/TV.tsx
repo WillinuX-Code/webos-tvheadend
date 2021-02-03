@@ -21,9 +21,13 @@ export enum State {
 }
 
 const TV = () => {
-    const { appState, tvhDataService, epgData, currentChannelPosition, setCurrentChannelPosition } = useContext(
-        AppContext
-    );
+    const {
+        appVisibilityState,
+        tvhDataService,
+        epgData,
+        currentChannelPosition,
+        setCurrentChannelPosition
+    } = useContext(AppContext);
 
     const tvWrapper = useRef<HTMLDivElement>(null);
     const video = useRef<HTMLVideoElement>(null);
@@ -330,7 +334,7 @@ const TV = () => {
      */
     useEffect(() => {
         // state changed to focus -> refocus
-        if (appState === AppVisibilityState.FOCUSED) {
+        if (appVisibilityState === AppVisibilityState.FOCUSED) {
             console.log('TV: changed to focused');
             setState(State.CHANNEL_INFO);
             showCurrentChannelNumber();
@@ -338,7 +342,7 @@ const TV = () => {
         }
 
         // state changed to background -> stop playback
-        if (appState === AppVisibilityState.BACKGROUND) {
+        if (appVisibilityState === AppVisibilityState.BACKGROUND) {
             console.log('TV: changed to background');
             const videoElement = getMediaElement();
             if (!videoElement) return;
@@ -346,7 +350,7 @@ const TV = () => {
         }
 
         // state changed to foreground -> start playback
-        if (appState === AppVisibilityState.FOREGROUND) {
+        if (appVisibilityState === AppVisibilityState.FOREGROUND) {
             console.log('TV: changed to foreground');
             const currentChannel = getCurrentChannel();
             // manually call update because we want to start the channel as we
@@ -356,7 +360,7 @@ const TV = () => {
             currentChannel && !video.current?.firstChild && updateStreamSource(currentChannel.getStreamUrl());
             focus();
         }
-    }, [appState]);
+    }, [appVisibilityState]);
 
     return (
         <div

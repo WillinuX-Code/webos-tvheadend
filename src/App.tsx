@@ -8,7 +8,9 @@ import EPGChannel from './models/EPGChannel';
 import StorageHelper from './utils/StorageHelper';
 
 const App = () => {
-    const { setAppState, setLocale, tvhDataService, setTvhDataService, epgData, imageCache } = useContext(AppContext);
+    const { setAppVisibilityState, setLocale, tvhDataService, setTvhDataService, epgData, imageCache } = useContext(
+        AppContext
+    );
 
     const [isSettingsVisible, setIsSettingsVisible] = useState(false);
     const [isEpgDataLoaded, setIsEpgDataLoaded] = useState(false);
@@ -105,23 +107,23 @@ const App = () => {
     const handleBlur = (event: FocusEvent) => {
         event.stopPropagation();
         console.log('app is blurred');
-        setAppState(AppVisibilityState.BLURRED);
+        setAppVisibilityState(AppVisibilityState.BLURRED);
     };
 
     const handleFocus = (event: FocusEvent) => {
         event.stopPropagation();
         console.log('app is focused');
-        setAppState(AppVisibilityState.FOCUSED);
+        setAppVisibilityState(AppVisibilityState.FOCUSED);
     };
 
     const handleVisibilityChange = (event: Event) => {
         event.stopPropagation();
         if (document.hidden) {
             console.log('app is in background');
-            setAppState(AppVisibilityState.BACKGROUND);
+            setAppVisibilityState(AppVisibilityState.BACKGROUND);
         } else {
             console.log('app is in foreground');
-            setAppState(AppVisibilityState.FOREGROUND);
+            setAppVisibilityState(AppVisibilityState.FOREGROUND);
         }
     };
 

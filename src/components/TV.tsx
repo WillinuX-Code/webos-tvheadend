@@ -132,7 +132,7 @@ const TV = () => {
     };
 
     const handleClick = () => {
-        setState(State.CHANNEL_INFO);
+        handleChannelInfoSwitch();
     };
 
     const getMediaElement = () => video.current;

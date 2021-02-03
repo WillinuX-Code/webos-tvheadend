@@ -134,7 +134,7 @@ const TV = () => {
 
     const getMediaElement = () => video.current;
 
-    const toggleRecording = (epgEvent: EPGEvent) => {
+    const toggleRecording = (epgEvent: EPGEvent, callback?: () => any) => {
         // add current viewing channel to records
         // get current event
 
@@ -151,13 +151,13 @@ const TV = () => {
                 // cancel recording
                 tvhDataService.cancelRec(recEvent, (recordings) => {
                     epgData.updateRecordings(recordings);
-                    //this.updateCanvas();
+                    callback && callback();
                 });
             } else {
                 // creat new recording from event
                 tvhDataService.createRec(epgEvent, (recordings) => {
                     epgData.updateRecordings(recordings);
-                    //this.updateCanvas();
+                    callback && callback();
                 });
             }
         }
@@ -388,7 +388,7 @@ const TV = () => {
 
             {state === State.CHANNEL_LIST && (
                 <ChannelList
-                    toggleRecording={(event: EPGEvent) => toggleRecording(event)}
+                    toggleRecording={(event: EPGEvent, callback: () => any) => toggleRecording(event, callback)}
                     unmount={() => setState(State.CHANNEL_INFO)}
                 />
             )}

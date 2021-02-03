@@ -393,7 +393,21 @@ const TV = () => {
                 <ChannelHeader channelNumberText={channelNumberText} unmount={() => setChannelNumberText('')} />
             )}
 
-            {!isVideoPlaying && <Spinner centered component={Panel}></Spinner>}
+            {!isVideoPlaying && (
+                <>
+                    <img
+                        src={epgData.getChannel(currentChannelPosition)?.getImageURL()?.toString() || ''}
+                        style={{
+                            display: 'block',
+                            marginLeft: 'auto',
+                            marginRight: 'auto',
+                            width: '50%',
+                            opacity: 0.05
+                        }}
+                    />
+                    <Spinner centered component={Panel}></Spinner>
+                </>
+            )}
 
             {state === State.CHANNEL_SETTINGS && (
                 <ChannelSettings

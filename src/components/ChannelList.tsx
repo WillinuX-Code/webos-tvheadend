@@ -11,12 +11,20 @@ import EPGUtils from '../utils/EPGUtils';
 const VERTICAL_SCROLL_TOP_PADDING_ITEM = 5;
 const IS_DEBUG = false;
 
-export enum State {
+enum State {
     NORMAL = 'normal',
     DETAILS = 'details'
 }
 
-const ChannelList = (props: { toggleRecording: (event: EPGEvent) => void; unmount: () => void }) => {
+interface DetailsState {
+    focusedChannel?: EPGChannel;
+    focusedEvent?: EPGEvent;
+}
+
+const ChannelList = (props: {
+    toggleRecording: (event: EPGEvent, callback: () => any) => void;
+    unmount: () => void;
+}) => {
     const { epgData, imageCache, currentChannelPosition, setCurrentChannelPosition } = useContext(AppContext);
     const canvas = useRef<HTMLCanvasElement>(null);
     const listWrapper = useRef<HTMLDivElement>(null);
@@ -25,10 +33,9 @@ const ChannelList = (props: { toggleRecording: (event: EPGEvent) => void; unmoun
     const channelPosition = useRef(currentChannelPosition);
 
     // details refs
-    const [focusedChannel, setFocusedChannel] = useState<EPGChannel>();
-    const [focusedEventOffset, setFocusedEventOffset] = useState(0);
-    const [focusedEvent, setFocusedEvent] = useState<EPGEvent>();
+    const [detailsState, setDetailsState] = useState<DetailsState>();
 
+    const focusedEventOffset = useRef(0);
     const nextEvents = useRef<EPGEvent[]>([]);
     const nextSameEvents = useRef<EPGEvent[]>([]);
 
@@ -371,20 +378,15 @@ const ChannelList = (props: { toggleRecording: (event: EPGEvent) => void; unmoun
             case 403: {
                 // red button trigger recording
                 event.stopPropagation();
-                const epgEvent =
-                    focusedEvent ||
-                    epgData
-                        .getChannel(channelPosition.current)
-                        ?.getEvents()
-                        .find((e) => e.isCurrent());
-                epgEvent && props.toggleRecording(epgEvent);
+                toggleRecording();
                 break;
             }
             case 39: // right arrow
                 event.stopPropagation();
                 if (state === State.DETAILS) {
                     // switch to next event details
-                    setFocusedEventOffset(focusedEventOffset + 1);
+                    focusedEventOffset.current += 1;
+                    setDetailsData();
                 } else {
                     // show channelListDetails
                     setState(State.DETAILS);
@@ -392,11 +394,12 @@ const ChannelList = (props: { toggleRecording: (event: EPGEvent) => void; unmoun
                 break;
             case 37: // left arrow
                 event.stopPropagation();
-                if (state === State.DETAILS && focusedEventOffset > 0) {
+                if (state === State.DETAILS && focusedEventOffset.current > 0) {
                     // switch to previous event details
-                    setFocusedEventOffset(focusedEventOffset - 1);
+                    focusedEventOffset.current -= 1;
+                    setDetailsData();
                 } else {
-                    // hidee channelListDetails
+                    // hide channelListDetails
                     setState(State.NORMAL);
                 }
                 break;
@@ -406,6 +409,22 @@ const ChannelList = (props: { toggleRecording: (event: EPGEvent) => void; unmoun
 
         // pass unhandled events to parent
         if (!event.isPropagationStopped) return event;
+    };
+
+    const toggleRecording = () => {
+        const epgEvent =
+            detailsState?.focusedEvent ||
+            epgData
+                .getChannel(channelPosition.current)
+                ?.getEvents()
+                .find((e) => e.isCurrent());
+        if (epgEvent) {
+            // call passed toggle recording function
+            props.toggleRecording(epgEvent, () => {
+                // trigger rerender
+                setDetailsState({ ...detailsState });
+            });
+        }
     };
 
     const handleScrollWheel = (event: React.WheelEvent<HTMLDivElement>) => {
@@ -465,11 +484,17 @@ const ChannelList = (props: { toggleRecording: (event: EPGEvent) => void; unmoun
 
     const setDetailsData = () => {
         const channel = epgData.getChannel(channelPosition.current);
+        // in case channel changed
+        if (channel?.getChannelID() !== detailsState?.focusedChannel?.getChannelID()) {
+            focusedEventOffset.current = 0;
+        }
         // get current event
         const currentEvent = epgData.getEventAtTimestamp(channelPosition.current, epgUtils.getNow()) || undefined;
+        let newFocusedEvent = null;
         if (currentEvent) {
             // get next event position with offset
-            const eventPos = epgData.getEventPosition(channelPosition.current, currentEvent) + focusedEventOffset;
+            const eventPos =
+                epgData.getEventPosition(channelPosition.current, currentEvent) + focusedEventOffset.current;
             const nextEventsArray: EPGEvent[] = [];
             for (let i = eventPos; i < eventPos + 5; i++) {
                 const nextEvent = epgData.getEvent(channelPosition.current, i + 1);
@@ -479,17 +504,17 @@ const ChannelList = (props: { toggleRecording: (event: EPGEvent) => void; unmoun
             // get same
 
             // set event with offset
-            const newfocusedEvent = epgData.getEvent(channelPosition.current, eventPos);
-            setFocusedEvent(newfocusedEvent);
+            newFocusedEvent = epgData.getEvent(channelPosition.current, eventPos);
         } else {
             nextEvents.current = [];
             nextSameEvents.current = [];
         }
-        // in case channel changed reset offset
-        if (channel?.getChannelID() !== focusedChannel?.getChannelID()) {
-            setFocusedEventOffset(0);
-            setFocusedChannel(channel || undefined);
-        }
+
+        // trigger rerender
+        setDetailsState({
+            focusedEvent: newFocusedEvent || undefined,
+            focusedChannel: channel || undefined
+        });
     };
 
     useEffect(() => {
@@ -506,7 +531,7 @@ const ChannelList = (props: { toggleRecording: (event: EPGEvent) => void; unmoun
         if (state === State.DETAILS) {
             setDetailsData();
         }
-    }, [state, focusedEventOffset]);
+    }, [state]);
 
     return (
         <div
@@ -520,13 +545,13 @@ const ChannelList = (props: { toggleRecording: (event: EPGEvent) => void; unmoun
         >
             <canvas ref={canvas} width={getWidth()} height={getHeight()} style={{ display: 'block' }} />
 
-            {state === State.DETAILS && focusedChannel && (
+            {state === State.DETAILS && (
                 <ChannelListDetails
                     isRecording={(event: EPGEvent) => {
                         return epgData.isRecording(event);
                     }}
-                    epgChannel={focusedChannel}
-                    currentEvent={focusedEvent}
+                    epgChannel={detailsState?.focusedChannel}
+                    currentEvent={detailsState?.focusedEvent}
                     nextEvents={nextEvents.current}
                     nextSameEvents={nextSameEvents.current}
                 />

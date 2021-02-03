@@ -9,7 +9,7 @@ const epgUtils = new EPGUtils();
 const ChannelListDetails = (props: {
     isRecording: (event: EPGEvent) => boolean;
     currentEvent?: EPGEvent;
-    epgChannel: EPGChannel;
+    epgChannel?: EPGChannel;
     nextEvents: EPGEvent[]; // next events in line
     nextSameEvents: EPGEvent[]; // next events with same title
 }) => {

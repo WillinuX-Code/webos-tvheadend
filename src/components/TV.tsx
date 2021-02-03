@@ -9,6 +9,8 @@ import AppContext, { AppState } from '../AppContext';
 import '../styles/app.css';
 import StorageHelper from '../utils/StorageHelper';
 import EPGEvent from '../models/EPGEvent';
+import Spinner from '@enact/moonstone/Spinner';
+import { Panel } from '@enact/moonstone/Panels';
 
 export enum State {
     TV = 'tv',
@@ -29,6 +31,7 @@ const TV = () => {
     const audioTracksRef = useRef<AudioTrackList>();
     const textTracksRef = useRef<TextTrackList>();
 
+    const [isVideoPlaying, setIsVideoPlaying] = useState(false);
     const [state, setState] = useState<State>(State.CHANNEL_INFO);
     const [channelNumberText, setChannelNumberText] = useState('');
 
@@ -245,6 +248,7 @@ const TV = () => {
         if (!videoElement) return;
 
         resetPlayer(videoElement);
+        setIsVideoPlaying(false);
 
         //const options = {
         //    mediaTransportType: 'URI'
@@ -266,7 +270,7 @@ const TV = () => {
         // Auto-play video with some (unused) error handling
         videoElement
             .play()
-            .then()
+            .then(() => setIsVideoPlaying(true))
             .catch((error) => console.log('channel switched before it could be played', error));
     };
 
@@ -362,11 +366,13 @@ const TV = () => {
             onKeyDown={handleKeyPress}
             onWheel={handleScrollWheel}
             onClick={handleClick}
-            className="tv"
+            className={isVideoPlaying ? 'tv playing' : 'tv loading'}
         >
             {channelNumberText !== '' && (
                 <ChannelHeader channelNumberText={channelNumberText} unmount={() => setChannelNumberText('')} />
             )}
+
+            {!isVideoPlaying && <Spinner centered component={Panel}></Spinner>}
 
             {state === State.CHANNEL_SETTINGS && (
                 <ChannelSettings

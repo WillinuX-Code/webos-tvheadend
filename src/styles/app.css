@@ -8,6 +8,7 @@ body {
     height: 100%;
     /*margin: 0;*/
     z-index: 1;
+    background-image: url('../images/background.png');
 }
 
 .epg {
@@ -26,6 +27,14 @@ body {
     top: 0;
     left: 0;
     z-index: 2;
+}
+
+.tv.loading {
+    background: #222;
+}
+
+.tv.playing {
+    background: black;
 }
 
 .channelList {
@@ -98,6 +107,7 @@ body {
     display: grid;
     grid-template-columns: 1fr 3fr;
 }
+
 .separator {
     line-height: 1em;
     position: relative;
@@ -109,6 +119,7 @@ body {
     opacity: 0.5;
     width: 100%;
 }
+
 .separator:after {
     content: attr(data-content);
     position: relative;
@@ -119,6 +130,7 @@ body {
     color: #fff;
     background-color: #012533;
 }
+
 .separator:before {
     content: '';
     background: linear-gradient(90deg, transparent, #fff, transparent);
@@ -157,6 +169,7 @@ body {
     white-space: pre-wrap;
     overflow: hidden;
 }
+
 .channelInfo {
     position: absolute;
     width: 100%;
@@ -182,7 +195,7 @@ body {
 }
 
 .tvhSettings {
-    background-color: rgba(11, 39, 58, 0.7);
+    background-color: rgba(11, 39, 58, 0.95);
     position: absolute;
     width: 100%;
     height: 100%;

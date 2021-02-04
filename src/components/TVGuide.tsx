@@ -530,11 +530,11 @@ const TVGuide = (props: { toggleRecording: (event: EPGEvent, callback: () => any
 
         // Background
         canvas.fillStyle = event.isCurrent() ? mEventLayoutBackgroundCurrent : mEventLayoutBackground;
-        if (event.getId() === focusedEvent.getId()) {
+        if (event.getId() === focusedEvent?.getId()) {
             canvas.fillStyle = mEventLayoutBackgroundFocus;
         }
 
-        if (event.isCurrent() || event.getId() === focusedEvent.getId()) {
+        if (event.isCurrent() || event.getId() === focusedEvent?.getId()) {
             canvas.fillRect(drawingRect.left + 1, drawingRect.top + 1, drawingRect.width + 1, drawingRect.height + 1);
         }
 

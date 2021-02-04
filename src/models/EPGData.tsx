@@ -51,14 +51,13 @@ export default class EPGData {
         const channel = this.channels[channelPosition];
         const events = channel.getEvents();
 
-        // find the last event that begins before the timestamp
-        let eventAtTimestamp = events.length > 0 ? events[0] : null;
-        events.forEach((event) => {
-            if (event.getStart() <= timestamp) {
-                eventAtTimestamp = event;
+        // find the event at the timestamp
+        for (let i = 0; i < events.length; i++) {
+            if (events[i].isCurrent()) {
+                return events[i];
             }
-        });
-        return eventAtTimestamp;
+        }
+        return null;
     }
 
     isRecording(epgEvent: EPGEvent) {

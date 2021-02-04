@@ -19,15 +19,8 @@ const VISIBLE_CHANNEL_COUNT = 8; // No of channel to show at a time
 // const VERTICAL_SCROLL_BOTTOM_PADDING_ITEM = VISIBLE_CHANNEL_COUNT / 2 - 1;
 const VERTICAL_SCROLL_TOP_PADDING_ITEM = VISIBLE_CHANNEL_COUNT / 2 - 1;
 
-const TVGuide = (props: { unmount: () => void }) => {
-    const {
-        locale,
-        currentChannelPosition,
-        epgData,
-        tvhDataService,
-        imageCache,
-        setCurrentChannelPosition
-    } = useContext(AppContext);
+const TVGuide = (props: { toggleRecording: (event: EPGEvent, callback: () => any) => void; unmount: () => void }) => {
+    const { locale, currentChannelPosition, epgData, imageCache, setCurrentChannelPosition } = useContext(AppContext);
 
     const canvas = useRef<HTMLCanvasElement>(null);
     const epgWrapper = useRef<HTMLDivElement>(null);
@@ -58,13 +51,13 @@ const TVGuide = (props: { unmount: () => void }) => {
     const mEventLayoutBackground = '#234054';
     const mEventLayoutBackgroundCurrent = 'rgb(50,85,110)';
     const mEventLayoutBackgroundFocus = 'rgb(65,182,230)';
-    const mEventLayoutTextColor = '#d6d6d6';
+    const mEventLayoutTextColor = '#cccccc';
     const mEventLayoutTextSize = 28;
-    const mEventLayoutRecordingColor = '#da0000';
+    const mEventLayoutRecordingColor = '#ff0000';
 
     const mDetailsLayoutMargin = 5;
     const mDetailsLayoutPadding = 8;
-    const mDetailsLayoutTextColor = '#d6d6d6';
+    const mDetailsLayoutTextColor = '#cccccc';
     const mDetailsLayoutTitleTextSize = 30;
     const mDetailsLayoutSubTitleTextSize = 26;
     const mDetailsLayoutSubTitleTextColor = '#969696';
@@ -273,7 +266,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         // rect for logo
         drawingRect.left = getScrollX();
         drawingRect.top = getChannelListHeight();
-        drawingRect.right = drawingRect.left + 300;
+        drawingRect.right = drawingRect.left + 450;
         drawingRect.bottom = getHeight();
 
         const channel = epgData.getChannel(focusedChannelPosition.current);
@@ -303,12 +296,24 @@ const TVGuide = (props: { unmount: () => void }) => {
             drawingRect.top += mDetailsLayoutTitleTextSize + mDetailsLayoutMargin;
             drawingRect.right -= mDetailsLayoutMargin;
             drawingRect.bottom -= mDetailsLayoutMargin;
+
+            const leftBeforeRecMark = drawingRect.left;
+            // draw recording mark
+            if (epgData.isRecording(focusedEvent)) {
+                const radius = 10;
+                canvas.fillStyle = mEventLayoutRecordingColor;
+                canvas.beginPath();
+                canvas.arc(drawingRect.left + radius, drawingRect.top, radius, 0, 2 * Math.PI);
+                canvas.fill();
+                drawingRect.left += 2 * radius + mChannelLayoutPadding;
+            }
             // draw title, description etc
             CanvasUtils.writeText(canvas, focusedEvent.getTitle(), drawingRect.left, drawingRect.top, {
                 fontSize: mDetailsLayoutTitleTextSize,
                 isBold: true,
                 fillStyle: mDetailsLayoutTextColor
             });
+            drawingRect.left = leftBeforeRecMark;
             if (focusedEvent.getSubTitle() !== undefined) {
                 drawDetailsSubtitle(focusedEvent.getSubTitle(), canvas, drawingRect);
             }
@@ -324,7 +329,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         drect.right = getWidth() - 10;
         drect.top += (mDetailsLayoutTitleTextSize + mDetailsLayoutPadding) * 2 + 3;
         // draw title, description etc
-        canvas.font = mDetailsLayoutDescriptionTextSize + 'px Arial';
+        canvas.font = mDetailsLayoutDescriptionTextSize + 'px Moonstone';
         canvas.fillStyle = mDetailsLayoutTextColor;
         CanvasUtils.wrapText(canvas, description, drect.left, drect.top, drect.width, mDetailsLayoutTitleTextSize + 5);
     };
@@ -525,10 +530,13 @@ const TVGuide = (props: { unmount: () => void }) => {
 
         // Background
         canvas.fillStyle = event.isCurrent() ? mEventLayoutBackgroundCurrent : mEventLayoutBackground;
-        if (event.getId() === focusedEvent?.getId()) {
+        if (event.getId() === focusedEvent.getId()) {
             canvas.fillStyle = mEventLayoutBackgroundFocus;
         }
-        canvas.fillRect(drawingRect.left + 1, drawingRect.top + 1, drawingRect.width + 1, drawingRect.height + 1);
+
+        if (event.isCurrent() || event.getId() === focusedEvent.getId()) {
+            canvas.fillRect(drawingRect.left + 1, drawingRect.top + 1, drawingRect.width + 1, drawingRect.height + 1);
+        }
 
         // draw vertical line
         canvas.beginPath();
@@ -554,7 +562,7 @@ const TVGuide = (props: { unmount: () => void }) => {
             maxWidth: drawingRect.width
         });
         // if (event.getSubTitle()) {
-        //     canvas.font = this.mEventLayoutTextSize - 6 + "px Arial";
+        //     canvas.font = this.mEventLayoutTextSize - 6 + "px Moonstone";
         //     canvas.fillText(this.canvasUtils.getShortenedText(canvas, event.getSubTitle(), drawingRect), drawingRect.left, drawingRect.top + 18);
         // }
     };
@@ -593,7 +601,7 @@ const TVGuide = (props: { unmount: () => void }) => {
  
         drawingRect.top += (((drawingRect.bottom - drawingRect.top) / 2) + (10/2));
  
-        canvas.font = "bold " + mEventLayoutTextSize+"px Arial";
+        canvas.font = "bold " + mEventLayoutTextSize+"px Moonstone";
         let channelName = epgData.getChannel(position).getName();
         let channelNumber = epgData.getChannel(position).getId();
         //canvas.fillText(channelNumber, drawingRect.left, drawingRect.top);
@@ -607,7 +615,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         drawingRect.bottom = drawingRect.top + mChannelLayoutHeight;
 
         /*
-                canvas.font = mEventLayoutTextSize + "px Arial";
+                canvas.font = mEventLayoutTextSize + "px Moonstone";
                 canvas.fillStyle = mEventLayoutTextColor;
                 canvas.textAlign = 'right';
                 canvas.fillText(epgData.getChannel(position).getChannelID(),
@@ -634,7 +642,7 @@ const TVGuide = (props: { unmount: () => void }) => {
             canvas.drawImage(image, drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
         } else {
             canvas.textAlign = 'center';
-            canvas.font = 'bold 17px Arial';
+            canvas.font = 'bold 17px Moonstone';
             canvas.fillStyle = mEventLayoutTextColor;
             CanvasUtils.wrapText(
                 canvas,
@@ -762,30 +770,11 @@ const TVGuide = (props: { unmount: () => void }) => {
     };
 
     const toggleRecording = (channelPosition: number, eventPosition: number) => {
-        // red button to trigger or cancel recording
         // get current event
         const currentEvent = epgData.getEvent(channelPosition, eventPosition);
-
-        if (currentEvent.isPastDated(EPGUtils.getNow())) {
-            // past dated do nothing
-            return;
-        }
-
-        // check if event is already marked for recording
-        const recEvent = epgData.getRecording(currentEvent);
-        if (recEvent) {
-            // cancel recording
-            tvhDataService?.cancelRec(recEvent, (recordings: EPGEvent[]) => {
-                epgData.updateRecordings(recordings);
-                updateCanvas();
-            });
-        } else {
-            // creat new recording from event
-            tvhDataService?.createRec(currentEvent, (recordings: EPGEvent[]) => {
-                epgData.updateRecordings(recordings);
-                updateCanvas();
-            });
-        }
+        props.toggleRecording(currentEvent, () => {
+            updateCanvas();
+        });
     };
 
     const scrollToEventPosition = (eventPosition: number) => {

@@ -42,7 +42,7 @@ const ChannelList = (props: {
     const mChannelLayoutTextSize = 32;
     const mChannelLayoutEventTextSize = 26;
     const mChannelLayoutNumberTextSize = 38;
-    const mChannelLayoutTextColor = '#d6d6d6';
+    const mChannelLayoutTextColor = '#cccccc';
     const mChannelLayoutTitleTextColor = '#969696';
     const mChannelLayoutMargin = 3;
     const mChannelLayoutPadding = 7;
@@ -189,9 +189,22 @@ const ChannelList = (props: {
             isBold: true
         });
 
-        // channel name
+        // channel line
+        const currentEvent = epgData.getEventAtTimestamp(position, EPGUtils.getNow());
         const channelIconWidth = mChannelLayoutHeight * 1.3;
         const channelNameWidth = mChannelLayoutWidth - channelIconWidth - 90;
+
+        const leftBeforeRecMark = drawingRect.left;
+        // recording mark
+        if (currentEvent && epgData.isRecording(currentEvent)) {
+            const radius = 10;
+            canvas.fillStyle = '#FF0000';
+            canvas.beginPath();
+            canvas.arc(drawingRect.left + 90 + radius, drawingRect.middle - radius, radius, 0, 2 * Math.PI);
+            canvas.fill();
+            drawingRect.left += 2 * radius + mChannelLayoutPadding;
+        }
+        // channel name
         CanvasUtils.writeText(
             canvas,
             channel.getName(),
@@ -204,6 +217,7 @@ const ChannelList = (props: {
                 maxWidth: channelNameWidth
             }
         );
+        drawingRect.left = leftBeforeRecMark;
 
         // channel event
         channel.getEvents().forEach((event) => {
@@ -418,6 +432,7 @@ const ChannelList = (props: {
         if (epgEvent) {
             // call passed toggle recording function
             props.toggleRecording(epgEvent, () => {
+                updateCanvas();
                 // trigger rerender
                 setDetailsState({ ...detailsState });
             });

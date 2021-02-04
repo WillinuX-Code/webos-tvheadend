@@ -92,10 +92,10 @@ export default class CanvasUtils {
      */
     static writeText(canvas: CanvasRenderingContext2D, text: string, x: number, y: number, options: WriteTextOptions = {}) {
         // set default options
-        options.fontFace = options.fontFace || 'Arial';
+        options.fontFace = options.fontFace || 'Moonstone';
         options.textAlign = options.textAlign || 'left';
         options.textBaseline = options.textBaseline || 'middle';
-        options.fillStyle = options.fillStyle || '#FFFFFF';
+        options.fillStyle = options.fillStyle || '#cccccc';
         options.fontSize = options.fontSize || 20;
         options.isBold = options.isBold !== undefined || false;
         options.maxWidth = options.maxWidth || undefined;

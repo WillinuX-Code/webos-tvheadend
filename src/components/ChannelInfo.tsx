@@ -15,7 +15,7 @@ const ChannelInfo = (props: { unmount: () => void }) => {
 
     const mChannelInfoHeight = 150;
     const mChannelInfoTitleSize = 42;
-    const mChannelLayoutTextColor = '#d6d6d6';
+    const mChannelLayoutTextColor = '#cccccc';
     const mChannelLayoutTitleTextColor = '#969696';
     const mChannelInfoTimeBoxWidth = 375;
     const mChannelLayoutMargin = 3;
@@ -83,7 +83,7 @@ const ChannelInfo = (props: { unmount: () => void }) => {
         //canvas.strokeStyle = ;
         // drawingRect.top = 70;
         // drawingRect.left += 100;
-        // canvas.font = "bold " + mChannelInfoTextSize + "px Arial";
+        // canvas.font = "bold " + mChannelInfoTextSize + "px Moonstone";
         // canvas.fillStyle = mChannelLayoutTextColor;
         // canvas.textAlign = 'right';
         // canvas.fillText(channel.getChannelID(), drawingRect.left, drawingRect.top);
@@ -92,7 +92,7 @@ const ChannelInfo = (props: { unmount: () => void }) => {
         // drawingRect.left += 15;
         // drawingRect.top += mChannelInfoTitleSize + mChannelLayoutPadding;
         // drawingRect.right = getWidth();
-        // canvas.font = "bold " + mChannelInfoTitleSize + "px Arial";
+        // canvas.font = "bold " + mChannelInfoTitleSize + "px Moonstone";
         // canvas.textAlign = 'left';
         // canvas.fillText(canvasUtils.getShortenedText(canvas, channel.getName(), drawingRect),
         //     drawingRect.left, drawingRect.top);
@@ -114,8 +114,7 @@ const ChannelInfo = (props: { unmount: () => void }) => {
         drawingRect.left += drawingRect.right + 20;
         drawingRect.right = getWidth();
         drawingRect.top = getHeight() / 2 - mChannelInfoTitleSize + mChannelInfoTitleSize / 2 + mChannelLayoutPadding;
-        canvas.font = mChannelInfoTitleSize + 'px Arial';
-        canvas.fillStyle = mChannelLayoutTextColor;
+        canvas.font = 'bold ' + mChannelInfoTitleSize + 'px Moonstone';
         canvas.textAlign = 'left';
         let currentEvent, nextEvent;
 
@@ -133,8 +132,18 @@ const ChannelInfo = (props: { unmount: () => void }) => {
         if (currentEvent !== undefined) {
             const left = drawingRect.left;
             drawingRect.right -= mChannelInfoTimeBoxWidth;
+            // draw recording mark
+            if (epgData.isRecording(currentEvent)) {
+                const radius = 10;
+                canvas.fillStyle = '#FF0000';
+                canvas.beginPath();
+                canvas.arc(drawingRect.left + radius, drawingRect.top - radius, radius, 0, 2 * Math.PI);
+                canvas.fill();
+                drawingRect.left += 2 * radius + 2 * mChannelLayoutPadding;
+            }
 
             // draw current event
+            canvas.fillStyle = mChannelLayoutTextColor;
             canvas.fillText(
                 CanvasUtils.getShortenedText(canvas, currentEvent.getTitle(), drawingRect.width),
                 drawingRect.left,
@@ -153,8 +162,8 @@ const ChannelInfo = (props: { unmount: () => void }) => {
             canvas.textAlign = 'left';
 
             // draw subtitle event
-            canvas.font = 'bold ' + (mChannelInfoTitleSize - 8) + 'px Arial';
-            drawingRect.top += mChannelInfoTitleSize + mChannelLayoutPadding;
+            canvas.font = mChannelInfoTitleSize - 8 + 'px Moonstone';
+            drawingRect.top += mChannelInfoTitleSize - 5 + mChannelLayoutPadding;
             if (currentEvent.getSubTitle() !== undefined) {
                 drawingRect.left = left;
                 drawingRect.right -= mChannelInfoTimeBoxWidth;
@@ -172,19 +181,21 @@ const ChannelInfo = (props: { unmount: () => void }) => {
             const remainingTime = Math.ceil((currentEvent.getEnd() - EPGUtils.getNow()) / 1000 / 60);
             drawingRect.left = drawingRect.right - mChannelLayoutPadding - 20;
             canvas.textAlign = 'right';
-            canvas.font = mChannelInfoTitleSize - 8 + 'px Arial';
+            canvas.font = mChannelInfoTitleSize - 8 + 'px Moonstone';
             canvas.fillStyle = mChannelLayoutTitleTextColor;
             canvas.fillText(runningTime + ' (+' + remainingTime + ')', drawingRect.left, drawingRect.top);
 
             // draw next event
             if (nextEvent !== undefined) {
-                drawingRect.top += mChannelInfoTitleSize - 15 + mChannelLayoutPadding;
-                canvas.font = mChannelInfoTitleSize - 15 + 'px Arial';
+                drawingRect.top += mChannelInfoTitleSize - 14 + mChannelLayoutPadding;
+                canvas.font = mChannelInfoTitleSize - 14 + 'px Moonstone';
+                const titleMetrics = canvas.measureText(nextEvent.getTitle());
+                canvas.fillStyle = mChannelLayoutTextColor;
+                canvas.fillText(nextEvent.getTitle(), drawingRect.left, drawingRect.top);
+                drawingRect.left -= titleMetrics.width + mChannelLayoutPadding;
                 canvas.fillStyle = 'rgb(65, 182, 230)';
                 canvas.fillText(
-                    EPGUtils.toTimeFrameString(nextEvent.getStart(), nextEvent.getEnd(), locale) +
-                        ':   ' +
-                        nextEvent.getTitle(),
+                    EPGUtils.toTimeFrameString(nextEvent.getStart(), nextEvent.getEnd(), locale),
                     drawingRect.left,
                     drawingRect.top
                 );
@@ -232,11 +243,6 @@ const ChannelInfo = (props: { unmount: () => void }) => {
     };
 
     const getDrawingRectForChannelImage = (drawingRect: Rect, image: HTMLImageElement) => {
-        drawingRect.left += mChannelLayoutPadding;
-        drawingRect.top += mChannelLayoutPadding;
-        drawingRect.right -= mChannelLayoutPadding;
-        drawingRect.bottom -= mChannelLayoutPadding;
-
         const imageWidth = image.width;
         const imageHeight = image.height;
         const imageRatio = imageHeight / imageWidth;

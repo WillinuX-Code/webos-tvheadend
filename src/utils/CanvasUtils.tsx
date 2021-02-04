@@ -14,14 +14,14 @@ export default class CanvasUtils {
     /**
      * Return character width approximation of current font
      */
-    getWidthPerCharacter(canvas: CanvasRenderingContext2D) {
+    static getWidthPerCharacter(canvas: CanvasRenderingContext2D) {
         return canvas.measureText(CanvasUtils.MEASURE_STRING).width / CanvasUtils.MEASURE_STRING.length;
     }
 
     /**
      * Faster shortened function with a complexity of 2
      */
-    getShortenedText(canvas: CanvasRenderingContext2D, text: string, maxWidth: number) {
+    static getShortenedText(canvas: CanvasRenderingContext2D, text: string, maxWidth: number) {
         let result = text;
         // use test character to measure width per character
         const widthPerCharacter = this.getWidthPerCharacter(canvas);
@@ -43,7 +43,7 @@ export default class CanvasUtils {
     /**
      * Wraps a text inside a given area
      */
-    wrapText(
+    static wrapText(
         canvas: CanvasRenderingContext2D,
         text: string,
         x: number,
@@ -90,7 +90,7 @@ export default class CanvasUtils {
     /**
      * Writes a text to a specific position without changing the canvas context
      */
-    writeText(canvas: CanvasRenderingContext2D, text: string, x: number, y: number, options: WriteTextOptions = {}) {
+    static writeText(canvas: CanvasRenderingContext2D, text: string, x: number, y: number, options: WriteTextOptions = {}) {
         // set default options
         options.fontFace = options.fontFace || 'Arial';
         options.textAlign = options.textAlign || 'left';

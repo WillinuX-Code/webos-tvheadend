@@ -41,8 +41,6 @@ const TV = () => {
     const [state, setState] = useState<State>(State.CHANNEL_INFO);
     const [channelNumberText, setChannelNumberText] = useState('');
 
-    const epgUtils = new EPGUtils();
-
     const focus = () => tvWrapper.current?.focus();
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -157,7 +155,7 @@ const TV = () => {
         // get current event
 
         if (!epgEvent) return;
-        if (epgEvent.isPastDated(epgUtils.getNow())) {
+        if (epgEvent.isPastDated(EPGUtils.getNow())) {
             // past dated do nothing
             return;
         }

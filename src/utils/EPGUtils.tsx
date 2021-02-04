@@ -2,12 +2,12 @@
  * Created by satadru on 3/31/17.
  */
 export default class EPGUtils {
-    getWeekdayName(dateMillis: number, locale: string) {
+    static getWeekdayName(dateMillis: number, locale: string) {
         const date = new Date(dateMillis);
         return date.toLocaleString(locale, { weekday: 'short' });
     }
 
-    scaleBetween(unscaledNum: number, max: number, min = 0, minAllowed = 0, maxAllowed = 3840) {
+    static scaleBetween(unscaledNum: number, max: number, min = 0, minAllowed = 0, maxAllowed = 3840) {
         return ((maxAllowed - minAllowed) * (unscaledNum - min)) / (max - min) + minAllowed;
     }
 
@@ -17,7 +17,7 @@ export default class EPGUtils {
      * @param {Number} minutes
      * @param {Date} d
      */
-    getRoundedDate(minutes: number, d = new Date()) {
+    static getRoundedDate(minutes: number, d = new Date()) {
         const ms = 1000 * 60 * minutes; // convert minutes to ms
         const roundedDate = new Date(Math.round(d.getTime() / ms) * ms);
         return roundedDate;
@@ -27,7 +27,7 @@ export default class EPGUtils {
      *
      * @param {Number} time
      */
-    toTimeString(time: number, locale: string) {
+    static toTimeString(time: number, locale: string) {
         const options = {
             hour: '2-digit',
             minute: '2-digit'
@@ -40,7 +40,7 @@ export default class EPGUtils {
      *
      * @param {Number} time
      */
-    toDateString(time: number, locale: string) {
+    static toDateString(time: number, locale: string) {
         const options = {
             day: '2-digit',
             month: '2-digit',
@@ -55,11 +55,11 @@ export default class EPGUtils {
      * @param {Number} start
      * @param {Number} stop
      */
-    toTimeFrameString(start: number, stop: number, locale: string) {
+    static toTimeFrameString(start: number, stop: number, locale: string) {
         return this.toTimeString(start, locale) + ' - ' + this.toTimeString(stop, locale);
     }
 
-    toDuration(start: number, end: number) {
+    static toDuration(start: number, end: number) {
         const date = new Date(end - start);
         let result = '';
         if (date.getUTCHours() > 0) {
@@ -75,8 +75,8 @@ export default class EPGUtils {
     /**
      * return current date in millis (or nanos?)
      */
-    getNow() {
-        //return 1607462851000;
+    static getNow() {
+        //return 1607462851000 + 80000000;
         return Date.now();
     }
 }

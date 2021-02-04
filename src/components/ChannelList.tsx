@@ -39,9 +39,6 @@ const ChannelList = (props: {
     const nextEvents = useRef<EPGEvent[]>([]);
     const nextSameEvents = useRef<EPGEvent[]>([]);
 
-    const canvasUtils = new CanvasUtils();
-    const epgUtils = new EPGUtils();
-
     const mChannelLayoutTextSize = 32;
     const mChannelLayoutEventTextSize = 26;
     const mChannelLayoutNumberTextSize = 38;
@@ -185,7 +182,7 @@ const ChannelList = (props: {
         }
 
         // channel number
-        canvasUtils.writeText(canvas, channel.getChannelID().toString(), drawingRect.left + 70, drawingRect.middle, {
+        CanvasUtils.writeText(canvas, channel.getChannelID().toString(), drawingRect.left + 70, drawingRect.middle, {
             fontSize: mChannelLayoutNumberTextSize,
             textAlign: 'right',
             fillStyle: mChannelLayoutTextColor,
@@ -195,7 +192,7 @@ const ChannelList = (props: {
         // channel name
         const channelIconWidth = mChannelLayoutHeight * 1.3;
         const channelNameWidth = mChannelLayoutWidth - channelIconWidth - 90;
-        canvasUtils.writeText(
+        CanvasUtils.writeText(
             canvas,
             channel.getName(),
             drawingRect.left + 90,
@@ -234,7 +231,7 @@ const ChannelList = (props: {
 
                 // channel event text
                 const channelEventWidth = mChannelLayoutWidth - channelIconWidth - 90 - channelEventProgressRect.width;
-                canvasUtils.writeText(
+                CanvasUtils.writeText(
                     canvas,
                     event.getTitle(),
                     channelEventProgressRect.right + mChannelLayoutPadding,
@@ -489,7 +486,7 @@ const ChannelList = (props: {
             focusedEventOffset.current = 0;
         }
         // get current event
-        const currentEvent = epgData.getEventAtTimestamp(channelPosition.current, epgUtils.getNow()) || undefined;
+        const currentEvent = epgData.getEventAtTimestamp(channelPosition.current, EPGUtils.getNow()) || undefined;
         let newFocusedEvent = null;
         if (currentEvent) {
             // get next event position with offset

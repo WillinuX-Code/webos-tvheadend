@@ -4,8 +4,6 @@ import EPGUtils from '../utils/EPGUtils';
  * Created by satadru on 3/30/17.
  */
 export default class EPGEvent {
-    private epgUtils: EPGUtils;
-
     constructor(
         private id: number,
         private start: number,
@@ -14,9 +12,7 @@ export default class EPGEvent {
         private description: string,
         private subTitle: string,
         private channelUuid: string
-    ) {
-        this.epgUtils = new EPGUtils();
-    }
+    ) { }
 
     getId() {
         return this.id;
@@ -39,7 +35,7 @@ export default class EPGEvent {
     }
 
     getDoneFactor() {
-        const now = this.epgUtils.getNow();
+        const now = EPGUtils.getNow();
         if (now > this.end) {
             return 1;
         } else if (now < this.start) {
@@ -50,7 +46,7 @@ export default class EPGEvent {
     }
 
     isCurrent() {
-        const now = this.epgUtils.getNow();
+        const now = EPGUtils.getNow();
         return now >= this.start && now <= this.end;
     }
 

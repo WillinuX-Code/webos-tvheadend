@@ -29,16 +29,13 @@ const TVGuide = (props: { unmount: () => void }) => {
         setCurrentChannelPosition
     } = useContext(AppContext);
 
-    const canvasUtils = new CanvasUtils();
-    const epgUtils = new EPGUtils();
-
     const canvas = useRef<HTMLCanvasElement>(null);
     const epgWrapper = useRef<HTMLDivElement>(null);
     const programguideContents = useRef<HTMLDivElement>(null);
     const scrollAnimationId = useRef(0);
     const focusedEventPosition = useRef(-1);
     const focusedChannelPosition = useRef(currentChannelPosition);
-    const timePosition = useRef(epgUtils.getNow());
+    const timePosition = useRef(EPGUtils.getNow());
 
     const millisPerPixel = useRef(0);
     const timeOffset = useRef(0);
@@ -93,7 +90,7 @@ const TVGuide = (props: { unmount: () => void }) => {
 
     const calculatedBaseLine = () => {
         //return LocalDateTime.now().toDateTime().minusMillis(DAYS_BACK_MILLIS).getMillis();
-        return epgUtils.getNow() - DAYS_BACK_MILLIS;
+        return EPGUtils.getNow() - DAYS_BACK_MILLIS;
     };
 
     const getFirstVisibleChannelPosition = () => {
@@ -307,7 +304,7 @@ const TVGuide = (props: { unmount: () => void }) => {
             drawingRect.right -= mDetailsLayoutMargin;
             drawingRect.bottom -= mDetailsLayoutMargin;
             // draw title, description etc
-            canvasUtils.writeText(canvas, focusedEvent.getTitle(), drawingRect.left, drawingRect.top, {
+            CanvasUtils.writeText(canvas, focusedEvent.getTitle(), drawingRect.left, drawingRect.top, {
                 fontSize: mDetailsLayoutTitleTextSize,
                 isBold: true,
                 fillStyle: mDetailsLayoutTextColor
@@ -329,14 +326,14 @@ const TVGuide = (props: { unmount: () => void }) => {
         // draw title, description etc
         canvas.font = mDetailsLayoutDescriptionTextSize + 'px Arial';
         canvas.fillStyle = mDetailsLayoutTextColor;
-        canvasUtils.wrapText(canvas, description, drect.left, drect.top, drect.width, mDetailsLayoutTitleTextSize + 5);
+        CanvasUtils.wrapText(canvas, description, drect.left, drect.top, drect.width, mDetailsLayoutTitleTextSize + 5);
     };
 
     const drawDetailsTimeInfo = (event: EPGEvent, canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
         const tDrawingRect = drawingRect.clone();
         tDrawingRect.right = getWidth() - 10;
-        const timeFrameText = epgUtils.toTimeFrameString(event.getStart(), event.getEnd(), locale);
-        canvasUtils.writeText(canvas, timeFrameText, tDrawingRect.right, tDrawingRect.top, {
+        const timeFrameText = EPGUtils.toTimeFrameString(event.getStart(), event.getEnd(), locale);
+        CanvasUtils.writeText(canvas, timeFrameText, tDrawingRect.right, tDrawingRect.top, {
             fontSize: mDetailsLayoutTitleTextSize,
             textAlign: 'right',
             isBold: true
@@ -346,7 +343,7 @@ const TVGuide = (props: { unmount: () => void }) => {
     const drawDetailsSubtitle = (subtitle: string, canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
         const drect = drawingRect.clone();
         drect.top += mDetailsLayoutTitleTextSize + mDetailsLayoutPadding;
-        canvasUtils.writeText(canvas, subtitle, drect.left, drect.top, {
+        CanvasUtils.writeText(canvas, subtitle, drect.left, drect.top, {
             fontSize: mDetailsLayoutSubTitleTextSize,
             fillStyle: mDetailsLayoutSubTitleTextColor,
             isBold: true,
@@ -366,12 +363,12 @@ const TVGuide = (props: { unmount: () => void }) => {
                 TIME_LABEL_SPACING_MILLIS *
                 ((timeLowerBoundary.current + TIME_LABEL_SPACING_MILLIS * i + TIME_LABEL_SPACING_MILLIS / 2) /
                     TIME_LABEL_SPACING_MILLIS);
-            time = epgUtils.getRoundedDate(30, new Date(time)).getTime();
+            time = EPGUtils.getRoundedDate(30, new Date(time)).getTime();
 
-            const timeText = epgUtils.toTimeString(time, locale);
+            const timeText = EPGUtils.toTimeString(time, locale);
             const x = getXFrom(time);
             const y = drawingRect.middle;
-            canvasUtils.writeText(canvas, timeText, x, y, {
+            CanvasUtils.writeText(canvas, timeText, x, y, {
                 fontSize: mEventLayoutTextSize,
                 fillStyle: mEventLayoutTextColor,
                 textAlign: 'center',
@@ -394,8 +391,8 @@ const TVGuide = (props: { unmount: () => void }) => {
         canvas.fillRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
 
         // Text
-        const weekdayText = epgUtils.getWeekdayName(timeLowerBoundary.current, locale);
-        canvasUtils.writeText(canvas, weekdayText, drawingRect.center, drawingRect.middle, {
+        const weekdayText = EPGUtils.getWeekdayName(timeLowerBoundary.current, locale);
+        CanvasUtils.writeText(canvas, weekdayText, drawingRect.center, drawingRect.middle, {
             fontSize: mTimeBarTextSize,
             fillStyle: mEventLayoutTextColor,
             textAlign: 'center',
@@ -416,7 +413,7 @@ const TVGuide = (props: { unmount: () => void }) => {
     };
 
     const drawTimeLine = (canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
-        const now = epgUtils.getNow();
+        const now = EPGUtils.getNow();
 
         if (shouldDrawPastTimeOverlay(now)) {
             // draw opaque overlay
@@ -457,8 +454,8 @@ const TVGuide = (props: { unmount: () => void }) => {
         // draw now time text
         drawingRect.top += mTimeBarNowTextSize / 2;
         drawingRect.left = getXFrom(timePosition.current) + mChannelLayoutPadding;
-        const timeText = epgUtils.toTimeString(timePosition.current, locale);
-        canvasUtils.writeText(canvas, timeText, drawingRect.left, drawingRect.top, {
+        const timeText = EPGUtils.toTimeString(timePosition.current, locale);
+        CanvasUtils.writeText(canvas, timeText, drawingRect.left, drawingRect.top, {
             fontSize: mTimeBarNowTextSize,
             fillStyle: mTimeBarLinePositionColor,
             isBold: true
@@ -551,7 +548,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         drawingRect.right -= mChannelLayoutPadding;
 
         // Text
-        canvasUtils.writeText(canvas, event.getTitle(), drawingRect.left, drawingRect.middle, {
+        CanvasUtils.writeText(canvas, event.getTitle(), drawingRect.left, drawingRect.middle, {
             fontSize: mEventLayoutTextSize,
             fillStyle: mEventLayoutTextColor,
             maxWidth: drawingRect.width
@@ -639,7 +636,7 @@ const TVGuide = (props: { unmount: () => void }) => {
             canvas.textAlign = 'center';
             canvas.font = 'bold 17px Arial';
             canvas.fillStyle = mEventLayoutTextColor;
-            canvasUtils.wrapText(
+            CanvasUtils.wrapText(
                 canvas,
                 channel?.getName() || '',
                 drawingRect.left + drawingRect.width / 2,
@@ -769,7 +766,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         // get current event
         const currentEvent = epgData.getEvent(channelPosition, eventPosition);
 
-        if (currentEvent.isPastDated(epgUtils.getNow())) {
+        if (currentEvent.isPastDated(EPGUtils.getNow())) {
             // past dated do nothing
             return;
         }
@@ -889,7 +886,7 @@ const TVGuide = (props: { unmount: () => void }) => {
         // set current time and event when mounted
         const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition.current, timePosition.current);
         targetEvent && scrollToEventPosition(epgData.getEventPosition(currentChannelPosition, targetEvent));
-        setTimePosition(epgUtils.getNow());
+        setTimePosition(EPGUtils.getNow());
         updateCanvas();
 
         return () => {

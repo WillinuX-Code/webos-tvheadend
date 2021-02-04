@@ -282,8 +282,7 @@ export default class TVHDataService {
             });
 
             if (success.result) {
-                const parser = new M3UParser(success.result);
-                const parserResult = parser.parse();
+                const parserResult = M3UParser.parse(success.result);
                 parserResult.items.forEach((item) => {
                     const channel = new EPGChannel(
                         item.logoUrl && item.logoUrl.length > 0 ? new URL(item.logoUrl) : undefined,

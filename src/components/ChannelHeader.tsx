@@ -8,7 +8,6 @@ const HEADER_TEXT_SIZE = 90;
 const ChannelHeader = (props: { channelNumberText: string; unmount: () => void }) => {
     const canvas = useRef<HTMLCanvasElement>(null);
     const timeoutReference = useRef<NodeJS.Timeout | null>(null);
-    const canvasUtils = new CanvasUtils();
 
     const drawChannelNumber = (canvas: CanvasRenderingContext2D) => {
         // create gradient for text
@@ -18,7 +17,7 @@ const ChannelHeader = (props: { channelNumberText: string; unmount: () => void }
         gradient.addColorStop(1, 'rgba(200, 200, 200, 1)');
 
         // draw text
-        canvasUtils.writeText(canvas, props.channelNumberText, getWidth() - 20, HEADER_TEXT_SIZE / 2 + 20, {
+        CanvasUtils.writeText(canvas, props.channelNumberText, getWidth() - 20, HEADER_TEXT_SIZE / 2 + 20, {
             fontSize: HEADER_TEXT_SIZE,
             fillStyle: gradient,
             textAlign: 'right'

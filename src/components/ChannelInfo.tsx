@@ -10,8 +10,6 @@ const ChannelInfo = (props: { unmount: () => void }) => {
 
     const canvas = useRef<HTMLCanvasElement>(null);
     const infoWrapper = useRef<HTMLDivElement>(null);
-    const epgUtils = new EPGUtils();
-    const canvasUtils = new CanvasUtils();
     const timeoutReference = useRef<NodeJS.Timeout | null>(null);
     const intervalReference = useRef<NodeJS.Timeout | null>(null);
 
@@ -138,7 +136,7 @@ const ChannelInfo = (props: { unmount: () => void }) => {
 
             // draw current event
             canvas.fillText(
-                canvasUtils.getShortenedText(canvas, currentEvent.getTitle(), drawingRect.width),
+                CanvasUtils.getShortenedText(canvas, currentEvent.getTitle(), drawingRect.width),
                 drawingRect.left,
                 drawingRect.top
             );
@@ -148,7 +146,7 @@ const ChannelInfo = (props: { unmount: () => void }) => {
             drawingRect.left = drawingRect.right - mChannelLayoutPadding - 20;
             canvas.textAlign = 'right';
             canvas.fillText(
-                epgUtils.toTimeFrameString(currentEvent.getStart(), currentEvent.getEnd(), locale),
+                EPGUtils.toTimeFrameString(currentEvent.getStart(), currentEvent.getEnd(), locale),
                 drawingRect.left,
                 drawingRect.top
             );
@@ -162,7 +160,7 @@ const ChannelInfo = (props: { unmount: () => void }) => {
                 drawingRect.right -= mChannelInfoTimeBoxWidth;
                 canvas.fillStyle = mChannelLayoutTitleTextColor;
                 canvas.fillText(
-                    canvasUtils.getShortenedText(canvas, currentEvent.getSubTitle(), drawingRect.width),
+                    CanvasUtils.getShortenedText(canvas, currentEvent.getSubTitle(), drawingRect.width),
                     drawingRect.left,
                     drawingRect.top
                 );
@@ -170,8 +168,8 @@ const ChannelInfo = (props: { unmount: () => void }) => {
             }
 
             // draw current time in programm as well as overall durations
-            const runningTime = epgUtils.toDuration(currentEvent.getStart(), epgUtils.getNow());
-            const remainingTime = Math.ceil((currentEvent.getEnd() - epgUtils.getNow()) / 1000 / 60);
+            const runningTime = EPGUtils.toDuration(currentEvent.getStart(), EPGUtils.getNow());
+            const remainingTime = Math.ceil((currentEvent.getEnd() - EPGUtils.getNow()) / 1000 / 60);
             drawingRect.left = drawingRect.right - mChannelLayoutPadding - 20;
             canvas.textAlign = 'right';
             canvas.font = mChannelInfoTitleSize - 8 + 'px Arial';
@@ -184,7 +182,7 @@ const ChannelInfo = (props: { unmount: () => void }) => {
                 canvas.font = mChannelInfoTitleSize - 15 + 'px Arial';
                 canvas.fillStyle = 'rgb(65, 182, 230)';
                 canvas.fillText(
-                    epgUtils.toTimeFrameString(nextEvent.getStart(), nextEvent.getEnd(), locale) +
+                    EPGUtils.toTimeFrameString(nextEvent.getStart(), nextEvent.getEnd(), locale) +
                         ':   ' +
                         nextEvent.getTitle(),
                     drawingRect.left,

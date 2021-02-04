@@ -4,8 +4,6 @@ import EPGChannel from '../models/EPGChannel';
 import EPGEvent from '../models/EPGEvent';
 import EPGUtils from '../utils/EPGUtils';
 
-const epgUtils = new EPGUtils();
-
 const ChannelListDetails = (props: {
     isRecording: (event: EPGEvent) => boolean;
     currentEvent?: EPGEvent;
@@ -24,9 +22,9 @@ const ChannelListDetails = (props: {
         const end = event.getEnd();
 
         if (date) {
-            return epgUtils.toDateString(start, locale);
+            return EPGUtils.toDateString(start, locale);
         } else {
-            return epgUtils.toTimeFrameString(start, end, locale);
+            return EPGUtils.toTimeFrameString(start, end, locale);
         }
     };
 
@@ -59,7 +57,7 @@ const ChannelListDetails = (props: {
         >
             <div>
                 <div className="timeframe">{formatTime(props.currentEvent)}</div>
-                <div className="now">{epgUtils.toTimeString(epgUtils.getNow(), locale)}</div>
+                <div className="now">{EPGUtils.toTimeString(EPGUtils.getNow(), locale)}</div>
             </div>
             <div className="title">
                 {props.currentEvent && props.isRecording(props.currentEvent) && <div className="rec"></div>}

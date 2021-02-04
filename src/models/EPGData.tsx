@@ -53,7 +53,7 @@ export default class EPGData {
 
         // find the event at the timestamp
         for (let i = 0; i < events.length; i++) {
-            if (events[i].isCurrent()) {
+            if (timestamp >= events[i].getStart() && timestamp <= events[i].getEnd()) {
                 return events[i];
             }
         }

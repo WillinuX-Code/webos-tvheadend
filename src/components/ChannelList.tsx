@@ -220,44 +220,42 @@ const ChannelList = (props: {
         drawingRect.left = leftBeforeRecMark;
 
         // channel event
-        channel.getEvents().forEach((event) => {
-            if (event.isCurrent()) {
-                // channel event progress bar
-                const channelEventProgressRect = new Rect();
-                channelEventProgressRect.left = drawingRect.left + 90;
-                channelEventProgressRect.right = channelEventProgressRect.left + 80;
-                channelEventProgressRect.top = drawingRect.top + mChannelLayoutHeight * 0.66;
-                channelEventProgressRect.bottom = channelEventProgressRect.top + mChannelLayoutEventTextSize * 0.5;
-                canvas.strokeStyle = mChannelLayoutTextColor;
-                canvas.strokeRect(
-                    channelEventProgressRect.left,
-                    channelEventProgressRect.top,
-                    channelEventProgressRect.width,
-                    channelEventProgressRect.height
-                );
-                canvas.fillStyle = isSelectedChannel ? mChannelLayoutTextColor : mChannelLayoutTitleTextColor;
-                canvas.fillRect(
-                    channelEventProgressRect.left + 2,
-                    channelEventProgressRect.top + 2,
-                    (channelEventProgressRect.width - 4) * event.getDoneFactor(),
-                    channelEventProgressRect.height - 4
-                );
+        if (currentEvent) {
+            // channel event progress bar
+            const channelEventProgressRect = new Rect();
+            channelEventProgressRect.left = drawingRect.left + 90;
+            channelEventProgressRect.right = channelEventProgressRect.left + 80;
+            channelEventProgressRect.top = drawingRect.top + mChannelLayoutHeight * 0.66;
+            channelEventProgressRect.bottom = channelEventProgressRect.top + mChannelLayoutEventTextSize * 0.5;
+            canvas.strokeStyle = mChannelLayoutTextColor;
+            canvas.strokeRect(
+                channelEventProgressRect.left,
+                channelEventProgressRect.top,
+                channelEventProgressRect.width,
+                channelEventProgressRect.height
+            );
+            canvas.fillStyle = isSelectedChannel ? mChannelLayoutTextColor : mChannelLayoutTitleTextColor;
+            canvas.fillRect(
+                channelEventProgressRect.left + 2,
+                channelEventProgressRect.top + 2,
+                (channelEventProgressRect.width - 4) * currentEvent.getDoneFactor(),
+                channelEventProgressRect.height - 4
+            );
 
-                // channel event text
-                const channelEventWidth = mChannelLayoutWidth - channelIconWidth - 90 - channelEventProgressRect.width;
-                CanvasUtils.writeText(
-                    canvas,
-                    event.getTitle(),
-                    channelEventProgressRect.right + mChannelLayoutPadding,
-                    channelEventProgressRect.middle,
-                    {
-                        fontSize: mChannelLayoutEventTextSize,
-                        fillStyle: canvas.fillStyle,
-                        maxWidth: channelEventWidth
-                    }
-                );
-            }
-        });
+            // channel event text
+            const channelEventWidth = mChannelLayoutWidth - channelIconWidth - 90 - channelEventProgressRect.width;
+            CanvasUtils.writeText(
+                canvas,
+                currentEvent.getTitle(),
+                channelEventProgressRect.right + mChannelLayoutPadding,
+                channelEventProgressRect.middle,
+                {
+                    fontSize: mChannelLayoutEventTextSize,
+                    fillStyle: canvas.fillStyle,
+                    maxWidth: channelEventWidth
+                }
+            );
+        }
 
         // channel logo
         const imageURL = channel.getImageURL();

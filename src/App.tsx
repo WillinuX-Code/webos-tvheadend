@@ -31,6 +31,8 @@ const App = () => {
 
     const [isEpgDataLoaded, setIsEpgDataLoaded] = useState(false);
 
+    const isWebKit = typeof document['hidden'] === 'undefined';
+
     const menu: MenuItem[] = [
         { icon: 'liveplayback', label: 'TV', action: () => setAppViewState(AppViewState.TV) },
         {
@@ -142,11 +144,17 @@ const App = () => {
         setTvhDataService(service);
 
         // add global event listeners for blur and focus of the app
-        window.onblur = handleBlur;
-        window.onfocus = handleFocus;
+        window.addEventListener('blur', handleBlur);
+        window.addEventListener('focus', handleFocus);
 
         // add global event listener for visibility change of the app
-        document.onvisibilitychange = handleVisibilityChange;
+        document.addEventListener(isWebKit ? 'webkitvisibilitychange' : 'visibilitychange', handleVisibilityChange);
+
+        // webOSLaunch event
+        document.addEventListener('webOSLaunch', handleWebOSLaunch);
+
+        // webOSRelaunch event
+        document.addEventListener('webOSRelaunch', handleWebOSRelaunch);
     }, []);
 
     const handleBlur = (event: FocusEvent) => {
@@ -163,13 +171,24 @@ const App = () => {
 
     const handleVisibilityChange = (event: Event) => {
         event.stopPropagation();
-        if (document.hidden) {
+        
+        if (isWebKit ? (document as any)['webkitHidden'] : document['hidden']) {
             console.log('app is in background');
             setAppVisibilityState(AppVisibilityState.BACKGROUND);
         } else {
             console.log('app is in foreground');
             setAppVisibilityState(AppVisibilityState.FOREGROUND);
         }
+    };
+
+    // for future use
+    const handleWebOSLaunch = () => {
+        console.log('app is launched');
+    };
+
+    // for future use
+    const handleWebOSRelaunch = () => {
+        console.log('app is relaunched');
     };
 
     useEffect(() => {

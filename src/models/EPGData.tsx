@@ -47,17 +47,32 @@ export default class EPGData {
         return events[eventPosition];
     }
 
+    getEventBeforeTimestamp(channelPosition: number, timestamp: number) {
+        const channel = this.channels[channelPosition];
+        const events = channel.getEvents();
+
+        // find the first event before the timestamp
+        return events
+            .filter((event) => event.getEnd() <= timestamp)
+            .reduce((prev, current) => (prev.getEnd() > current.getEnd() ? prev : current));
+    }
+
     getEventAtTimestamp(channelPosition: number, timestamp: number) {
         const channel = this.channels[channelPosition];
         const events = channel.getEvents();
 
         // find the event at the timestamp
-        for (let i = 0; i < events.length; i++) {
-            if (timestamp >= events[i].getStart() && timestamp <= events[i].getEnd()) {
-                return events[i];
-            }
-        }
-        return null;
+        return events.find((event) => event.getStart() <= timestamp && timestamp <= event.getEnd());
+    }
+
+    getEventAfterTimestamp(channelPosition: number, timestamp: number) {
+        const channel = this.channels[channelPosition];
+        const events = channel.getEvents();
+
+        // find the first event after the timestamp
+        return events
+            .filter((event) => event.getStart() >= timestamp)
+            .reduce((prev, current) => (prev.getStart() < current.getStart() ? prev : current));
     }
 
     isRecording(epgEvent: EPGEvent) {

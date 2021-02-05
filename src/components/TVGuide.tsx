@@ -700,13 +700,21 @@ const TVGuide = (props: { toggleRecording: (event: EPGEvent, callback: () => any
         switch (keyCode) {
             case 39: // right arrow
                 event.stopPropagation();
-                if (eventPosition < 0) break;
+                if (eventPosition < 0) {
+                    const nextEvent = epgData.getEventAfterTimestamp(channelPosition, timePosition.current);
+                    nextEvent && scrollToEventPosition(epgData.getEventPosition(channelPosition, nextEvent));
+                    break;
+                }
                 eventPosition += 1;
                 scrollToEventPosition(eventPosition);
                 break;
             case 37: // left arrow
                 event.stopPropagation();
-                if (eventPosition < 0) break;
+                if (eventPosition < 0) {
+                    const prevEvent = epgData.getEventBeforeTimestamp(channelPosition, timePosition.current);
+                    prevEvent && scrollToEventPosition(epgData.getEventPosition(channelPosition, prevEvent));
+                    break;
+                }
                 eventPosition -= 1;
                 scrollToEventPosition(eventPosition);
                 break;
@@ -876,6 +884,7 @@ const TVGuide = (props: { toggleRecording: (event: EPGEvent, callback: () => any
         const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition.current, timePosition.current);
         targetEvent && scrollToEventPosition(epgData.getEventPosition(currentChannelPosition, targetEvent));
         setTimePosition(EPGUtils.getNow());
+        setScrollX(getXFrom(timePosition.current - HOURS_IN_VIEWPORT_MILLIS / 2));
         updateCanvas();
 
         return () => {

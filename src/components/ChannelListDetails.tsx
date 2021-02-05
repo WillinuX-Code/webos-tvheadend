@@ -33,14 +33,14 @@ const ChannelListDetails = (props: {
 
         for (let i = 0; i < events.length; i++) {
             itemList.push(
-                <div key={i}>
+                <li key={i}>
                     {withDate && <div className="listItemDate">{formatTime(events[i], true)}</div>}
                     <div className="listItemTime">{formatTime(events[i])}</div>
                     <div className="listItemTitle">
                         {props.isRecording(events[i]) && <div className="rec"></div>}
                         {events[i].getTitle()}
                     </div>
-                </div>
+                </li>
             );
         }
 
@@ -67,7 +67,7 @@ const ChannelListDetails = (props: {
             <div className="desc">{props.currentEvent?.getDescription() || ''}</div>
             <div className="next">
                 <div className="separator"></div>
-                <div className="list">{getEventList(props.nextEvents)}</div>
+                <ul className="list">{getEventList(props.nextEvents)}</ul>
             </div>
             <div className="nextSameTitle">{getEventList(props.nextSameEvents, true)}</div>
         </div>

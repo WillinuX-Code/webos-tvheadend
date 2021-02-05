@@ -881,10 +881,12 @@ const TVGuide = (props: { toggleRecording: (event: EPGEvent, callback: () => any
         focus();
 
         // set current time and event when mounted
-        const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition.current, timePosition.current);
+        const targetTime = timePosition.current;
+        const targetEvent = epgData.getEventAtTimestamp(focusedChannelPosition.current, targetTime);
         targetEvent && scrollToEventPosition(epgData.getEventPosition(currentChannelPosition, targetEvent));
-        setTimePosition(EPGUtils.getNow());
-        setScrollX(getXFrom(timePosition.current - HOURS_IN_VIEWPORT_MILLIS / 2));
+        resetBoundaries();
+        setTimePosition(targetTime);
+        setScrollX(getXFrom(targetTime - HOURS_IN_VIEWPORT_MILLIS / 2));
         updateCanvas();
 
         return () => {

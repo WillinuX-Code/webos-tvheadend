@@ -23,6 +23,7 @@ export enum State {
 
 const TV = () => {
     const {
+        menuState,
         appViewState,
         appVisibilityState,
         tvhDataService,
@@ -45,7 +46,7 @@ const TV = () => {
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
         // in case we are in menu state we don't handle any keypress
-        if (appViewState === AppViewState.MENU) {
+        if (menuState) {
             return;
         }
         const keyCode = event.keyCode;
@@ -343,7 +344,7 @@ const TV = () => {
         if (appViewState === AppViewState.TV) {
             focus();
         }
-    }, [appViewState]);
+    }, [appViewState, menuState]);
     /**
      * handle app state changes
      */

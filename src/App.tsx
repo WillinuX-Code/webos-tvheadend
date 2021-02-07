@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import TVHDataService from './services/TVHDataService';
 import TV from './components/TV';
+/*import Player from './components/Player';*/
 import TVHSettings from './components/TVHSettings';
 import './styles/app.css';
 import AppContext, { AppVisibilityState } from './AppContext';
@@ -9,7 +10,6 @@ import StorageHelper from './utils/StorageHelper';
 import Menu, { MenuItem } from './components/Menu';
 
 export enum AppViewState {
-    MENU,
     TV,
     SETTINGS,
     RECORDINGS,
@@ -19,6 +19,8 @@ export enum AppViewState {
 
 const App = () => {
     const {
+        menuState,
+        setMenuState,
         appViewState,
         setAppViewState,
         setAppVisibilityState,
@@ -34,24 +36,29 @@ const App = () => {
     const isWebKit = typeof document['hidden'] === 'undefined';
 
     const menu: MenuItem[] = [
-        { icon: 'liveplayback', label: 'TV', action: () => setAppViewState(AppViewState.TV) },
+        { icon: 'liveplayback', label: 'TV', action: () => updateAppViewState(AppViewState.TV) },
         {
             icon: 'recordings',
             label: 'Recordings',
-            action: () => console.log('not yet available') /*action: () => setAppViewState(AppViewState.RECORDINGS)*/
+            action: () => updateAppViewState(AppViewState.RECORDINGS)
         },
-        { icon: 'gear', label: 'Setup', action: () => setAppViewState(AppViewState.SETTINGS) },
+        { icon: 'gear', label: 'Setup', action: () => updateAppViewState(AppViewState.SETTINGS) },
         {
             icon: 'denselist',
             label: 'Help',
-            action: () => console.log('not yet available') /*action: () => setAppViewState(AppViewState.HELP)*/
+            action: () => console.log('not yet available') /*action: () => updateAppViewState(AppViewState.HELP)*/
         },
         {
             icon: 'circle',
             label: 'Contact',
-            action: () => console.log('not yet available') /*action: () => setAppViewState(AppViewState.CONTACT)*/
+            action: () => console.log('not yet available') /*action: () => updateAppViewState(AppViewState.CONTACT)*/
         }
     ];
+
+    const updateAppViewState = (appViewState: AppViewState) => {
+        setMenuState(false);
+        setAppViewState(appViewState);
+    };
 
     const reloadData = () => {
         if (tvhDataService) {
@@ -121,15 +128,13 @@ const App = () => {
             case 404: // green button
             case 71: //'g'
                 event.stopPropagation();
-                appViewState !== AppViewState.MENU
-                    ? setAppViewState(AppViewState.MENU)
-                    : setAppViewState(AppViewState.TV);
+                setMenuState(!menuState);
                 break;
             case 461: // back button
             case 66: // 'b'
                 event.stopPropagation();
-                if (appViewState === AppViewState.MENU) {
-                    setAppViewState(AppViewState.TV);
+                if (menuState) {
+                    setMenuState(false);
                 }
                 break;
             default:
@@ -171,7 +176,7 @@ const App = () => {
 
     const handleVisibilityChange = (event: Event) => {
         event.stopPropagation();
-        
+
         if (isWebKit ? (document as any)['webkitHidden'] : document['hidden']) {
             console.log('app is in background');
             setAppVisibilityState(AppVisibilityState.BACKGROUND);
@@ -197,11 +202,10 @@ const App = () => {
 
     return (
         <div className="app" onKeyDown={handleKeyPress}>
-            {appViewState === AppViewState.MENU && (
-                <Menu items={menu} unmount={() => setAppViewState(AppViewState.TV)} />
-            )}
+            {menuState && <Menu items={menu} unmount={() => setAppViewState(AppViewState.TV)} />}
             {appViewState === AppViewState.SETTINGS && <TVHSettings unmount={() => setAppViewState(AppViewState.TV)} />}
-            {(appViewState === AppViewState.TV || appViewState === AppViewState.MENU) && isEpgDataLoaded && <TV />}
+            {appViewState === AppViewState.TV && isEpgDataLoaded && <TV />}
+            {/*appViewState === AppViewState.RECORDINGS && <Player />*/}
         </div>
     );
 };

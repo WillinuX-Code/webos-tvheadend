@@ -7,7 +7,7 @@ import Spinner from '@enact/moonstone/Spinner';
 import { Panel } from '@enact/moonstone/Panels';
 import { AppViewState } from '../App';
 import RecordingList from './RecordingList';
-import Recording from '../models/Recording';
+import EPGChannel from '../models/EPGChannel';
 
 export enum State {
     PLAYER = 'player',
@@ -18,6 +18,7 @@ export enum State {
 
 const Player = () => {
     const {
+        persistentAuthToken,
         currentRecordingPosition,
         setCurrentRecordingPosition,
         menuState,
@@ -30,10 +31,10 @@ const Player = () => {
     const video = useRef<HTMLVideoElement>(null);
     const audioTracksRef = useRef<AudioTrackList>();
     const textTracksRef = useRef<TextTrackList>();
-    const recordings = useRef<Recording[]>([]);
+    const recordings = useRef<EPGChannel[]>([]);
 
     const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-    const [state, setState] = useState<State>(State.PLAYER_INFO);
+    const [state, setState] = useState<State>(State.RECORDINGS_LIST);
 
     const focus = () => tvWrapper.current?.focus();
 
@@ -214,7 +215,7 @@ const Player = () => {
     };
 
     useEffect(() => {
-        tvhDataService?.retrieveM3URecordings().then((result) => (recordings.current = result));
+        tvhDataService?.retrieveRecordings(persistentAuthToken).then((result) => (recordings.current = result));
 
         focus();
 
@@ -302,7 +303,7 @@ const Player = () => {
             )}
 
             {state === State.RECORDINGS_LIST && (
-                <RecordingList recordings={recordings.current} unmount={() => setState(State.PLAYER_INFO)} />
+                <RecordingList recordings={recordings.current} unmount={() => setState(State.PLAYER)} />
             )}
 
             <video
@@ -311,6 +312,7 @@ const Player = () => {
                 width={getWidth()}
                 height={getHeight()}
                 preload="none"
+                controls
                 onLoadedMetadata={handleLoadedMetaData}
             ></video>
         </div>

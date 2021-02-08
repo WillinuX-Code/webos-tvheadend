@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import TVHDataService from './services/TVHDataService';
 import TV from './components/TV';
-/*import Player from './components/Player';*/
+import Player from './components/Player';
 import TVHSettings from './components/TVHSettings';
 import './styles/app.css';
 import AppContext, { AppVisibilityState } from './AppContext';
@@ -218,7 +218,7 @@ const App = () => {
             {menuState && <Menu items={menu} unmount={() => setAppViewState(AppViewState.TV)} />}
             {appViewState === AppViewState.SETTINGS && <TVHSettings unmount={() => setAppViewState(AppViewState.TV)} />}
             {appViewState === AppViewState.TV && isEpgDataLoaded && <TV />}
-            {/*appViewState === AppViewState.RECORDINGS && <Player />*/}
+            {appViewState === AppViewState.RECORDINGS && <Player />}
         </div>
     );
 };

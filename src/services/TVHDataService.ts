@@ -202,7 +202,7 @@ export default class TVHDataService {
             });
     }
 
-    async retrieveRecordings(authToken: string): Promise<EPGChannel[]> {
+    async retrieveRecordings(authToken?: string): Promise<EPGChannel[]> {
         // now create rec by event
         const success = await this.serviceAdapter.call({
             url: this.url + TVHDataService.API_DVR_RECORDINGS,
@@ -254,7 +254,7 @@ export default class TVHDataService {
      * @param authToken optional auth token
      * @param id number of fake channel
      */
-    toEpgChannelRec(recordingEntry: TVHRecordingEntry, authToken: string, id: number): EPGChannel {
+    toEpgChannelRec(recordingEntry: TVHRecordingEntry, authToken: string | undefined, id: number): EPGChannel {
         const event = this.toEpgEventRec(recordingEntry);
         const authParam = authToken ? '?auth=' + authToken : '';
         const channel = new EPGChannel(

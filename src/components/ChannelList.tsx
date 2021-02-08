@@ -32,9 +32,6 @@ const ChannelList = (props: {
     const scrollY = useRef(0);
     const channelPosition = useRef(currentChannelPosition);
 
-    // details refs
-    const [detailsState, setDetailsState] = useState<DetailsState>();
-
     const focusedEventOffset = useRef(0);
     const nextEvents = useRef<EPGEvent[]>([]);
     const nextSameEvents = useRef<EPGEvent[]>([]);
@@ -51,6 +48,7 @@ const ChannelList = (props: {
     const mChannelLayoutBackgroundFocus = 'rgba(65,182,230,1)';
 
     const [state, setState] = useState<State>(State.NORMAL);
+    const [detailsState, setDetailsState] = useState<DetailsState>();
 
     const getTopFrom = (position: number) => {
         const y = position * mChannelLayoutHeight; //+ this.mChannelLayoutMargin;

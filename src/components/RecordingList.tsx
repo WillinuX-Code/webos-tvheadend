@@ -1,21 +1,33 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import Rect from '../models/Rect';
 import CanvasUtils from '../utils/CanvasUtils';
-import '../styles/app.css';
-import Recording from '../models/Recording';
 import AppContext from '../AppContext';
+import EPGChannel from '../models/EPGChannel';
+import ChannelListDetails from './ChannelListDetails';
+import EPGEvent from '../models/EPGEvent';
+import '../styles/app.css';
 
 const VERTICAL_SCROLL_TOP_PADDING_ITEM = 5;
 const IS_DEBUG = false;
 
-const RecordingList = (props: { unmount: () => void; recordings: Recording[] }) => {
-    const { setCurrentRecordingPosition } = useContext(AppContext);
+enum State {
+    NORMAL = 'normal',
+    DETAILS = 'details'
+}
+
+interface DetailsState {
+    focusedChannel?: EPGChannel;
+    focusedEvent?: EPGEvent;
+}
+
+const RecordingList = (props: { unmount: () => void; recordings: EPGChannel[] }) => {
+    const { imageCache, currentRecordingPosition, setCurrentRecordingPosition } = useContext(AppContext);
 
     const canvas = useRef<HTMLCanvasElement>(null);
     const listWrapper = useRef<HTMLDivElement>(null);
     const scrollAnimationId = useRef(0);
     const scrollY = useRef(0);
-    const recordPosition = useRef(0);
+    const recordPosition = useRef(currentRecordingPosition);
 
     const mChannelLayoutTextSize = 32;
     const mChannelLayoutEventTextSize = 26;
@@ -28,6 +40,9 @@ const RecordingList = (props: { unmount: () => void; recordings: Recording[] }) 
     const mChannelLayoutWidth = 900;
     const mChannelLayoutBackgroundFocus = 'rgba(65,182,230,1)';
 
+    const [state, setState] = useState<State>(State.DETAILS);
+    const [, setDetailsState] = useState<DetailsState>();
+
     const getTopFrom = (position: number) => {
         const y = position * mChannelLayoutHeight; //+ this.mChannelLayoutMargin;
         return y - scrollY.current;
@@ -35,7 +50,10 @@ const RecordingList = (props: { unmount: () => void; recordings: Recording[] }) 
 
     const scrollToChannelPosition = (channelPosition: number, withAnimation: boolean) => {
         // start scrolling after padding position top
-        if (channelPosition < VERTICAL_SCROLL_TOP_PADDING_ITEM) {
+        if (
+            channelPosition < VERTICAL_SCROLL_TOP_PADDING_ITEM ||
+            props.recordings.length <= getLastVisibleChannelPosition() - getFirstVisibleChannelPosition()
+        ) {
             scrollY.current = 0;
             updateCanvas();
             return;
@@ -164,10 +182,12 @@ const RecordingList = (props: { unmount: () => void; recordings: Recording[] }) 
             fillStyle: mChannelLayoutTextColor,
             isBold: true
         });
-
         // channel line
+        const currentEvent = channel.getEvents()[0];
         const channelIconWidth = mChannelLayoutHeight * 1.3;
         const channelNameWidth = mChannelLayoutWidth - channelIconWidth - 90;
+
+        const leftBeforeRecMark = drawingRect.left;
 
         // channel name
         CanvasUtils.writeText(
@@ -182,6 +202,60 @@ const RecordingList = (props: { unmount: () => void; recordings: Recording[] }) 
                 maxWidth: channelNameWidth
             }
         );
+        drawingRect.left = leftBeforeRecMark;
+
+        // channel event
+        if (currentEvent) {
+            // channel event progress bar
+            const channelEventProgressRect = new Rect();
+            channelEventProgressRect.left = drawingRect.left + 90;
+            channelEventProgressRect.right = channelEventProgressRect.left + 80;
+            channelEventProgressRect.top = drawingRect.top + mChannelLayoutHeight * 0.66;
+            channelEventProgressRect.bottom = channelEventProgressRect.top + mChannelLayoutEventTextSize * 0.5;
+            canvas.strokeStyle = mChannelLayoutTextColor;
+            canvas.strokeRect(
+                channelEventProgressRect.left,
+                channelEventProgressRect.top,
+                channelEventProgressRect.width,
+                channelEventProgressRect.height
+            );
+            canvas.fillStyle = isSelectedChannel ? mChannelLayoutTextColor : mChannelLayoutTitleTextColor;
+            canvas.fillRect(
+                channelEventProgressRect.left + 2,
+                channelEventProgressRect.top + 2,
+                (channelEventProgressRect.width - 4) * currentEvent.getDoneFactor(),
+                channelEventProgressRect.height - 4
+            );
+
+            // channel event text
+            const channelEventWidth = mChannelLayoutWidth - channelIconWidth - 90 - channelEventProgressRect.width;
+            CanvasUtils.writeText(
+                canvas,
+                currentEvent.getTitle(),
+                channelEventProgressRect.right + mChannelLayoutPadding,
+                channelEventProgressRect.middle,
+                {
+                    fontSize: mChannelLayoutEventTextSize,
+                    fillStyle: canvas.fillStyle,
+                    maxWidth: channelEventWidth
+                }
+            );
+        }
+
+        // channel logo
+        const imageURL = channel.getImageURL();
+        const image = imageURL && imageCache.get(imageURL);
+        if (image !== undefined) {
+            const channelImageRect = getDrawingRectForChannelImage(position, image);
+            canvas.drawImage(
+                image,
+                channelImageRect.left,
+                channelImageRect.top,
+                channelImageRect.width,
+                channelImageRect.height
+            );
+            drawDebugRect(canvas, channelImageRect);
+        }
     };
 
     const drawDebugRect = (canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
@@ -189,6 +263,34 @@ const RecordingList = (props: { unmount: () => void; recordings: Recording[] }) 
             canvas.strokeStyle = '#FF0000';
             canvas.strokeRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
         }
+    };
+
+    const getDrawingRectForChannelImage = (position: number, image: HTMLImageElement) => {
+        const drawingRect = new Rect();
+        drawingRect.right = mChannelLayoutWidth - mChannelLayoutMargin;
+        drawingRect.left = drawingRect.right - mChannelLayoutHeight * 1.3;
+        drawingRect.top = getTopFrom(position);
+        drawingRect.bottom = drawingRect.top + mChannelLayoutHeight;
+
+        const imageWidth = image.width;
+        const imageHeight = image.height;
+        const imageRatio = imageHeight / imageWidth;
+
+        const rectWidth = drawingRect.right - drawingRect.left;
+        const rectHeight = drawingRect.bottom - drawingRect.top;
+
+        // Keep aspect ratio.
+        if (imageWidth > imageHeight) {
+            const padding = (rectHeight - rectWidth * imageRatio) / 2;
+            drawingRect.top += padding;
+            drawingRect.bottom -= padding;
+        } else if (imageWidth <= imageHeight) {
+            const padding = (rectWidth - rectHeight / imageRatio) / 2;
+            drawingRect.left += padding;
+            drawingRect.right -= padding;
+        }
+
+        return drawingRect;
     };
 
     /**
@@ -267,6 +369,26 @@ const RecordingList = (props: { unmount: () => void; recordings: Recording[] }) 
                 setCurrentRecordingPosition(recordPosition.current);
                 props.unmount();
                 break;
+            case 39: // right arrow
+                event.stopPropagation();
+                if (state === State.DETAILS) {
+                    // switch to next event details
+                    setDetailsData();
+                } else {
+                    // show channelListDetails
+                    setState(State.DETAILS);
+                }
+                break;
+            case 37: // left arrow
+                event.stopPropagation();
+                if (state === State.DETAILS) {
+                    // switch to previous event details
+                    setDetailsData();
+                } else {
+                    // hide channelListDetails
+                    setState(State.NORMAL);
+                }
+                break;
             default:
                 console.log('RecordingList-keyPressed:', keyCode);
         }
@@ -275,13 +397,24 @@ const RecordingList = (props: { unmount: () => void; recordings: Recording[] }) 
         if (!event.isPropagationStopped) return event;
     };
 
+    const setDetailsData = () => {
+        const channel = props.recordings[recordPosition.current];
+        // get current event
+        const currentEvent = channel.getEvents()[0];
+        // trigger rerender
+        setDetailsState({
+            focusedEvent: currentEvent,
+            focusedChannel: channel
+        });
+    };
+
     const handleScrollWheel = (event: React.WheelEvent<HTMLDivElement>) => {
         event.deltaY < 0 ? scrollUp() : scrollDown();
         focus();
     };
 
     const handleClick = () => {
-        setChannelPosition(recordPosition.current);
+        setCurrentRecordingPosition(recordPosition.current);
         props.unmount();
     };
 
@@ -324,7 +457,14 @@ const RecordingList = (props: { unmount: () => void; recordings: Recording[] }) 
 
     const setChannelPosition = (channelPos: number) => {
         recordPosition.current = channelPos;
+        if (state === State.DETAILS) {
+            setDetailsData();
+        }
         scrollToChannelPosition(channelPos, true);
+    };
+
+    const getFocusedChannel = (): EPGChannel => {
+        return props.recordings[recordPosition.current];
     };
 
     useEffect(() => {
@@ -339,7 +479,7 @@ const RecordingList = (props: { unmount: () => void; recordings: Recording[] }) 
 
     return (
         <div
-            id="channellist-wrapper"
+            id="recordinglist-wrapper"
             ref={listWrapper}
             tabIndex={-1}
             onKeyDown={handleKeyPress}
@@ -348,6 +488,18 @@ const RecordingList = (props: { unmount: () => void; recordings: Recording[] }) 
             className="channelList"
         >
             <canvas ref={canvas} width={getWidth()} height={getHeight()} style={{ display: 'block' }} />
+
+            {state === State.DETAILS && getFocusedChannel() && (
+                <ChannelListDetails
+                    isRecording={() => {
+                        return false;
+                    }}
+                    epgChannel={getFocusedChannel()}
+                    currentEvent={getFocusedChannel().getEvents()[0]}
+                    nextEvents={[]}
+                    nextSameEvents={[]}
+                />
+            )}
         </div>
     );
 };

@@ -1,0 +1,73 @@
+{
+    "entries": [
+        {
+            "uuid": "ff0859a620fae00506d19839647486d3",
+            "enabled": true,
+            "create": 1607812784,
+            "watched": 0,
+            "start": 1607466600,
+            "start_extra": 0,
+            "start_real": 1607815710,
+            "stop": 1607471100,
+            "stop_extra": 0,
+            "stop_real": 1607817780,
+            "duration": 2040,
+            "channel": "f2ceba520639ad0ffaaf030edc7453ee",
+            "channel_icon": "imagecache/7166",
+            "channelname": "ZDF HD",
+            "image": "",
+            "fanart_image": "",
+            "title": {
+                "ger": "Markus Lanz"
+            },
+            "disp_title": "Markus Lanz",
+            "subtitle": {
+                "ger": "Nachrichtensatire mit Oliver Welke"
+            },
+            "disp_subtitle": "Nachrichtensatire mit Oliver Welke",
+            "disp_summary": "",
+            "description": {
+                "ger": "Satire, Deutschland 2020\nOliver Welke berichtet über einen harten Lockdown und Showpolitik, eine orientierungslose Volkspartei, den Brexit auf der Zielgeraden und rapide weniger werdende Insekten.\n\nHeute in Welkes Team: Tina Hausten, Matthias Matschke, Till Reiners und Holger Stockhaus.\nHD-Produktion\nAltersfreigabe: 6"
+            },
+            "disp_description": "Satire, Deutschland 2020\nOliver Welke berichtet über einen harten Lockdown und Showpolitik, eine orientierungslose Volkspartei, den Brexit auf der Zielgeraden und rapide weniger werdende Insekten.\n\nHeute in Welkes Team: Tina Hausten, Matthias Matschke, Till Reiners und Holger Stockhaus.\nHD-Produktion\nAltersfreigabe: 6",
+            "disp_extratext": "Nachrichtensatire mit Oliver Welke",
+            "pri": 6,
+            "retention": 0,
+            "removal": 0,
+            "playposition": 0,
+            "playcount": 0,
+            "config_name": "d5c1f4f2385f87cdf57fe059b0965532",
+            "creator": "192.168.178.47",
+            "filename": "",
+            "errorcode": 0,
+            "errors": 0,
+            "data_errors": 0,
+            "dvb_eid": 17926,
+            "noresched": false,
+            "norerecord": false,
+            "fileremoved": 0,
+            "autorec": "",
+            "autorec_caption": "",
+            "timerec": "",
+            "timerec_caption": "",
+            "parent": "",
+            "child": "",
+            "content_type": 3,
+            "copyright_year": 0,
+            "broadcast": 67938273,
+            "episode_disp": "",
+            "url": "",
+            "filesize": 0,
+            "status": "Scheduled for recording",
+            "sched_status": "scheduled",
+            "duplicate": 0,
+            "first_aired": 0,
+            "comment": "webos-tvheadend",
+            "category": [],
+            "credits": {},
+            "keyword": [],
+            "genre": [48]
+        }
+    ],
+    "total": 1
+}

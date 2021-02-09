@@ -47,6 +47,9 @@ interface TVHRecordingEntry {
     disp_description: string;
     disp_subtitle: string;
     channel: string;
+    channel_icon: string;
+    channelname: string;
+    url: string;
     // and many more
 }
 
@@ -78,6 +81,7 @@ export default class TVHDataService {
     static API_DVR_CREATE_BY_EVENT = 'api/dvr/entry/create_by_event?';
     static API_DVR_CANCEL = 'api/dvr/entry/cancel?uuid=';
     static API_DVR_UPCOMING = 'api/dvr/entry/grid_upcoming?duplicates=0';
+    static API_DVR_RECORDINGS = 'api/dvr/entry/grid_finished?sort=disp_title';
     static M3U_PLAYLIST = 'playlist/%schannels';
 
     private serviceAdapter = new LunaServiceAdapter();
@@ -198,6 +202,26 @@ export default class TVHDataService {
             });
     }
 
+    async retrieveRecordings(authToken: string): Promise<EPGChannel[]> {
+        // now create rec by event
+        const success = await this.serviceAdapter.call({
+            url: this.url + TVHDataService.API_DVR_RECORDINGS,
+            user: this.user,
+            password: this.password
+        });
+
+        const response = JSON.parse(success.result) as TVHRecordings;
+        console.log('retrieved recordings: %s', response.entries.length);
+        const recordings: EPGChannel[] = [];
+
+        // build recordings
+        response.entries.forEach((recordingEntry) => {
+            recordings.push(this.toEpgChannelRec(recordingEntry, authToken, recordings.length + 1));
+        });
+
+        return recordings;
+    }
+
     toEpgEvent(tvhEvent: TVHEventEntry) {
         return new EPGEvent(
             tvhEvent.eventId,
@@ -220,6 +244,30 @@ export default class TVHDataService {
             recordingEntry.disp_subtitle,
             recordingEntry.channel
         );
+    }
+
+    /**
+     * build up data model from recording entry
+     * One recording = one epg Channel with one epg event
+     *
+     * @param recordingEntry tvheadend record entry
+     * @param authToken optional auth token
+     * @param id number of fake channel
+     */
+    toEpgChannelRec(recordingEntry: TVHRecordingEntry, authToken: string, id: number): EPGChannel {
+        const event = this.toEpgEventRec(recordingEntry);
+        const authParam = authToken ? '?auth=' + authToken : '';
+        const channel = new EPGChannel(
+            recordingEntry.channel_icon && recordingEntry.channel_icon.length > 0
+                ? new URL(this.url + recordingEntry.channel_icon + authParam)
+                : undefined,
+            recordingEntry.channelname,
+            id, // use our own numbers item.channelNumber
+            recordingEntry.channel,
+            new URL(this.url + recordingEntry.url + authParam)
+        );
+        channel.addEvent(event);
+        return channel;
     }
 
     async retrieveDVRConfig() {

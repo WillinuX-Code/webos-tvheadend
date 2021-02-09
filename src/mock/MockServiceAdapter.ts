@@ -1,6 +1,7 @@
 import channelMock from './channels.json';
 import epgMock from './epg.json';
-import recordingMock from './recordings.json';
+import upcomintRecordingMock from './recordings.upcoming.json';
+import recordingsMock from './recordings.json';
 import channelTagsMock from './channelTags.json';
 import channelM3UMock from './channels.m3u.json';
 interface ProxySuccessResponse<TResult> extends WebOSTV.OnCompleteSuccessResponse {
@@ -54,7 +55,13 @@ export default class MockServiceAdapter {
             };
             //return epgMock;
         } else if (url.includes('api/dvr/entry/grid_upcoming')) {
-            const value = JSON.stringify(recordingMock);
+            const value = JSON.stringify(upcomintRecordingMock);
+            return {
+                returnValue: true,
+                result: value
+            };
+        } else if (url.includes('api/dvr/entry/grid_finished')) {
+            const value = JSON.stringify(recordingsMock);
             return {
                 returnValue: true,
                 result: value

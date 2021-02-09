@@ -28,7 +28,8 @@ const App = () => {
         tvhDataService,
         setTvhDataService,
         epgData,
-        imageCache
+        imageCache,
+        setPersistentAuthToken
     } = useContext(AppContext);
 
     const [isEpgDataLoaded, setIsEpgDataLoaded] = useState(false);
@@ -70,6 +71,10 @@ const App = () => {
                 epgData.updateChannels(channels);
                 setIsEpgDataLoaded(true);
 
+                // safe persistent token if available
+                if (channels.length > 0) {
+                    safePersistentAuthToken(channels[0].getStreamUrl());
+                }
                 // preload images
                 preloadImages(channels);
 
@@ -99,6 +104,14 @@ const App = () => {
             console.log('Retrieved locale info:', locale);
         } catch (error) {
             console.log('Failed to retrieve locale info: ', error);
+        }
+    };
+
+    const safePersistentAuthToken = (url: URL) => {
+        const authParam = url.searchParams.get('auth');
+        if (authParam) {
+            // put auth token to app context
+            setPersistentAuthToken(authParam.trim());
         }
     };
 

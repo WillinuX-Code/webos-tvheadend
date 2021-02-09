@@ -373,7 +373,6 @@ const ChannelList = (props: {
                 event.stopPropagation();
                 scrollDown();
                 break;
-            case 404: // TODO yellow button + back button
             case 67: // keyboard 'c'
             case 461: // back button
                 event.stopPropagation();

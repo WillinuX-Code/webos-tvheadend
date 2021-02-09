@@ -118,14 +118,12 @@ const TV = () => {
                 event.stopPropagation();
                 setState(State.TV);
                 break;
-            case 404: // green button
-            case 71: //'g'
-                // note that this key event should be passed to app
-                setState(State.TV);
-                break;
             default:
                 console.log('TV-keyPressed:', keyCode);
         }
+
+        // pass unhandled events to parent
+        if (!event.isPropagationStopped()) return event;
     };
 
     const handleChannelInfoSwitch = () => {

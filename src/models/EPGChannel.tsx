@@ -36,6 +36,10 @@ export default class EPGChannel {
         return this.events;
     }
 
+    setEvents(events: EPGEvent[]) {
+        this.events = events;
+    }
+
     addEvent(event: EPGEvent) {
         this.events.push(event);
     }

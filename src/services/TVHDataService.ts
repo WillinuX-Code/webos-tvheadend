@@ -3,6 +3,7 @@ import LunaServiceAdapter from '../luna/LunaServiceAdapter';
 import EPGChannel from '../models/EPGChannel';
 import EPGEvent from '../models/EPGEvent';
 import M3UParser from '../utils/M3UParser';
+import { restoreEpgDataFromCache } from '../utils/EPGCache';
 
 export interface TVHDataServiceParms {
     tvhUrl: string;
@@ -348,6 +349,9 @@ export default class TVHDataService {
                     return;
                 }
                 console.log('processed all epg events');
+
+                // restore cached EPG data
+                restoreEpgDataFromCache(this.channels);
             })
             .catch((error) => {
                 console.log('Failed to retrieve epg data: ', JSON.stringify(error));

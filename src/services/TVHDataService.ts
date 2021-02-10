@@ -399,7 +399,10 @@ export default class TVHDataService {
                 console.log('processed all epg events');
 
                 // restore cached EPG data
-                restoreEpgDataFromCache(this.channels);
+                restoreEpgDataFromCache(this.channels).then((channels) => {
+                    // notify calling component
+                    callback(channels);
+                });
             })
             .catch((error) => {
                 console.log('Failed to retrieve epg data: ', JSON.stringify(error));

@@ -98,23 +98,27 @@ const showIndexedDBUsage = () => {
 };
 
 export const restoreEpgDataFromCache = (channels: EPGChannel[]) => {
-    // get current events
-    const currentChannelEvents = getChannelEvents(channels);
+    return new Promise<EPGChannel[]>((resolve, reject) => {
+        // get epg data from cache
+        getEpgCache()
+            .then((previousChannelEvents) => {
+                // get current events
+                const currentChannelEvents = getChannelEvents(channels);
 
-    // get epg data from cache
-    getEpgCache()
-        .then((previousChannelEvents) => {
-            // update epg data
-            const combinedChannelEvents = combineEvents(previousChannelEvents, currentChannelEvents);
-            setChannelEvents(channels, combinedChannelEvents);
-            console.log('EPG data restored');
+                // update epg data
+                const combinedChannelEvents = combineEvents(previousChannelEvents, currentChannelEvents);
+                setChannelEvents(channels, combinedChannelEvents);
+                console.log('EPG data restored');
+                resolve(channels);
 
-            // storing new epg data to cache
-            setEpgCache(combinedChannelEvents)
-                .then(() => console.log('updated EPG data cache'))
-                .finally(() => showIndexedDBUsage());
-        })
-        .catch((error) => {
-            console.error('failed to get EPG data from cache!', error);
-        });
+                // storing new epg data to cache
+                setEpgCache(combinedChannelEvents)
+                    .then(() => console.log('updated EPG data cache'))
+                    .finally(() => showIndexedDBUsage());
+            })
+            .catch((error) => {
+                console.error('failed to get EPG data from cache!', error);
+                reject(error);
+            });
+    });
 };

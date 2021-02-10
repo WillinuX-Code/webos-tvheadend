@@ -32,7 +32,7 @@ const App = () => {
         setPersistentAuthToken
     } = useContext(AppContext);
 
-    const [isEpgDataLoaded, setIsEpgDataLoaded] = useState(false);
+    const [isChannelsRetrieved, setIsChannelsRetrieved] = useState(false);
 
     const isWebKit = typeof document['hidden'] === 'undefined';
 
@@ -67,9 +67,10 @@ const App = () => {
             loadLocale(tvhDataService);
 
             // retrieve channel infos etc
+            setIsChannelsRetrieved(false);
             tvhDataService.retrieveM3UChannels().then((channels) => {
                 epgData.updateChannels(channels);
-                setIsEpgDataLoaded(true);
+                setIsChannelsRetrieved(true);
 
                 // safe persistent token if available
                 if (channels.length > 0) {
@@ -80,6 +81,7 @@ const App = () => {
 
                 // retrieve epg and update channels
                 tvhDataService.retrieveTVHEPG(0, (channels) => {
+                    // note: channels are already updated as we are working on references here
                     epgData.updateChannels(channels);
                 });
 
@@ -217,7 +219,7 @@ const App = () => {
         <div className="app" onKeyDown={handleKeyPress}>
             {menuState && <Menu items={menu} unmount={() => setAppViewState(AppViewState.TV)} />}
             {appViewState === AppViewState.SETTINGS && <TVHSettings unmount={() => setAppViewState(AppViewState.TV)} />}
-            {appViewState === AppViewState.TV && isEpgDataLoaded && <TV />}
+            {appViewState === AppViewState.TV && isChannelsRetrieved && <TV />}
             {/*appViewState === AppViewState.RECORDINGS && <Player />*/}
         </div>
     );

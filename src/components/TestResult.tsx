@@ -1,7 +1,7 @@
 import BodyText from '@enact/moonstone/BodyText';
 import React from 'react';
 import TestResultItem from './TestResultItem';
-import { TestResults } from './TVHSettingsTest';
+import { TestResults } from '../utils/TVHSettingsTest';
 
 const TestResult = (results: TestResults) => (
     <>

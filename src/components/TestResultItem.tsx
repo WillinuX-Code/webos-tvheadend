@@ -1,6 +1,6 @@
 import Icon from '@enact/moonstone/Icon';
 import React from 'react';
-import { ResultItem } from './TVHSettingsTest';
+import { ResultItem } from '../utils/TVHSettingsTest';
 
 const warnStyle = {
     color: 'orange'

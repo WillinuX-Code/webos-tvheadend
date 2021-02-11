@@ -5,7 +5,7 @@ import { Header, Panel } from '@enact/moonstone/Panels';
 import Heading from '@enact/moonstone/Heading';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import TVHDataService, { TVHDataServiceParms } from '../services/TVHDataService';
-import TVHSettingsTest, { TestResults } from './TVHSettingsTest';
+import TVHSettingsTest, { TestResults } from '../utils/TVHSettingsTest';
 import AppContext from '../AppContext';
 import TestResult from './TestResult';
 import StorageHelper from '../utils/StorageHelper';

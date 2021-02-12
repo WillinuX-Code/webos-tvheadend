@@ -39,16 +39,18 @@ const combineEvents = (previousEvents: ChannelEvents, currentEvents: ChannelEven
     const events: ChannelEvents = {};
     const TWO_DAYS = 2 * 24 * 60 * 60 * 1000;
 
+    // trim previous channel events to current time position
+    const currentTime = EPGUtils.getNow();
+    Object.entries(previousEvents).forEach(([key, value]) => {
+        previousEvents[key] = value.filter((epgEvent) => epgEvent.end < currentTime);
+    });
+
     // loop through all current channel keys and update the epg data for each
+    const pastTime = EPGUtils.getNow() - TWO_DAYS;
     Object.entries(currentEvents).forEach(([key, value]) => {
         const combinedEvents = [...(previousEvents[key] || []), ...value];
         // filter the combined list of events to have only unique data that is not older than two days
-        events[key] = combinedEvents.filter((epgEvent, index, self) => {
-            return (
-                epgEvent['end'] > EPGUtils.getNow() - TWO_DAYS &&
-                self.findIndex((uniqueEvent) => uniqueEvent['id'] === epgEvent['id']) === index
-            );
-        });
+        events[key] = combinedEvents.filter((epgEvent) => epgEvent.end > pastTime);
     });
 
     return events;

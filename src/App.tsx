@@ -37,22 +37,35 @@ const App = () => {
     const isWebKit = typeof document['hidden'] === 'undefined';
 
     const menu: MenuItem[] = [
-        { icon: 'liveplayback', label: 'TV', action: () => updateAppViewState(AppViewState.TV) },
+        {
+            icon: 'liveplayback',
+            label: 'TV',
+            action: () => updateAppViewState(AppViewState.TV),
+            isActive: appViewState === AppViewState.TV
+        },
         {
             icon: 'recordings',
             label: 'Recordings',
-            action: () => updateAppViewState(AppViewState.RECORDINGS)
+            action: () => updateAppViewState(AppViewState.RECORDINGS),
+            isActive: appViewState === AppViewState.RECORDINGS
         },
-        { icon: 'gear', label: 'Setup', action: () => updateAppViewState(AppViewState.SETTINGS) },
+        {
+            icon: 'gear',
+            label: 'Setup',
+            action: () => updateAppViewState(AppViewState.SETTINGS),
+            isActive: appViewState === AppViewState.SETTINGS
+        },
         {
             icon: 'denselist',
             label: 'Help',
-            action: () => console.log('not yet available') /*action: () => updateAppViewState(AppViewState.HELP)*/
+            action: () => console.log('not yet available') /*action: () => updateAppViewState(AppViewState.HELP)*/,
+            isActive: false
         },
         {
             icon: 'circle',
             label: 'Contact',
-            action: () => console.log('not yet available') /*action: () => updateAppViewState(AppViewState.CONTACT)*/
+            action: () => console.log('not yet available') /*action: () => updateAppViewState(AppViewState.CONTACT)*/,
+            isActive: false
         }
     ];
 

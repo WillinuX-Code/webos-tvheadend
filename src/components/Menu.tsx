@@ -1,8 +1,8 @@
-import BodyText from '@enact/moonstone/BodyText';
 import LabeledIconButton from '@enact/moonstone/LabeledIconButton';
 import React from 'react';
 
 export interface MenuItem {
+    isActive: boolean;
     icon: string;
     label: string;
     action: () => void;
@@ -20,6 +20,7 @@ const Menu = (props: { items: MenuItem[]; unmount: () => void }) => {
             result.push(
                 <div className="menuItem" key={i}>
                     <LabeledIconButton
+                        selected={items[i].isActive}
                         size="large"
                         icon={items[i].icon}
                         labelPosition="left"

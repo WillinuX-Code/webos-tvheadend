@@ -2,11 +2,10 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import Rect from '../models/Rect';
 import CanvasUtils from '../utils/CanvasUtils';
 import AppContext from '../AppContext';
-import '../styles/app.css';
+import EPGChannel from '../models/EPGChannel';
 import ChannelListDetails from './ChannelListDetails';
 import EPGEvent from '../models/EPGEvent';
-import EPGChannel from '../models/EPGChannel';
-import EPGUtils from '../utils/EPGUtils';
+import '../styles/app.css';
 
 const VERTICAL_SCROLL_TOP_PADDING_ITEM = 5;
 const IS_DEBUG = false;
@@ -21,20 +20,14 @@ interface DetailsState {
     focusedEvent?: EPGEvent;
 }
 
-const ChannelList = (props: {
-    toggleRecording: (event: EPGEvent, callback: () => any) => void;
-    unmount: () => void;
-}) => {
-    const { epgData, imageCache, currentChannelPosition, setCurrentChannelPosition } = useContext(AppContext);
+const RecordingList = (props: { unmount: () => void; recordings: EPGChannel[] }) => {
+    const { imageCache, currentRecordingPosition, setCurrentRecordingPosition } = useContext(AppContext);
+
     const canvas = useRef<HTMLCanvasElement>(null);
     const listWrapper = useRef<HTMLDivElement>(null);
     const scrollAnimationId = useRef(0);
     const scrollY = useRef(0);
-    const channelPosition = useRef(currentChannelPosition);
-
-    const focusedEventOffset = useRef(0);
-    const nextEvents = useRef<EPGEvent[]>([]);
-    const nextSameEvents = useRef<EPGEvent[]>([]);
+    const recordPosition = useRef(currentRecordingPosition);
 
     const mChannelLayoutTextSize = 32;
     const mChannelLayoutEventTextSize = 26;
@@ -47,8 +40,8 @@ const ChannelList = (props: {
     const mChannelLayoutWidth = 900;
     const mChannelLayoutBackgroundFocus = 'rgba(65,182,230,1)';
 
-    const [state, setState] = useState<State>(State.NORMAL);
-    const [detailsState, setDetailsState] = useState<DetailsState>();
+    const [state, setState] = useState<State>(State.DETAILS);
+    const [, setDetailsState] = useState<DetailsState>();
 
     const getTopFrom = (position: number) => {
         const y = position * mChannelLayoutHeight; //+ this.mChannelLayoutMargin;
@@ -57,14 +50,17 @@ const ChannelList = (props: {
 
     const scrollToChannelPosition = (channelPosition: number, withAnimation: boolean) => {
         // start scrolling after padding position top
-        if (channelPosition < VERTICAL_SCROLL_TOP_PADDING_ITEM) {
+        if (
+            channelPosition < VERTICAL_SCROLL_TOP_PADDING_ITEM ||
+            props.recordings.length <= getLastVisibleChannelPosition() - getFirstVisibleChannelPosition()
+        ) {
             scrollY.current = 0;
             updateCanvas();
             return;
         }
 
         // stop scrolling before top padding position
-        const maxPosition = epgData.getChannelCount() - VERTICAL_SCROLL_TOP_PADDING_ITEM;
+        const maxPosition = props.recordings.length - VERTICAL_SCROLL_TOP_PADDING_ITEM;
         if (channelPosition >= maxPosition) {
             // fix scroll to channel in case it is within bottom padding
             if (scrollY.current === 0) {
@@ -160,8 +156,8 @@ const ChannelList = (props: {
     };
 
     const drawChannelItem = (canvas: CanvasRenderingContext2D, position: number) => {
-        const isSelectedChannel = position === channelPosition.current;
-        const channel = epgData.getChannel(position);
+        const isSelectedChannel = position === recordPosition.current;
+        const channel = props.recordings[position];
         const drawingRect = new Rect();
 
         // should not happen, but better check it
@@ -186,22 +182,13 @@ const ChannelList = (props: {
             fillStyle: mChannelLayoutTextColor,
             isBold: true
         });
-
         // channel line
-        const currentEvent = epgData.getEventAtTimestamp(position, EPGUtils.getNow());
+        const currentEvent = channel.getEvents()[0];
         const channelIconWidth = mChannelLayoutHeight * 1.3;
         const channelNameWidth = mChannelLayoutWidth - channelIconWidth - 90;
 
         const leftBeforeRecMark = drawingRect.left;
-        // recording mark
-        if (currentEvent && epgData.isRecording(currentEvent)) {
-            const radius = 10;
-            canvas.fillStyle = '#FF0000';
-            canvas.beginPath();
-            canvas.arc(drawingRect.left + 90 + radius, drawingRect.middle - radius, radius, 0, 2 * Math.PI);
-            canvas.fill();
-            drawingRect.left += 2 * radius + mChannelLayoutPadding;
-        }
+
         // channel name
         CanvasUtils.writeText(
             canvas,
@@ -325,7 +312,7 @@ const ChannelList = (props: {
         const screenHeight = getHeight();
         let position = Math.floor((y + screenHeight) / mChannelLayoutHeight);
 
-        const channelCount = epgData.getChannelCount();
+        const channelCount = props.recordings.length;
         // this will fade the bottom channel in while scrolling
         if (position < channelCount) {
             position += 1;
@@ -339,9 +326,9 @@ const ChannelList = (props: {
     };
 
     const recalculateAndRedraw = (withAnimation: boolean) => {
-        if (epgData !== null && epgData.hasData()) {
+        if (props.recordings !== null && props.recordings.length > 0) {
             // calculateMaxVerticalScroll();
-            scrollToChannelPosition(channelPosition.current, withAnimation);
+            scrollToChannelPosition(recordPosition.current, withAnimation);
         }
     };
 
@@ -371,6 +358,7 @@ const ChannelList = (props: {
                 event.stopPropagation();
                 scrollDown();
                 break;
+            case 404: // TODO yellow button + back button
             case 67: // keyboard 'c'
             case 461: // back button
                 event.stopPropagation();
@@ -378,20 +366,13 @@ const ChannelList = (props: {
                 break;
             case 13: // ok button -> switch to focused channel
                 event.stopPropagation();
-                setCurrentChannelPosition(channelPosition.current);
+                setCurrentRecordingPosition(recordPosition.current);
                 props.unmount();
                 break;
-            case 403: {
-                // red button trigger recording
-                event.stopPropagation();
-                toggleRecording();
-                break;
-            }
             case 39: // right arrow
                 event.stopPropagation();
                 if (state === State.DETAILS) {
                     // switch to next event details
-                    focusedEventOffset.current += 1;
                     setDetailsData();
                 } else {
                     // show channelListDetails
@@ -400,9 +381,8 @@ const ChannelList = (props: {
                 break;
             case 37: // left arrow
                 event.stopPropagation();
-                if (state === State.DETAILS && focusedEventOffset.current > 0) {
+                if (state === State.DETAILS) {
                     // switch to previous event details
-                    focusedEventOffset.current -= 1;
                     setDetailsData();
                 } else {
                     // hide channelListDetails
@@ -410,28 +390,22 @@ const ChannelList = (props: {
                 }
                 break;
             default:
-                console.log('ChannelList-keyPressed:', keyCode);
+                console.log('RecordingList-keyPressed:', keyCode);
         }
 
         // pass unhandled events to parent
         if (!event.isPropagationStopped) return event;
     };
 
-    const toggleRecording = () => {
-        const epgEvent =
-            detailsState?.focusedEvent ||
-            epgData
-                .getChannel(channelPosition.current)
-                ?.getEvents()
-                .find((e) => e.isCurrent());
-        if (epgEvent) {
-            // call passed toggle recording function
-            props.toggleRecording(epgEvent, () => {
-                updateCanvas();
-                // trigger rerender
-                setDetailsState({ ...detailsState });
-            });
-        }
+    const setDetailsData = () => {
+        const channel = props.recordings[recordPosition.current];
+        // get current event
+        const currentEvent = channel.getEvents()[0];
+        // trigger rerender
+        setDetailsState({
+            focusedEvent: currentEvent,
+            focusedChannel: channel
+        });
     };
 
     const handleScrollWheel = (event: React.WheelEvent<HTMLDivElement>) => {
@@ -440,27 +414,27 @@ const ChannelList = (props: {
     };
 
     const handleClick = () => {
-        setCurrentChannelPosition(channelPosition.current);
+        setCurrentRecordingPosition(recordPosition.current);
         props.unmount();
     };
 
     const scrollUp = () => {
         // if we reached 0 we scroll to end of list
-        if (channelPosition.current === 0) {
-            setChannelPosition(epgData.getChannelCount() - 1);
+        if (recordPosition.current === 0) {
+            setChannelPosition(props.recordings.length - 1);
         } else {
             // channel down
-            setChannelPosition(channelPosition.current - 1);
+            setChannelPosition(recordPosition.current - 1);
         }
     };
 
     const scrollDown = () => {
         // when channel position increased channelcount we scroll to beginning
-        if (channelPosition.current === epgData.getChannelCount() - 1) {
+        if (recordPosition.current === props.recordings.length - 1) {
             setChannelPosition(0);
         } else {
             // channel up
-            setChannelPosition(channelPosition.current + 1);
+            setChannelPosition(recordPosition.current + 1);
         }
     };
 
@@ -476,52 +450,21 @@ const ChannelList = (props: {
     };
 
     const onDraw = (canvas: CanvasRenderingContext2D) => {
-        if (epgData && epgData.hasData()) {
+        if (props.recordings && props.recordings.length > 0) {
             drawChannelListItems(canvas);
         }
     };
 
     const setChannelPosition = (channelPos: number) => {
-        channelPosition.current = channelPos;
+        recordPosition.current = channelPos;
         if (state === State.DETAILS) {
             setDetailsData();
         }
         scrollToChannelPosition(channelPos, true);
     };
 
-    const setDetailsData = () => {
-        const channel = epgData.getChannel(channelPosition.current);
-        // in case channel changed
-        if (channel?.getChannelID() !== detailsState?.focusedChannel?.getChannelID()) {
-            focusedEventOffset.current = 0;
-        }
-        // get current event
-        const currentEvent = epgData.getEventAtTimestamp(channelPosition.current, EPGUtils.getNow()) || undefined;
-        let newFocusedEvent = null;
-        if (currentEvent) {
-            // get next event position with offset
-            const eventPos =
-                epgData.getEventPosition(channelPosition.current, currentEvent) + focusedEventOffset.current;
-            const nextEventsArray: EPGEvent[] = [];
-            for (let i = eventPos; i < eventPos + 5; i++) {
-                const nextEvent = epgData.getEvent(channelPosition.current, i + 1);
-                nextEvent && nextEventsArray.push(nextEvent);
-            }
-            nextEvents.current = nextEventsArray;
-            // get same
-
-            // set event with offset
-            newFocusedEvent = epgData.getEvent(channelPosition.current, eventPos);
-        } else {
-            nextEvents.current = [];
-            nextSameEvents.current = [];
-        }
-
-        // trigger rerender
-        setDetailsState({
-            focusedEvent: newFocusedEvent || undefined,
-            focusedChannel: channel || undefined
-        });
+    const getFocusedChannel = (): EPGChannel => {
+        return props.recordings[recordPosition.current];
     };
 
     useEffect(() => {
@@ -534,15 +477,9 @@ const ChannelList = (props: {
         };
     }, []);
 
-    useEffect(() => {
-        if (state === State.DETAILS) {
-            setDetailsData();
-        }
-    }, [state]);
-
     return (
         <div
-            id="channellist-wrapper"
+            id="recordinglist-wrapper"
             ref={listWrapper}
             tabIndex={-1}
             onKeyDown={handleKeyPress}
@@ -552,19 +489,19 @@ const ChannelList = (props: {
         >
             <canvas ref={canvas} width={getWidth()} height={getHeight()} style={{ display: 'block' }} />
 
-            {state === State.DETAILS && (
+            {state === State.DETAILS && getFocusedChannel() && (
                 <ChannelListDetails
-                    isRecording={(event: EPGEvent) => {
-                        return epgData.isRecording(event);
+                    isRecording={() => {
+                        return false;
                     }}
-                    epgChannel={detailsState?.focusedChannel}
-                    currentEvent={detailsState?.focusedEvent}
-                    nextEvents={nextEvents.current}
-                    nextSameEvents={nextSameEvents.current}
+                    epgChannel={getFocusedChannel()}
+                    currentEvent={getFocusedChannel().getEvents()[0]}
+                    nextEvents={[]}
+                    nextSameEvents={[]}
                 />
             )}
         </div>
     );
 };
 
-export default ChannelList;
+export default RecordingList;

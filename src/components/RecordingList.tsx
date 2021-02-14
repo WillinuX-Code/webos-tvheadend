@@ -186,26 +186,24 @@ const RecordingList = (props: { unmount: () => void; recordings: EPGChannel[] })
         const currentEvent = channel.getEvents()[0];
         const channelIconWidth = mChannelLayoutHeight * 1.3;
         const channelNameWidth = mChannelLayoutWidth - channelIconWidth - 90;
-
         const leftBeforeRecMark = drawingRect.left;
-
-        // channel name
-        CanvasUtils.writeText(
-            canvas,
-            channel.getName(),
-            drawingRect.left + 90,
-            drawingRect.top + mChannelLayoutHeight * 0.33,
-            {
-                fontSize: mChannelLayoutTextSize,
-                fillStyle: mChannelLayoutTextColor,
-                isBold: true,
-                maxWidth: channelNameWidth
-            }
-        );
-        drawingRect.left = leftBeforeRecMark;
 
         // channel event
         if (currentEvent) {
+            // channel name
+            CanvasUtils.writeText(
+                canvas,
+                currentEvent.getTitle(),
+                drawingRect.left + 90,
+                drawingRect.top + mChannelLayoutHeight * 0.33,
+                {
+                    fontSize: mChannelLayoutTextSize,
+                    fillStyle: mChannelLayoutTextColor,
+                    isBold: true,
+                    maxWidth: channelNameWidth
+                }
+            );
+            drawingRect.left = leftBeforeRecMark;
             // channel event progress bar
             const channelEventProgressRect = new Rect();
             channelEventProgressRect.left = drawingRect.left + 90;
@@ -231,7 +229,7 @@ const RecordingList = (props: { unmount: () => void; recordings: EPGChannel[] })
             const channelEventWidth = mChannelLayoutWidth - channelIconWidth - 90 - channelEventProgressRect.width;
             CanvasUtils.writeText(
                 canvas,
-                currentEvent.getTitle(),
+                currentEvent.getSubTitle(),
                 channelEventProgressRect.right + mChannelLayoutPadding,
                 channelEventProgressRect.middle,
                 {

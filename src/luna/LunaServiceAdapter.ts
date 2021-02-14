@@ -7,6 +7,10 @@ interface ProxyRequestParams {
     method?: string;
 }
 
+interface EpgSuccessResponse<TResult> extends WebOSTV.OnCompleteSuccessResponse {
+    result: TResult;
+}
+
 interface ProxySuccessResponse<TResult> extends WebOSTV.OnCompleteSuccessResponse {
     result: TResult;
     statusCode: number;
@@ -55,6 +59,36 @@ export default class LunaServiceAdapter {
                 onFailure: (res: ProxyErrorResponse) => reject(res),
                 onComplete: () => {
                     console.log('lsa:%s end', params.url);
+                }
+            });
+        });
+    }
+
+    writeEpgCache(data: any) {
+        return new Promise<WebOSTV.OnCompleteSuccessResponse>((resolve, reject) => {
+            console.log('lsa: write epg cache');
+            global.webOS.service.request('luna://com.willinux.tvh.app.proxy', {
+                method: 'fileIO',
+                parameters: { filename: 'epgcache.json', write: true, data: data },
+                onSuccess: (res: WebOSTV.OnCompleteSuccessResponse) => resolve(res),
+                onFailure: (res: ProxyErrorResponse) => reject(res),
+                onComplete: () => {
+                    console.log('lsa: write epg cache end');
+                }
+            });
+        });
+    }
+
+    readEpgCache() {
+        return new Promise<EpgSuccessResponse<any>>((resolve, reject) => {
+            console.log('lsa: read epg cache');
+            global.webOS.service.request('luna://com.willinux.tvh.app.proxy', {
+                method: 'fileIO',
+                parameters: { filename: 'epgcache.json', read: true },
+                onSuccess: (res: EpgSuccessResponse<any>) => resolve(res),
+                onFailure: (res: ProxyErrorResponse) => reject(res),
+                onComplete: () => {
+                    console.log('lsa: read epg cache end');
                 }
             });
         });

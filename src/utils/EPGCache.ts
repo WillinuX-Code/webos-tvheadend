@@ -1,10 +1,8 @@
-import { get as getDBValue, set as setDBValue } from 'idb-keyval';
-import { compress, decompress } from 'lzutf8';
 import EPGChannel from '../models/EPGChannel';
 import EPGEvent from '../models/EPGEvent';
 import EPGUtils from './EPGUtils';
 
-interface ChannelEvents {
+export interface ChannelEvents {
     [key: string]: EPGEventObject[];
 }
 
@@ -17,23 +15,6 @@ interface EPGEventObject {
     subTitle: string;
     channelUuid: string;
 }
-
-const DB_KEY = 'EPGCache';
-
-const getEpgCache = async () => {
-    const epgData = await getDBValue<string>(DB_KEY);
-    let epgCache: ChannelEvents = {};
-    if (epgData) {
-        const decompressedData = decompress(epgData, { inputEncoding: 'Base64' });
-        epgCache = JSON.parse(decompressedData);
-    }
-    return epgCache;
-};
-
-const setEpgCache = (epgCache: ChannelEvents) => {
-    const compressedData = compress(JSON.stringify(epgCache), { outputEncoding: 'Base64' });
-    return setDBValue(DB_KEY, compressedData);
-};
 
 const combineEvents = (previousEvents: ChannelEvents, currentEvents: ChannelEvents): ChannelEvents => {
     const events: ChannelEvents = {};
@@ -90,37 +71,12 @@ const setChannelEvents = (channels: EPGChannel[], channelEvents: ChannelEvents) 
     });
 };
 
-const showIndexedDBUsage = () => {
-    navigator.storage.estimate().then((storageEstimate) => {
-        if (storageEstimate.usage && storageEstimate.quota) {
-            const usageInPercent = storageEstimate.usage / storageEstimate.quota;
-            console.log(usageInPercent.toFixed(2) + '% of indexedDB space used.');
-        }
-    });
-};
-
-export const restoreEpgDataFromCache = (channels: EPGChannel[]) => {
-    return new Promise<EPGChannel[]>((resolve, reject) => {
-        // get epg data from cache
-        getEpgCache()
-            .then((previousChannelEvents) => {
-                // get current events
-                const currentChannelEvents = getChannelEvents(channels);
-
-                // update epg data
-                const combinedChannelEvents = combineEvents(previousChannelEvents, currentChannelEvents);
-                setChannelEvents(channels, combinedChannelEvents);
-                console.log('EPG data restored');
-                resolve(channels);
-
-                // storing new epg data to cache
-                setEpgCache(combinedChannelEvents)
-                    .then(() => console.log('updated EPG data cache'))
-                    .finally(() => showIndexedDBUsage());
-            })
-            .catch((error) => {
-                console.error('failed to get EPG data from cache!', error);
-                reject(error);
-            });
-    });
+export const restoreEpgDataFromCache = (previousChannelEvents: ChannelEvents, channels: EPGChannel[]) => {
+    // get current events
+    const currentChannelEvents = getChannelEvents(channels);
+    // update epg data
+    const combinedChannelEvents = combineEvents(previousChannelEvents, currentChannelEvents);
+    setChannelEvents(channels, combinedChannelEvents);
+    // return channels
+    return { channels: channels, channelEvents: combinedChannelEvents };
 };

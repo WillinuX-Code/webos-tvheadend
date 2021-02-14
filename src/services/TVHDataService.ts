@@ -3,7 +3,7 @@ import LunaServiceAdapter from '../luna/LunaServiceAdapter';
 import EPGChannel from '../models/EPGChannel';
 import EPGEvent from '../models/EPGEvent';
 import M3UParser from '../utils/M3UParser';
-import { restoreEpgDataFromCache } from '../utils/EPGCache';
+import { restoreEpgDataFromCache, ChannelEvents } from '../utils/EPGCache';
 
 export interface TVHDataServiceParms {
     tvhUrl: string;
@@ -398,14 +398,47 @@ export default class TVHDataService {
                 }
                 console.log('processed all epg events');
 
-                // restore cached EPG data
-                restoreEpgDataFromCache(this.channels).then((channels) => {
-                    // notify calling component
-                    callback(channels);
-                });
+                try {
+                    this.handleEpgCache(callback);
+                } catch (err) {
+                    console.log('Failure during handle epg cache processing', err);
+                }
             })
             .catch((error) => {
                 console.log('Failed to retrieve epg data: ', JSON.stringify(error));
+            });
+    }
+
+    handleEpgCache(callback: EPGCallback) {
+        // try to retrieve cached epg to display past events as well
+        let cacheResult: {
+            channels: EPGChannel[];
+            channelEvents: ChannelEvents;
+        };
+        this.serviceAdapter
+            .readEpgCache()
+            .then((epgCacheResult) => {
+                //console.log('Read epg cache was successful:', epgCacheResult.result);
+                // restore cached EPG data
+                cacheResult = restoreEpgDataFromCache(epgCacheResult.result, this.channels);
+                // notify calling component
+                callback(cacheResult.channels);
+                // safe new result to disk
+                this.serviceAdapter
+                    .writeEpgCache(cacheResult.channelEvents)
+                    .then(() => console.log('epg cache successfully updated'))
+                    .catch((error) => console.log('Failed to write epg cache data:', error.errorText));
+            })
+            .catch((e) => {
+                console.log('Failed to load Epg cache:', e.errorText);
+                cacheResult = restoreEpgDataFromCache({} as ChannelEvents, this.channels);
+                // notify calling component
+                callback(cacheResult.channels);
+                // safe new result to disk
+                this.serviceAdapter
+                    .writeEpgCache(cacheResult.channelEvents)
+                    .then(() => console.log('epg cache successfully updated'))
+                    .catch((error) => console.log('Failed to write epg cache data:', error.errorText));
             });
     }
 

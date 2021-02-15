@@ -1,4 +1,4 @@
-interface WriteTextOptions {
+export interface WriteTextOptions {
     fontSize?: number;
     fillStyle?: string | CanvasGradient | CanvasPattern;
     fontFace?: string;
@@ -90,7 +90,13 @@ export default class CanvasUtils {
     /**
      * Writes a text to a specific position without changing the canvas context
      */
-    static writeText(canvas: CanvasRenderingContext2D, text: string, x: number, y: number, options: WriteTextOptions = {}) {
+    static writeText(
+        canvas: CanvasRenderingContext2D,
+        text: string,
+        x: number,
+        y: number,
+        options: WriteTextOptions = {}
+    ) {
         // set default options
         options.fontFace = options.fontFace || 'Moonstone';
         options.textAlign = options.textAlign || 'left';

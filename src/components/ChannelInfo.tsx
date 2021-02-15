@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef } from 'react';
 import Rect from '../models/Rect';
 import EPGUtils from '../utils/EPGUtils';
-import CanvasUtils from '../utils/CanvasUtils';
+import CanvasUtils, { WriteTextOptions } from '../utils/CanvasUtils';
 import AppContext from '../AppContext';
 import '../styles/app.css';
 
@@ -23,6 +23,7 @@ const ChannelInfo = (props: { unmount: () => void }) => {
     const mChannelInfoTimeBoxWidth = 375;
     const mChannelLayoutMargin = 3;
     const mChannelLayoutPadding = 7;
+    const mChannelNextTitleMaxLength = 900;
     //const mChannelLayoutBackground = '#323232';
     //const mChannelLayoutBackgroundFocus = 'rgba(65,182,230,1)';
 
@@ -190,17 +191,29 @@ const ChannelInfo = (props: { unmount: () => void }) => {
 
             // draw next event
             drawingRect.top += mChannelInfoTitleSize - 14 + mChannelLayoutPadding;
-            canvas.font = mChannelInfoTitleSize - 14 + 'px Moonstone';
+            const nextEventTextOptions: WriteTextOptions = {
+                textAlign: 'right',
+                textBaseline: 'alphabetic',
+                fontSize: mChannelInfoTitleSize - 18
+            };
+            // needs to be set for measurement
             if (nextEvent !== undefined) {
+                canvas.font = mChannelInfoTitleSize - 18 + 'px Moonstone';
                 const titleMetrics = canvas.measureText(nextEvent.getTitle());
+                const titleLength =
+                    titleMetrics.width > mChannelNextTitleMaxLength ? mChannelNextTitleMaxLength : titleMetrics.width;
                 canvas.fillStyle = mChannelLayoutTextColor;
-                canvas.fillText(nextEvent.getTitle(), drawingRect.left, drawingRect.top);
-                drawingRect.left -= titleMetrics.width + mChannelLayoutPadding;
-                canvas.fillStyle = 'rgb(65, 182, 230)';
-                canvas.fillText(
+                CanvasUtils.writeText(canvas, nextEvent.getTitle(), drawingRect.left, drawingRect.top, {
+                    ...nextEventTextOptions,
+                    maxWidth: titleLength < mChannelNextTitleMaxLength ? undefined : mChannelNextTitleMaxLength
+                });
+                drawingRect.left -= titleLength + mChannelLayoutPadding;
+                CanvasUtils.writeText(
+                    canvas,
                     EPGUtils.toTimeFrameString(nextEvent.getStart(), nextEvent.getEnd(), locale),
                     drawingRect.left,
-                    drawingRect.top
+                    drawingRect.top,
+                    { ...nextEventTextOptions, fillStyle: 'rgb(65, 182, 230)' }
                 );
             }
 

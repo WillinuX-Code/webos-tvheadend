@@ -4,6 +4,9 @@ import upcomintRecordingMock from './recordings.upcoming.json';
 import recordingsMock from './recordings.json';
 import channelTagsMock from './channelTags.json';
 import channelM3UMock from './channels.m3u.json';
+interface EpgSuccessResponse<TResult> extends WebOSTV.OnCompleteSuccessResponse {
+    result: TResult;
+}
 interface ProxySuccessResponse<TResult> extends WebOSTV.OnCompleteSuccessResponse {
     result: TResult;
     statusCode: number;
@@ -140,6 +143,14 @@ export default class MockServiceAdapter {
             } as ProxyErrorResponse;
         }
         console.log('lsa:%s end');
+    }
+
+    async writeEpgCache(data: any): Promise<WebOSTV.OnCompleteSuccessResponse> {
+        return { returnValue: true };
+    }
+
+    async readEpgCache(): Promise<EpgSuccessResponse<any>> {
+        return { returnValue: true, result: {} };
     }
 
     toast(message: string) {

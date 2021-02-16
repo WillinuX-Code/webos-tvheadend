@@ -196,6 +196,7 @@ const ChannelInfo = (props: { unmount: () => void }) => {
                 textBaseline: 'alphabetic',
                 fontSize: mChannelInfoTitleSize - 18
             };
+
             // needs to be set for measurement
             if (nextEvent !== undefined) {
                 canvas.font = mChannelInfoTitleSize - 18 + 'px Moonstone';
@@ -220,9 +221,10 @@ const ChannelInfo = (props: { unmount: () => void }) => {
             // draw color keys description
             canvas.font = mChannelInfoKeyDescSize + 'px Moonstone';
             canvas.textAlign = 'left';
+            
             // red
             drawingRect.left = left;
-            canvas.fillStyle = 'red';
+            canvas.fillStyle = '#EF3343';
             canvas.fillRect(
                 drawingRect.left,
                 drawingRect.top - mChannelInfoKeyDescSize / 2,
@@ -237,7 +239,7 @@ const ChannelInfo = (props: { unmount: () => void }) => {
 
             // green
             drawingRect.left += recMetrics.width + mChannelLayoutPadding + mChannelInfoKeyPadding;
-            canvas.fillStyle = 'green';
+            canvas.fillStyle = '#46BB3E';
             canvas.fillRect(
                 drawingRect.left,
                 drawingRect.top - mChannelInfoKeyDescSize / 2,
@@ -252,7 +254,7 @@ const ChannelInfo = (props: { unmount: () => void }) => {
 
             // yellow
             drawingRect.left += menuMetrics.width + mChannelLayoutPadding + mChannelInfoKeyPadding;
-            canvas.fillStyle = 'yellow';
+            canvas.fillStyle = '#FBC821';
             canvas.fillRect(
                 drawingRect.left,
                 drawingRect.top - mChannelInfoKeyDescSize / 2,
@@ -267,7 +269,7 @@ const ChannelInfo = (props: { unmount: () => void }) => {
 
             // blue
             drawingRect.left += audioMetrics.width + mChannelLayoutPadding + mChannelInfoKeyPadding;
-            canvas.fillStyle = 'blue';
+            canvas.fillStyle = '#4065B8';
             canvas.fillRect(
                 drawingRect.left,
                 drawingRect.top - mChannelInfoKeyDescSize / 2,

@@ -219,68 +219,45 @@ const ChannelInfo = (props: { unmount: () => void }) => {
             }
 
             // draw color keys description
+            drawingRect.top -= mChannelInfoKeyDescSize / 2;
             canvas.font = mChannelInfoKeyDescSize + 'px Moonstone';
             canvas.textAlign = 'left';
-            
+
             // red
             drawingRect.left = left;
             canvas.fillStyle = '#EF3343';
-            canvas.fillRect(
-                drawingRect.left,
-                drawingRect.top - mChannelInfoKeyDescSize / 2,
-                mChannelInfoKeyRectWidth,
-                10
-            );
+            canvas.fillRect(drawingRect.left, drawingRect.top, mChannelInfoKeyRectWidth,10);
 
             drawingRect.left += mChannelInfoKeyRectWidth + mChannelLayoutPadding;
-            canvas.fillStyle = mChannelLayoutTextColor;
             const recMetrics = canvas.measureText('Rec');
-            canvas.fillText('Rec', drawingRect.left, drawingRect.top);
+            CanvasUtils.writeText(canvas, 'Rec', drawingRect.left, drawingRect.top + 5);
 
             // green
             drawingRect.left += recMetrics.width + mChannelLayoutPadding + mChannelInfoKeyPadding;
             canvas.fillStyle = '#46BB3E';
-            canvas.fillRect(
-                drawingRect.left,
-                drawingRect.top - mChannelInfoKeyDescSize / 2,
-                mChannelInfoKeyRectWidth,
-                10
-            );
+            canvas.fillRect(drawingRect.left, drawingRect.top, mChannelInfoKeyRectWidth, 10);
 
             drawingRect.left += mChannelInfoKeyRectWidth + mChannelLayoutPadding;
-            canvas.fillStyle = mChannelLayoutTextColor;
             const menuMetrics = canvas.measureText('Menu');
-            canvas.fillText('Menu', drawingRect.left, drawingRect.top);
+            CanvasUtils.writeText(canvas, 'Menu', drawingRect.left, drawingRect.top + 5);
 
             // yellow
             drawingRect.left += menuMetrics.width + mChannelLayoutPadding + mChannelInfoKeyPadding;
             canvas.fillStyle = '#FBC821';
-            canvas.fillRect(
-                drawingRect.left,
-                drawingRect.top - mChannelInfoKeyDescSize / 2,
-                mChannelInfoKeyRectWidth,
-                10
-            );
+            canvas.fillRect(drawingRect.left, drawingRect.top, mChannelInfoKeyRectWidth, 10);
 
             drawingRect.left += mChannelInfoKeyRectWidth + mChannelLayoutPadding;
-            canvas.fillStyle = mChannelLayoutTextColor;
             const audioMetrics = canvas.measureText('Audio');
-            canvas.fillText('Audio', drawingRect.left, drawingRect.top);
+            CanvasUtils.writeText(canvas, 'Audio', drawingRect.left, drawingRect.top + 5);
 
             // blue
             drawingRect.left += audioMetrics.width + mChannelLayoutPadding + mChannelInfoKeyPadding;
             canvas.fillStyle = '#4065B8';
-            canvas.fillRect(
-                drawingRect.left,
-                drawingRect.top - mChannelInfoKeyDescSize / 2,
-                mChannelInfoKeyRectWidth,
-                10
-            );
+            canvas.fillRect(drawingRect.left, drawingRect.top, mChannelInfoKeyRectWidth, 10);
 
             drawingRect.left += mChannelInfoKeyRectWidth + mChannelLayoutPadding;
-            canvas.fillStyle = mChannelLayoutTextColor;
             const epgMetrics = canvas.measureText('EPG');
-            canvas.fillText('EPG', drawingRect.left, drawingRect.top);
+            CanvasUtils.writeText(canvas, 'EPG', drawingRect.left, drawingRect.top + 5);
 
             // draw upcoming progress
             const channelEventProgressRect = new Rect(0, 0, 6, getWidth());

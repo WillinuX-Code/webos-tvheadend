@@ -3,8 +3,6 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import ChannelSettings from './ChannelSettings';
 import AppContext, { AppVisibilityState } from '../AppContext';
 import '../styles/app.css';
-import Spinner from '@enact/moonstone/Spinner';
-import { Panel } from '@enact/moonstone/Panels';
 import { AppViewState } from '../App';
 import RecordingList from './RecordingList';
 import EPGChannel from '../models/EPGChannel';
@@ -33,8 +31,8 @@ const Player = () => {
     const textTracksRef = useRef<TextTrackList>();
     const recordings = useRef<EPGChannel[]>([]);
 
-    const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-    const [state, setState] = useState<State>(State.RECORDINGS_LIST);
+    //const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+    const [state, setState] = useState<State>(State.PLAYER);
 
     const focus = () => tvWrapper.current?.focus();
 
@@ -177,7 +175,7 @@ const Player = () => {
         if (!videoElement) return;
 
         resetPlayer(videoElement);
-        setIsVideoPlaying(false);
+        //setIsVideoPlaying(false);
 
         //const options = {
         //    mediaTransportType: 'URI'
@@ -199,7 +197,7 @@ const Player = () => {
         // Auto-play video with some (unused) error handling
         videoElement
             .play()
-            .then(() => setIsVideoPlaying(true))
+            .then()
             .catch((error) => console.log('channel switched before it could be played', error));
     };
 
@@ -215,7 +213,10 @@ const Player = () => {
     };
 
     useEffect(() => {
-        tvhDataService?.retrieveRecordings(persistentAuthToken).then((result) => (recordings.current = result));
+        tvhDataService?.retrieveRecordings(persistentAuthToken).then((result) => {
+            recordings.current = result;
+            setState(State.RECORDINGS_LIST);
+        });
 
         focus();
 
@@ -223,6 +224,9 @@ const Player = () => {
             const videoElement = getMediaElement();
             if (!videoElement) return;
             resetPlayer(videoElement);
+
+            // reset current recording position
+            setCurrentRecordingPosition(-1);
         };
     }, []);
 
@@ -289,10 +293,7 @@ const Player = () => {
             onKeyDown={handleKeyPress}
             onWheel={handleScrollWheel}
             onClick={handleClick}
-            className={isVideoPlaying ? 'tv playing' : 'tv loading'}
         >
-            {!isVideoPlaying && <Spinner centered component={Panel}></Spinner>}
-
             {state === State.RECORDINGS_SETTINGS && (
                 <ChannelSettings
                     channelName={getCurrentChannel()?.getName() || ''}

@@ -6,6 +6,7 @@ import '../styles/app.css';
 import { AppViewState } from '../App';
 import RecordingList from './RecordingList';
 import EPGChannel from '../models/EPGChannel';
+import EPGEvent from '../models/EPGEvent';
 
 export enum State {
     PLAYER = 'player',
@@ -29,7 +30,7 @@ const Player = () => {
     const video = useRef<HTMLVideoElement>(null);
     const audioTracksRef = useRef<AudioTrackList>();
     const textTracksRef = useRef<TextTrackList>();
-    const recordings = useRef<EPGChannel[]>([]);
+    const [recordings, setRecordings] = useState<EPGChannel[]>([]);
 
     //const [isVideoPlaying, setIsVideoPlaying] = useState(false);
     const [state, setState] = useState<State>(State.PLAYER);
@@ -38,7 +39,7 @@ const Player = () => {
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
         // in case we are in menu state we don't handle any keypress
-        if (menuState) {
+        if (menuState || state == State.RECORDINGS_LIST) {
             return;
         }
         const keyCode = event.keyCode;
@@ -59,7 +60,7 @@ const Player = () => {
             case 33: // programm up
                 event.stopPropagation();
                 // channel up
-                if (currentRecordingPosition === recordings.current.length - 1) {
+                if (currentRecordingPosition === recordings.length - 1) {
                     return;
                 }
                 changeChannelPosition(currentRecordingPosition + 1);
@@ -90,7 +91,7 @@ const Player = () => {
                 setState(State.PLAYER);
                 break;
             default:
-                console.log('TV-keyPressed:', keyCode);
+                console.log('Player-keyPressed:', keyCode);
         }
     };
 
@@ -115,6 +116,26 @@ const Player = () => {
         handleChannelInfoSwitch();
     };
 
+    const deleteRecording = (event: EPGEvent, callback: () => void) => {
+        if (!event) {
+            return;
+        }
+        // if delete event is current play event stop player first
+        if (event === getCurrentChannel()?.getEvents()[0]) {
+            const video = getMediaElement();
+            video && resetPlayer(video);
+            setCurrentRecordingPosition(-1);
+        }
+
+        tvhDataService?.deleteRec(
+            event,
+            (newrecordings) => {
+                setRecordings(newrecordings);
+                callback();
+            },
+            persistentAuthToken
+        );
+    };
     const getMediaElement = () => video.current;
 
     const changeChannelPosition = (newChannelPosition: number) => {
@@ -203,7 +224,7 @@ const Player = () => {
 
     const getWidth = () => window.innerWidth;
     const getHeight = () => window.innerHeight;
-    const getCurrentChannel = () => recordings.current[currentRecordingPosition];
+    const getCurrentChannel = () => recordings[currentRecordingPosition];
 
     const updateStreamSource = (streamUrl: URL) => {
         // show the channel info, if the channel was changed
@@ -214,7 +235,7 @@ const Player = () => {
 
     useEffect(() => {
         tvhDataService?.retrieveRecordings(persistentAuthToken).then((result) => {
-            recordings.current = result;
+            setRecordings(result);
             setState(State.RECORDINGS_LIST);
         });
 
@@ -232,7 +253,7 @@ const Player = () => {
 
     useEffect(() => {
         // change channel in case we have channels retrieved and channel position changed
-        if (recordings.current.length > 0) {
+        if (recordings.length > 0) {
             const currentChannel = getCurrentChannel();
             if (currentChannel && currentChannel.getChannelID() !== currentRecordingPosition) {
                 updateStreamSource(currentChannel.getStreamUrl());
@@ -304,7 +325,14 @@ const Player = () => {
             )}
 
             {state === State.RECORDINGS_LIST && (
-                <RecordingList recordings={recordings.current} unmount={() => setState(State.PLAYER)} />
+                <RecordingList
+                    deleteRecording={(event, callback) => deleteRecording(event, callback)}
+                    recordings={recordings}
+                    unmount={() => {
+                        console.log('unmounting reclist');
+                        setState(State.PLAYER);
+                    }}
+                />
             )}
 
             <video

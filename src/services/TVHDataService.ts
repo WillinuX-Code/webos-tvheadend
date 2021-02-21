@@ -82,6 +82,7 @@ export default class TVHDataService {
     static API_DVR_CANCEL = 'api/dvr/entry/cancel?uuid=';
     static API_DVR_UPCOMING = 'api/dvr/entry/grid_upcoming?duplicates=0';
     static API_DVR_RECORDINGS = 'api/dvr/entry/grid_finished?sort=disp_title';
+    static API_DVR_DELETE = 'api/dvr/entry/remove?uuid=';
     static M3U_PLAYLIST = 'playlist/%schannels';
 
     private serviceAdapter = new LunaServiceAdapter();
@@ -178,6 +179,25 @@ export default class TVHDataService {
             });
     }
 
+    deleteRec(event: EPGEvent, callback: EPGCallback, authToken?: string) {
+        // delete rec by event
+        this.serviceAdapter
+            .call({
+                url: this.url + TVHDataService.API_DVR_DELETE + event.getId(),
+                user: this.user,
+                password: this.password
+            })
+            .then(() => {
+                console.log('deleted record: %s', event.getTitle());
+                // toast information
+                this.showToastMessage('Deleted DVR entry: ' + event.getTitle());
+                // retrieve recordings
+                this.retrieveRecordings(authToken).then((recordings) => callback(recordings));
+            })
+            .catch((error) => {
+                console.log('Failed to delete entry by uuid: ', JSON.stringify(error));
+            });
+    }
     retrieveUpcomingRecordings(callback: DVRCallback) {
         // now create rec by event
         this.serviceAdapter

@@ -6,13 +6,15 @@ import EPGChannel from '../models/EPGChannel';
 import ChannelListDetails from './ChannelListDetails';
 import EPGEvent from '../models/EPGEvent';
 import '../styles/app.css';
+import DialogPopup from './DialogPopup';
 
 const VERTICAL_SCROLL_TOP_PADDING_ITEM = 5;
 const IS_DEBUG = false;
 
 enum State {
     NORMAL = 'normal',
-    DETAILS = 'details'
+    DETAILS = 'details',
+    DELETE_DIALOG = 'deleteDialog'
 }
 
 interface DetailsState {
@@ -20,7 +22,11 @@ interface DetailsState {
     focusedEvent?: EPGEvent;
 }
 
-const RecordingList = (props: { unmount: () => void; recordings: EPGChannel[] }) => {
+const RecordingList = (props: {
+    deleteRecording: (event: EPGEvent, callback: () => void) => void;
+    unmount: () => void;
+    recordings: EPGChannel[];
+}) => {
     const { imageCache, currentRecordingPosition, setCurrentRecordingPosition } = useContext(AppContext);
 
     const canvas = useRef<HTMLCanvasElement>(null);
@@ -41,7 +47,7 @@ const RecordingList = (props: { unmount: () => void; recordings: EPGChannel[] })
     const mChannelLayoutBackgroundFocus = 'rgba(65,182,230,1)';
 
     const [state, setState] = useState<State>(State.DETAILS);
-    const [, setDetailsState] = useState<DetailsState>();
+    const [detailsState, setDetailsState] = useState<DetailsState>();
 
     const getTopFrom = (position: number) => {
         const y = position * mChannelLayoutHeight; //+ this.mChannelLayoutMargin;
@@ -345,6 +351,10 @@ const RecordingList = (props: { unmount: () => void; recordings: EPGChannel[] })
     const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
         const keyCode = event.keyCode;
 
+        if (state === State.DELETE_DIALOG) {
+            return event;
+        }
+
         switch (keyCode) {
             case 33: // programm up
             case 38: // arrow up
@@ -367,26 +377,16 @@ const RecordingList = (props: { unmount: () => void; recordings: EPGChannel[] })
                 setCurrentRecordingPosition(recordPosition.current);
                 props.unmount();
                 break;
-            case 39: // right arrow
+            case 82: // keyboard 'r'
+            case 403: {
+                // red button to trigger or cancel recording
                 event.stopPropagation();
-                if (state === State.DETAILS) {
-                    // switch to next event details
-                    setDetailsData();
-                } else {
-                    // show channelListDetails
-                    setState(State.DETAILS);
+                if (detailsState?.focusedEvent) {
+                    // show dialog
+                    setState(State.DELETE_DIALOG);
                 }
                 break;
-            case 37: // left arrow
-                event.stopPropagation();
-                if (state === State.DETAILS) {
-                    // switch to previous event details
-                    setDetailsData();
-                } else {
-                    // hide channelListDetails
-                    setState(State.NORMAL);
-                }
-                break;
+            }
             default:
                 console.log('RecordingList-keyPressed:', keyCode);
         }
@@ -395,6 +395,17 @@ const RecordingList = (props: { unmount: () => void; recordings: EPGChannel[] })
         if (!event.isPropagationStopped) return event;
     };
 
+    const deleteRecording = (event: EPGEvent | undefined) => {
+        if (!event) {
+            return;
+        }
+        props.deleteRecording(event, () => {
+            // callback: update canvas after recordings have been reloaded
+            updateCanvas();
+        });
+        setState(State.DETAILS);
+        focus();
+    };
     const setDetailsData = () => {
         const channel = props.recordings[recordPosition.current];
         // get current event
@@ -461,12 +472,11 @@ const RecordingList = (props: { unmount: () => void; recordings: EPGChannel[] })
         scrollToChannelPosition(channelPos, true);
     };
 
-    const getFocusedChannel = (): EPGChannel => {
-        return props.recordings[recordPosition.current];
-    };
-
     useEffect(() => {
         recalculateAndRedraw(false);
+        if (currentRecordingPosition > -1) {
+            setChannelPosition(currentRecordingPosition);
+        }
         focus();
 
         return () => {
@@ -487,16 +497,28 @@ const RecordingList = (props: { unmount: () => void; recordings: EPGChannel[] })
         >
             <canvas ref={canvas} width={getWidth()} height={getHeight()} style={{ display: 'block' }} />
 
-            {state === State.DETAILS && getFocusedChannel() && (
-                <ChannelListDetails
-                    isRecording={() => {
-                        return false;
+            <ChannelListDetails
+                isRecording={() => {
+                    return false;
+                }}
+                epgChannel={detailsState?.focusedChannel}
+                currentEvent={detailsState?.focusedEvent}
+                nextEvents={[]}
+                nextSameEvents={[]}
+            />
+
+            {state === State.DELETE_DIALOG && detailsState?.focusedEvent && (
+                <DialogPopup
+                    title={detailsState.focusedEvent.getTitle()}
+                    subtitle={detailsState.focusedEvent.getTitle() + ' - ' + detailsState.focusedEvent.getSubTitle()}
+                    confirmText="Delete"
+                    abortText="Abort"
+                    confirmAction={() => deleteRecording(detailsState.focusedEvent)}
+                    abortAcion={() => {
+                        setState(State.DETAILS);
+                        focus();
                     }}
-                    epgChannel={getFocusedChannel()}
-                    currentEvent={getFocusedChannel().getEvents()[0]}
-                    nextEvents={[]}
-                    nextSameEvents={[]}
-                />
+                ></DialogPopup>
             )}
         </div>
     );

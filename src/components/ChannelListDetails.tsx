@@ -57,7 +57,7 @@ const ChannelListDetails = (props: {
         >
             <div>
                 <div className="timeframe">
-                    {formatTime(props.currentEvent, true) + ' ' + formatTime(props.currentEvent)}
+                    {props.currentEvent && formatTime(props.currentEvent, true) + ' ' + formatTime(props.currentEvent)}
                 </div>
                 <div className="now">{EPGUtils.toTimeString(EPGUtils.getNow(), locale)}</div>
             </div>

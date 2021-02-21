@@ -381,6 +381,7 @@ const ChannelList = (props: {
                 setCurrentChannelPosition(channelPosition.current);
                 props.unmount();
                 break;
+            case 82: // keyboard 'r'
             case 403: {
                 // red button trigger recording
                 event.stopPropagation();

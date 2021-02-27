@@ -171,7 +171,7 @@ const ChannelList = (props: {
         drawingRect.top = getTopFrom(position);
         drawingRect.right = mChannelLayoutWidth;
         drawingRect.bottom = drawingRect.top + mChannelLayoutHeight;
-        drawDebugRect(canvas, drawingRect);
+        IS_DEBUG && CanvasUtils.drawDebugRect(canvas, drawingRect);
 
         // highlight selected channel
         if (isSelectedChannel) {
@@ -267,16 +267,11 @@ const ChannelList = (props: {
                 channelImageRect.width,
                 channelImageRect.height
             );
-            drawDebugRect(canvas, channelImageRect);
+            IS_DEBUG && CanvasUtils.drawDebugRect(canvas, channelImageRect);
         }
     };
 
-    const drawDebugRect = (canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
-        if (IS_DEBUG) {
-            canvas.strokeStyle = '#FF0000';
-            canvas.strokeRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
-        }
-    };
+
 
     const getDrawingRectForChannelImage = (position: number, image: HTMLImageElement) => {
         const drawingRect = new Rect();

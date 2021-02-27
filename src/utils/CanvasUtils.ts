@@ -1,3 +1,5 @@
+import Rect from "../models/Rect";
+
 export interface WriteTextOptions {
     fontSize?: number;
     fillStyle?: string | CanvasGradient | CanvasPattern;
@@ -137,5 +139,10 @@ export default class CanvasUtils {
         canvas.fillStyle = oldFillStyle;
         canvas.textAlign = oldTextAlign;
         canvas.textBaseline = oldTextBaseline;
+    }
+
+    static drawDebugRect(canvas: CanvasRenderingContext2D, drawingRect: Rect) {
+        canvas.strokeStyle = '#FF0000';
+        canvas.strokeRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
     }
 }

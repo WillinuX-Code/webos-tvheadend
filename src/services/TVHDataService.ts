@@ -4,6 +4,7 @@ import EPGChannel from '../models/EPGChannel';
 import EPGEvent from '../models/EPGEvent';
 import M3UParser from '../utils/M3UParser';
 import { restoreEpgDataFromCache, ChannelEvents } from '../utils/EPGCache';
+import EPGChannelRecording, { EPGChannelRecordingKind } from '../models/EPGChannelRecording';
 
 export interface TVHDataServiceParms {
     tvhUrl: string;
@@ -33,9 +34,13 @@ interface TVHEventEntry {
     channelUuid: string;
 }
 
-interface TVHRecordings {
-    entries: TVHRecordingEntry[];
+interface TVHRecordings<T extends EPGChannelRecordingKind> {
+    entries: TVHRecordingEntryEx<T>[];
     total: number;
+}
+
+interface TVHRecordingEntryEx<T extends EPGChannelRecordingKind> extends TVHRecordingEntry {
+    kind: T;
 }
 
 interface TVHRecordingEntry {
@@ -69,8 +74,8 @@ interface DVRCallback {
     (recordings: EPGEvent[]): void;
 }
 
-interface EPGCallback {
-    (channels: EPGChannel[]): void;
+interface EPGCallback<T extends EPGChannel | EPGChannelRecording = EPGChannel> {
+    (channels: T[]): void;
 }
 
 export default class TVHDataService {
@@ -81,6 +86,7 @@ export default class TVHDataService {
     static API_DVR_CREATE_BY_EVENT = 'api/dvr/entry/create_by_event?';
     static API_DVR_CANCEL = 'api/dvr/entry/cancel?uuid=';
     static API_DVR_UPCOMING = 'api/dvr/entry/grid_upcoming?duplicates=0';
+    static API_DVR_FAILED = 'api/dvr/entry/grid_failed?duplicates=0';
     static API_DVR_RECORDINGS = 'api/dvr/entry/grid_finished?sort=disp_title';
     static API_DVR_DELETE = 'api/dvr/entry/remove?uuid=';
     static M3U_PLAYLIST = 'playlist/%schannels';
@@ -120,12 +126,11 @@ export default class TVHDataService {
      */
     async retrieveServerInfo() {
         // now create rec by event
-        const success = await this.serviceAdapter.call({
+        return await this.serviceAdapter.call<TVHServerInfo>({
             url: this.url + TVHDataService.API_SERVER_INFO,
             user: this.user,
             password: this.password
         });
-        return JSON.parse(success.result) as TVHServerInfo;
     }
 
     createRec(event: EPGEvent, callback: DVRCallback) {
@@ -157,7 +162,7 @@ export default class TVHDataService {
             });
     }
 
-    cancelRec(event: EPGEvent, callback: DVRCallback) {
+    cancelRec(event: EPGEvent, callback: EPGCallback<EPGChannelRecording>, authToken?: string) {
         // now create rec by event
         this.serviceAdapter
             .call({
@@ -172,14 +177,14 @@ export default class TVHDataService {
                 this.showToastMessage('Cancelled DVR entry: ' + event.getTitle());
 
                 // update upcoming recordings
-                this.retrieveUpcomingRecordings(callback);
+                this.retrieveRecordings(authToken).then((recordings) => callback(recordings));
             })
             .catch((error) => {
                 console.log('Failed to cancel entry: ', JSON.stringify(error));
             });
     }
 
-    deleteRec(event: EPGEvent, callback: EPGCallback, authToken?: string) {
+    deleteRec(event: EPGEvent, callback: EPGCallback<EPGChannelRecording>, authToken?: string) {
         // delete rec by event
         this.serviceAdapter
             .call({
@@ -189,8 +194,10 @@ export default class TVHDataService {
             })
             .then(() => {
                 console.log('deleted record: %s', event.getTitle());
+
                 // toast information
                 this.showToastMessage('Deleted DVR entry: ' + event.getTitle());
+
                 // retrieve recordings
                 this.retrieveRecordings(authToken).then((recordings) => callback(recordings));
             })
@@ -198,45 +205,74 @@ export default class TVHDataService {
                 console.log('Failed to delete entry by uuid: ', JSON.stringify(error));
             });
     }
+
     retrieveUpcomingRecordings(callback: DVRCallback) {
         // now create rec by event
-        this.serviceAdapter
-            .call({
-                url: this.url + TVHDataService.API_DVR_UPCOMING,
+        this.retrieveTVHRecordings('REC_UPCOMING').then((response) => {
+            // update upcoming recordings
+            const recordings = [] as EPGEvent[];
+            response.entries.forEach((recordingEntry) => {
+                recordings.push(this.toEpgEventRec(recordingEntry));
+            });
+            callback(recordings);
+        });
+    }
+
+    private retrieveTVHRecordings(recordingKind: EPGChannelRecordingKind) {
+        let URL;
+        switch (recordingKind) {
+            case 'REC_FAILED':
+                URL = this.url + TVHDataService.API_DVR_FAILED;
+                break;
+            case 'REC_FINISHED':
+                URL = this.url + TVHDataService.API_DVR_RECORDINGS;
+                break;
+            case 'REC_UPCOMING':
+                URL = this.url + TVHDataService.API_DVR_UPCOMING;
+                break;
+        }
+
+        // now create rec by event
+        return this.serviceAdapter
+            .call<TVHRecordings<typeof recordingKind>>({
+                url: URL,
                 user: this.user,
                 password: this.password
             })
-            .then((success) => {
-                const response = JSON.parse(success.result) as TVHRecordings;
-                console.log('retrieved upcoming records: %s', response.total);
-                const recordings: EPGEvent[] = [];
-
-                // update upcoming recordings
-                response.entries.forEach((recordingEntry) => {
-                    recordings.push(this.toEpgEventRec(recordingEntry));
-                });
-                callback(recordings);
+            .then((response) => {
+                console.log('retrieved ' + recordingKind + ' recordings: %s', response.total);
+                response.entries.map((entry) => (entry.kind = recordingKind));
+                return response;
             })
             .catch((error) => {
-                console.log('Failed to retrieve recordings: ', JSON.stringify(error));
+                console.log('Failed to retrieve ' + recordingKind + ' recordings: ', JSON.stringify(error));
+                return {} as TVHRecordings<typeof recordingKind>;
             });
     }
 
-    async retrieveRecordings(authToken?: string): Promise<EPGChannel[]> {
-        // now create rec by event
-        const success = await this.serviceAdapter.call({
-            url: this.url + TVHDataService.API_DVR_RECORDINGS,
-            user: this.user,
-            password: this.password
+    async retrieveRecordings(authToken?: string): Promise<EPGChannelRecording[]> {
+        const finishedTVHRecordings = await this.retrieveTVHRecordings('REC_FINISHED');
+        const failedTVHRecordings = await this.retrieveTVHRecordings('REC_FAILED');
+        const upcomingTVHRecordings = await this.retrieveTVHRecordings('REC_UPCOMING');
+
+        const recordings: EPGChannelRecording[] = [];
+        const tvhRecordings = [
+            ...finishedTVHRecordings.entries,
+            ...failedTVHRecordings.entries,
+            ...upcomingTVHRecordings.entries
+        ].sort((a, b) => {
+            //if (a.channelname < b.channelname) return -1;
+            //if (a.channelname > b.channelname) return 1;
+            if (a.start < b.start) return -1;
+            if (a.start > b.start) return 1;
+            return 0;
         });
 
-        const response = JSON.parse(success.result) as TVHRecordings;
-        console.log('retrieved recordings: %s', response.entries.length);
-        const recordings: EPGChannel[] = [];
-
         // build recordings
-        response.entries.forEach((recordingEntry) => {
-            recordings.push(this.toEpgChannelRec(recordingEntry, authToken, recordings.length + 1));
+        tvhRecordings.forEach((recordingEntry) => {
+            recordings.push(
+                this.toEpgChannelRecording(recordingEntry, authToken, recordings.length + 1, recordingEntry.kind)
+            );
         });
 
         return recordings;
@@ -274,32 +310,37 @@ export default class TVHDataService {
      * @param authToken optional auth token
      * @param id number of fake channel
      */
-    toEpgChannelRec(recordingEntry: TVHRecordingEntry, authToken: string | undefined, id: number): EPGChannel {
+    toEpgChannelRecording(
+        recordingEntry: TVHRecordingEntry,
+        authToken: string | undefined,
+        id: number,
+        kind: EPGChannelRecordingKind
+    ): EPGChannelRecording {
         const event = this.toEpgEventRec(recordingEntry);
         const authParam = authToken ? '?auth=' + authToken : '';
-        const channel = new EPGChannel(
+        const channelRecording = new EPGChannelRecording(
             recordingEntry.channel_icon && recordingEntry.channel_icon.length > 0
                 ? new URL(this.url + recordingEntry.channel_icon + authParam)
                 : undefined,
             recordingEntry.channelname,
             id, // use our own numbers item.channelNumber
             recordingEntry.channel,
-            new URL(this.url + recordingEntry.url + authParam)
+            new URL(this.url + recordingEntry.url + authParam),
+            kind
         );
-        channel.addEvent(event);
-        return channel;
+        channelRecording.addEvent(event);
+        return channelRecording;
     }
 
     async retrieveDVRConfig() {
         // retrieve the default dvr config
         return this.serviceAdapter
-            .call({
+            .call<TVHRecordingsConfig>({
                 url: this.url + TVHDataService.API_DVR_CONFIG,
                 user: this.user,
                 password: this.password
             })
-            .then((success) => {
-                const response = JSON.parse(success.result) as TVHRecordingsConfig;
+            .then((response) => {
                 console.log('dvr configs received: %d', response.total);
 
                 // try first enabled
@@ -344,14 +385,14 @@ export default class TVHDataService {
                 playlistPath = TVHDataService.M3U_PLAYLIST.replace('%s', '');
             }
 
-            const success = await this.serviceAdapter.call({
+            const result = await this.serviceAdapter.call<string>({
                 url: this.url + playlistPath,
                 user: this.user,
                 password: this.password
             });
 
-            if (success.result) {
-                const parserResult = M3UParser.parse(success.result);
+            if (result) {
+                const parserResult = M3UParser.parse(result);
                 parserResult.items.forEach((item) => {
                     const channel = new EPGChannel(
                         item.logoUrl && item.logoUrl.length > 0 ? new URL(item.logoUrl) : undefined,
@@ -390,13 +431,12 @@ export default class TVHDataService {
         let totalCount = 0;
 
         return this.serviceAdapter
-            .call({
+            .call<TVHEvents>({
                 url: this.url + TVHDataService.API_EPG + start,
                 user: this.user,
                 password: this.password
             })
-            .then((success) => {
-                const response = JSON.parse(success.result) as TVHEvents;
+            .then((response) => {
                 console.log('epg events received: %d of %d', start + response.entries.length, response.totalCount);
                 if (response.entries.length > 0) {
                     totalCount = response.totalCount;
@@ -436,7 +476,7 @@ export default class TVHDataService {
             channelEvents: ChannelEvents;
         };
         this.serviceAdapter
-            .readEpgCache()
+            .readEpgCache<ChannelEvents>()
             .then((epgCacheResult) => {
                 //console.log('Read epg cache was successful:', epgCacheResult.result);
                 // restore cached EPG data

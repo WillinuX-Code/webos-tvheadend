@@ -5,8 +5,8 @@ import AppContext, { AppVisibilityState } from '../AppContext';
 import '../styles/app.css';
 import { AppViewState } from '../App';
 import RecordingList from './RecordingList';
-import EPGChannel from '../models/EPGChannel';
 import EPGEvent from '../models/EPGEvent';
+import EPGChannelRecording from '../models/EPGChannelRecording';
 
 export enum State {
     PLAYER = 'player',
@@ -23,14 +23,15 @@ const Player = () => {
         menuState,
         appViewState,
         appVisibilityState,
-        tvhDataService
+        tvhDataService,
+        epgData
     } = useContext(AppContext);
 
     const tvWrapper = useRef<HTMLDivElement>(null);
     const video = useRef<HTMLVideoElement>(null);
     const audioTracksRef = useRef<AudioTrackList>();
     const textTracksRef = useRef<TextTrackList>();
-    const [recordings, setRecordings] = useState<EPGChannel[]>([]);
+    const [recordings, setRecordings] = useState<EPGChannelRecording[]>([]);
 
     //const [isVideoPlaying, setIsVideoPlaying] = useState(false);
     const [state, setState] = useState<State>(State.PLAYER);
@@ -116,7 +117,7 @@ const Player = () => {
         handleChannelInfoSwitch();
     };
 
-    const deleteRecording = (event: EPGEvent, callback: () => void) => {
+    const deleteRecording = (event: EPGEvent) => {
         if (!event) {
             return;
         }
@@ -129,13 +130,30 @@ const Player = () => {
 
         tvhDataService?.deleteRec(
             event,
+            (newrecordings) => setRecordings(newrecordings),
+            persistentAuthToken
+        );
+    };
+
+    const cancelRecording = (event: EPGEvent) => {
+        console.log(event);
+        
+        if (!event) {
+            return;
+        }
+
+        tvhDataService?.cancelRec(
+            event,
             (newrecordings) => {
                 setRecordings(newrecordings);
-                callback();
+                epgData.updateRecordings(
+                    newrecordings.filter((rec) => rec.getKind() === 'REC_UPCOMING').map((rec) => rec.getEvents()[0])
+                );
             },
             persistentAuthToken
         );
     };
+
     const getMediaElement = () => video.current;
 
     const changeChannelPosition = (newChannelPosition: number) => {
@@ -326,7 +344,8 @@ const Player = () => {
 
             {state === State.RECORDINGS_LIST && (
                 <RecordingList
-                    deleteRecording={(event, callback) => deleteRecording(event, callback)}
+                    deleteRecording={(event) => deleteRecording(event)}
+                    cancelRecording={(event) => cancelRecording(event)}
                     recordings={recordings}
                     unmount={() => {
                         console.log('unmounting reclist');

@@ -173,7 +173,7 @@ body {
 
 .menu {
     background-color: rgba(5, 16, 24, 0.9);
-    -webkit-border-radius: 20px;
+    border-radius: 20px;
     position: absolute;
     padding: 10px;
     right: 0;

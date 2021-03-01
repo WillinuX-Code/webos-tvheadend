@@ -2,11 +2,12 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import Rect from '../models/Rect';
 import CanvasUtils from '../utils/CanvasUtils';
 import AppContext from '../AppContext';
-import EPGChannel from '../models/EPGChannel';
 import ChannelListDetails from './ChannelListDetails';
 import EPGEvent from '../models/EPGEvent';
 import '../styles/app.css';
 import DialogPopup from './DialogPopup';
+import EPGChannelRecording from '../models/EPGChannelRecording';
+import EPGUtils from '../utils/EPGUtils';
 
 const VERTICAL_SCROLL_TOP_PADDING_ITEM = 5;
 const IS_DEBUG = false;
@@ -14,18 +15,20 @@ const IS_DEBUG = false;
 enum State {
     NORMAL = 'normal',
     DETAILS = 'details',
-    DELETE_DIALOG = 'deleteDialog'
+    DELETE_DIALOG = 'deleteDialog',
+    CANCEL_DIALOG = 'cancelDialog'
 }
 
 interface DetailsState {
-    focusedChannel?: EPGChannel;
+    focusedChannelRecording?: EPGChannelRecording;
     focusedEvent?: EPGEvent;
 }
 
 const RecordingList = (props: {
-    deleteRecording: (event: EPGEvent, callback: () => void) => void;
+    deleteRecording: (event: EPGEvent) => void;
+    cancelRecording: (event: EPGEvent) => void;
     unmount: () => void;
-    recordings: EPGChannel[];
+    recordings: EPGChannelRecording[];
 }) => {
     const { imageCache, currentRecordingPosition, setCurrentRecordingPosition } = useContext(AppContext);
 
@@ -173,7 +176,7 @@ const RecordingList = (props: {
         drawingRect.top = getTopFrom(position);
         drawingRect.right = mChannelLayoutWidth;
         drawingRect.bottom = drawingRect.top + mChannelLayoutHeight;
-        drawDebugRect(canvas, drawingRect);
+        IS_DEBUG && CanvasUtils.drawDebugRect(canvas, drawingRect);
 
         // highlight selected channel
         if (isSelectedChannel) {
@@ -188,14 +191,35 @@ const RecordingList = (props: {
             fillStyle: mChannelLayoutTextColor,
             isBold: true
         });
+
         // channel line
         const currentEvent = channel.getEvents()[0];
         const channelIconWidth = mChannelLayoutHeight * 1.3;
         const channelNameWidth = mChannelLayoutWidth - channelIconWidth - 90;
         const leftBeforeRecMark = drawingRect.left;
 
+        let fillStyle = mChannelLayoutTextColor;
+        switch (channel.getKind()) {
+            case 'REC_FAILED':
+                fillStyle = '#EF3343';
+                break;
+            case 'REC_UPCOMING':
+                fillStyle = '#555555';
+                break;
+        }
+
         // channel event
         if (currentEvent) {
+            // recording mark
+            if (currentEvent && channel.getKind() === 'REC_UPCOMING' && currentEvent.getStart() < EPGUtils.getNow()) {
+                const radius = 10;
+                canvas.fillStyle = '#FF0000';
+                canvas.beginPath();
+                canvas.arc(drawingRect.left + 90 + radius, drawingRect.middle - radius, radius, 0, 2 * Math.PI);
+                canvas.fill();
+                drawingRect.left += 2 * radius + mChannelLayoutPadding;
+            }
+
             // channel name
             CanvasUtils.writeText(
                 canvas,
@@ -204,11 +228,12 @@ const RecordingList = (props: {
                 drawingRect.top + mChannelLayoutHeight * 0.33,
                 {
                     fontSize: mChannelLayoutTextSize,
-                    fillStyle: mChannelLayoutTextColor,
+                    fillStyle: fillStyle,
                     isBold: true,
                     maxWidth: channelNameWidth
                 }
             );
+
             drawingRect.left = leftBeforeRecMark;
             // channel event progress bar
             const channelEventProgressRect = new Rect();
@@ -258,14 +283,7 @@ const RecordingList = (props: {
                 channelImageRect.width,
                 channelImageRect.height
             );
-            drawDebugRect(canvas, channelImageRect);
-        }
-    };
-
-    const drawDebugRect = (canvas: CanvasRenderingContext2D, drawingRect: Rect) => {
-        if (IS_DEBUG) {
-            canvas.strokeStyle = '#FF0000';
-            canvas.strokeRect(drawingRect.left, drawingRect.top, drawingRect.width, drawingRect.height);
+            IS_DEBUG && CanvasUtils.drawDebugRect(canvas, channelImageRect);
         }
     };
 
@@ -351,7 +369,7 @@ const RecordingList = (props: {
     const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
         const keyCode = event.keyCode;
 
-        if (state === State.DELETE_DIALOG) {
+        if (state === State.DELETE_DIALOG || state === State.CANCEL_DIALOG) {
             return event;
         }
 
@@ -382,8 +400,13 @@ const RecordingList = (props: {
                 // red button to trigger or cancel recording
                 event.stopPropagation();
                 if (detailsState?.focusedEvent) {
-                    // show dialog
-                    setState(State.DELETE_DIALOG);
+                    if (detailsState?.focusedChannelRecording?.getKind() === 'REC_UPCOMING') {
+                        // show cancel dialog
+                        setState(State.CANCEL_DIALOG);
+                    } else {
+                        // show delete dialog
+                        setState(State.DELETE_DIALOG);
+                    }
                 }
                 break;
             }
@@ -399,13 +422,20 @@ const RecordingList = (props: {
         if (!event) {
             return;
         }
-        props.deleteRecording(event, () => {
-            // callback: update canvas after recordings have been reloaded
-            updateCanvas();
-        });
+        props.deleteRecording(event);
         setState(State.DETAILS);
         focus();
     };
+
+    const cancelRecording = (event: EPGEvent | undefined) => {
+        if (!event) {
+            return;
+        }
+        props.cancelRecording(event);
+        setState(State.DETAILS);
+        focus();
+    };
+
     const setDetailsData = () => {
         const channel = props.recordings[recordPosition.current];
         // get current event
@@ -413,7 +443,7 @@ const RecordingList = (props: {
         // trigger rerender
         setDetailsState({
             focusedEvent: currentEvent,
-            focusedChannel: channel
+            focusedChannelRecording: channel
         });
     };
 
@@ -473,6 +503,11 @@ const RecordingList = (props: {
     };
 
     useEffect(() => {
+        // callback: update canvas after recordings have been reloaded
+        updateCanvas();
+    }, [props.recordings]);
+
+    useEffect(() => {
         recalculateAndRedraw(false);
         if (currentRecordingPosition > -1) {
             setChannelPosition(currentRecordingPosition);
@@ -501,7 +536,7 @@ const RecordingList = (props: {
                 isRecording={() => {
                     return false;
                 }}
-                epgChannel={detailsState?.focusedChannel}
+                epgChannel={detailsState?.focusedChannelRecording}
                 currentEvent={detailsState?.focusedEvent}
                 nextEvents={[]}
                 nextSameEvents={[]}
@@ -514,6 +549,20 @@ const RecordingList = (props: {
                     confirmText="Delete"
                     abortText="Abort"
                     confirmAction={() => deleteRecording(detailsState.focusedEvent)}
+                    abortAcion={() => {
+                        setState(State.DETAILS);
+                        focus();
+                    }}
+                ></DialogPopup>
+            )}
+
+            {state === State.CANCEL_DIALOG && detailsState?.focusedEvent && (
+                <DialogPopup
+                    title={detailsState.focusedEvent.getTitle()}
+                    subtitle={detailsState.focusedEvent.getTitle() + ' - ' + detailsState.focusedEvent.getSubTitle()}
+                    confirmText="Cancel"
+                    abortText="Abort"
+                    confirmAction={() => cancelRecording(detailsState.focusedEvent)}
                     abortAcion={() => {
                         setState(State.DETAILS);
                         focus();

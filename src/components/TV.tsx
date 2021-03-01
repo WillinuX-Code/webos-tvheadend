@@ -165,7 +165,9 @@ const TV = () => {
             if (recEvent) {
                 // cancel recording
                 tvhDataService.cancelRec(recEvent, (recordings) => {
-                    epgData.updateRecordings(recordings);
+                    epgData.updateRecordings(
+                        recordings.filter((rec) => rec.getKind() === 'REC_UPCOMING').map((rec) => rec.getEvents()[0])
+                    );
                     callback && callback();
                 });
             } else {

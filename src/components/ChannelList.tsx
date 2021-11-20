@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Rect from '../models/Rect';
 import CanvasUtils from '../utils/CanvasUtils';
 import AppContext from '../AppContext';
@@ -271,8 +271,6 @@ const ChannelList = (props: {
         }
     };
 
-
-
     const getDrawingRectForChannelImage = (position: number, image: HTMLImageElement) => {
         const drawingRect = new Rect();
         drawingRect.right = mChannelLayoutWidth - mChannelLayoutMargin;
@@ -530,7 +528,7 @@ const ChannelList = (props: {
         };
     }, []);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (state === State.DETAILS) {
             setDetailsData();
         }

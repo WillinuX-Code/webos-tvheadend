@@ -1,7 +1,7 @@
 # webos-tvheadend
 
 ## Screenshots
-![Channel List](../screenshots/channellist.png?raw=true "Channel List")
+![Channel List](screenshots/channellist.png?raw=true "Channel List")
 
 ## Build
 Normal build without webos running

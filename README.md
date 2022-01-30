@@ -1,5 +1,8 @@
 # webos-tvheadend
 
+## Screenshots
+![Channel List](../screenshots/channellist.png?raw=true "Channel List")
+
 ## Build
 Normal build without webos running
 * TVGuides.js:getNow() needs to return 1607462851000 as mock timestamp for now

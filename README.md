@@ -1,7 +1,12 @@
 # webos-tvheadend
 
 ## Screenshots
+![Setup](screenshots/setup_verification.png?raw=true "Setup Verification")
 ![Channel List](screenshots/channellist.png?raw=true "Channel List")
+![Channel List Details](screenshots/channellist_details.png?raw=true "Channel List Details")
+![EPG](screenshots/epg.png?raw=true "EPG")
+![Infobar](screenshots/infobar.png?raw=true "Infobar")
+![Menü](screenshots/menu.png?raw=true "Menü")
 
 ## Build
 Normal build without webos running

@@ -1,10 +1,10 @@
-import LunaServiceAdapter from '../luna/LunaServiceAdapter';
-//import MockServiceAdapter from '../mock/MockServiceAdapter';
 import EPGChannel from '../models/EPGChannel';
 import EPGEvent from '../models/EPGEvent';
 import M3UParser from '../utils/M3UParser';
-import { restoreEpgDataFromCache, ChannelEvents } from '../utils/EPGCache';
 import EPGChannelRecording, { EPGChannelRecordingKind } from '../models/EPGChannelRecording';
+import EPGCacheService from './EPGCacheService';
+import WebOSService from './WebOSService';
+import Config from '../config/Config';
 
 export interface TVHDataServiceParms {
     tvhUrl: string;
@@ -91,8 +91,10 @@ export default class TVHDataService {
     static API_DVR_DELETE = 'api/dvr/entry/remove?uuid=';
     static M3U_PLAYLIST = 'playlist/%schannels';
 
-    private serviceAdapter = new LunaServiceAdapter();
-    //private serviceAdapter = new MockServiceAdapter();
+    //private serviceAdapter = new LunaServiceAdapter();
+    private httpProxyServiceAdapter = Config.httpProxyServiceAdapter;
+    private epgCacheService = new EPGCacheService();
+    private webosService = new WebOSService();
     private maxTotalEpgEntries = 10000;
     private channels: EPGChannel[] = [];
     private url?: string;
@@ -116,7 +118,7 @@ export default class TVHDataService {
      * retrieve local information from tv
      */
     async getLocaleInfo() {
-        const localeInfo = await this.serviceAdapter.getLocaleInfo();
+        const localeInfo = await this.webosService.getLocaleInfo();
         // console.log('getLocaleInfo:', localeInfo);
         return localeInfo;
     }
@@ -124,9 +126,9 @@ export default class TVHDataService {
     /**
      * retrieve tvh server info
      */
-    async retrieveServerInfo() {
+    async retrieveServerInfo(): Promise<TVHServerInfo> {
         // now create rec by event
-        return await this.serviceAdapter.call<TVHServerInfo>({
+        return await this.httpProxyServiceAdapter.call<TVHServerInfo>({
             url: this.url + TVHDataService.API_SERVER_INFO,
             user: this.user,
             password: this.password
@@ -135,7 +137,7 @@ export default class TVHDataService {
 
     createRec(event: EPGEvent, callback: DVRCallback) {
         // now create rec by event
-        return this.serviceAdapter
+        return this.httpProxyServiceAdapter
             .call({
                 url:
                     this.url +
@@ -152,7 +154,7 @@ export default class TVHDataService {
                 console.log('created record: %s', event.getTitle());
 
                 // toast information
-                this.showToastMessage('Added DVR entry: ' + event.getTitle());
+                this.webosService.showToastMessage('Added DVR entry: ' + event.getTitle());
 
                 // update upcoming recordings
                 this.retrieveUpcomingRecordings(callback);
@@ -164,7 +166,7 @@ export default class TVHDataService {
 
     cancelRec(event: EPGEvent, callback: EPGCallback<EPGChannelRecording>, authToken?: string) {
         // now create rec by event
-        this.serviceAdapter
+        this.httpProxyServiceAdapter
             .call({
                 url: this.url + TVHDataService.API_DVR_CANCEL + event.getId(),
                 user: this.user,
@@ -174,7 +176,7 @@ export default class TVHDataService {
                 console.log('cancelled record: %s', event.getTitle());
 
                 // toast information
-                this.showToastMessage('Cancelled DVR entry: ' + event.getTitle());
+                this.webosService.showToastMessage('Cancelled DVR entry: ' + event.getTitle());
 
                 // update upcoming recordings
                 this.retrieveRecordings(authToken).then((recordings) => callback(recordings));
@@ -186,7 +188,7 @@ export default class TVHDataService {
 
     deleteRec(event: EPGEvent, callback: EPGCallback<EPGChannelRecording>, authToken?: string) {
         // delete rec by event
-        this.serviceAdapter
+        this.httpProxyServiceAdapter
             .call({
                 url: this.url + TVHDataService.API_DVR_DELETE + event.getId(),
                 user: this.user,
@@ -196,7 +198,7 @@ export default class TVHDataService {
                 console.log('deleted record: %s', event.getTitle());
 
                 // toast information
-                this.showToastMessage('Deleted DVR entry: ' + event.getTitle());
+                this.webosService.showToastMessage('Deleted DVR entry: ' + event.getTitle());
 
                 // retrieve recordings
                 this.retrieveRecordings(authToken).then((recordings) => callback(recordings));
@@ -233,7 +235,7 @@ export default class TVHDataService {
         }
 
         // now create rec by event
-        return this.serviceAdapter
+        return this.httpProxyServiceAdapter
             .call<TVHRecordings<typeof recordingKind>>({
                 url: URL,
                 user: this.user,
@@ -334,7 +336,7 @@ export default class TVHDataService {
 
     async retrieveDVRConfig() {
         // retrieve the default dvr config
-        return this.serviceAdapter
+        return this.httpProxyServiceAdapter
             .call<TVHRecordingsConfig>({
                 url: this.url + TVHDataService.API_DVR_CONFIG,
                 user: this.user,
@@ -385,7 +387,7 @@ export default class TVHDataService {
                 playlistPath = TVHDataService.M3U_PLAYLIST.replace('%s', '');
             }
 
-            const result = await this.serviceAdapter.call<string>({
+            const result = await this.httpProxyServiceAdapter.call<string>({
                 url: this.url + playlistPath,
                 user: this.user,
                 password: this.password
@@ -419,7 +421,7 @@ export default class TVHDataService {
 
     /** request an url in head mode */
     retrieveTest(url: URL | string, withCredentials?: boolean) {
-        return this.serviceAdapter.call({
+        return this.httpProxyServiceAdapter.call({
             url: url.toString(),
             user: withCredentials ? this.user : '',
             password: withCredentials ? this.password : '',
@@ -430,7 +432,7 @@ export default class TVHDataService {
     retrieveTVHEPG(start: number, callback: EPGCallback) {
         let totalCount = 0;
 
-        return this.serviceAdapter
+        return this.httpProxyServiceAdapter
             .call<TVHEvents>({
                 url: this.url + TVHDataService.API_EPG + start,
                 user: this.user,
@@ -459,7 +461,7 @@ export default class TVHDataService {
                 console.log('processed all epg events');
 
                 try {
-                    this.handleEpgCache(callback);
+                    this.epgCacheService.handleEpgCache(this.channels, callback);
                 } catch (err) {
                     console.log('Failure during handle epg cache processing', err);
                 }
@@ -467,42 +469,5 @@ export default class TVHDataService {
             .catch((error) => {
                 console.log('Failed to retrieve epg data: ', JSON.stringify(error));
             });
-    }
-
-    handleEpgCache(callback: EPGCallback) {
-        // try to retrieve cached epg to display past events as well
-        let cacheResult: {
-            channels: EPGChannel[];
-            channelEvents: ChannelEvents;
-        };
-        this.serviceAdapter
-            .readEpgCache<ChannelEvents>()
-            .then((epgCacheResult) => {
-                //console.log('Read epg cache was successful:', epgCacheResult.result);
-                // restore cached EPG data
-                cacheResult = restoreEpgDataFromCache(epgCacheResult.result, this.channels);
-                // notify calling component
-                callback(cacheResult.channels);
-                // safe new result to disk
-                this.serviceAdapter
-                    .writeEpgCache(cacheResult.channelEvents)
-                    .then(() => console.log('epg cache successfully updated'))
-                    .catch((error) => console.log('Failed to write epg cache data:', error.errorText));
-            })
-            .catch((e) => {
-                console.log('Failed to load Epg cache:', e.errorText);
-                cacheResult = restoreEpgDataFromCache({} as ChannelEvents, this.channels);
-                // notify calling component
-                callback(cacheResult.channels);
-                // safe new result to disk
-                this.serviceAdapter
-                    .writeEpgCache(cacheResult.channelEvents)
-                    .then(() => console.log('epg cache successfully updated'))
-                    .catch((error) => console.log('Failed to write epg cache data:', error.errorText));
-            });
-    }
-
-    showToastMessage(message: string) {
-        this.serviceAdapter.toast(message);
     }
 }

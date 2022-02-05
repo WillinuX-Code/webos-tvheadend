@@ -205,7 +205,7 @@ const App = () => {
     const handleVisibilityChange = (event: Event) => {
         event.stopPropagation();
 
-        if (isWebKit ? (document as any)['webkitHidden'] : document['hidden']) {
+        if (isWebKit ? (document as never)['webkitHidden'] : document['hidden']) {
             console.log('app is in background');
             setAppVisibilityState(AppVisibilityState.BACKGROUND);
         } else {

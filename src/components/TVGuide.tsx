@@ -19,7 +19,10 @@ const VISIBLE_CHANNEL_COUNT = 8; // No of channel to show at a time
 // const VERTICAL_SCROLL_BOTTOM_PADDING_ITEM = VISIBLE_CHANNEL_COUNT / 2 - 1;
 const VERTICAL_SCROLL_TOP_PADDING_ITEM = VISIBLE_CHANNEL_COUNT / 2 - 1;
 
-const TVGuide = (props: { toggleRecording: (event: EPGEvent, callback: () => any) => void; unmount: () => void }) => {
+const TVGuide = (props: {
+    toggleRecording: (event: EPGEvent, callback: () => unknown) => void;
+    unmount: () => void;
+}) => {
     const { locale, currentChannelPosition, epgData, imageCache, setCurrentChannelPosition } = useContext(AppContext);
 
     const canvas = useRef<HTMLCanvasElement>(null);

@@ -22,7 +22,7 @@ interface DetailsState {
 }
 
 const ChannelList = (props: {
-    toggleRecording: (event: EPGEvent, callback: () => any) => void;
+    toggleRecording: (event: EPGEvent, callback: () => unknown) => void;
     unmount: () => void;
 }) => {
     const { epgData, imageCache, currentChannelPosition, setCurrentChannelPosition } = useContext(AppContext);

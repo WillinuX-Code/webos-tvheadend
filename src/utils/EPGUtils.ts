@@ -31,7 +31,7 @@ export default class EPGUtils {
         const options = {
             hour: '2-digit',
             minute: '2-digit'
-        };
+        } as const;
         return new Intl.DateTimeFormat(locale, options).format(new Date(time));
     }
 
@@ -45,7 +45,7 @@ export default class EPGUtils {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric'
-        };
+        } as const;
         return new Intl.DateTimeFormat(locale, options).format(new Date(time));
     }
 
@@ -76,7 +76,7 @@ export default class EPGUtils {
      * return current date in millis (or nanos?)
      */
     static getNow() {
-        //return 1607462851000 + 80000000;
+        //return 1607462851000; // + 80000000;
         return Date.now();
     }
 }

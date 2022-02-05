@@ -149,7 +149,7 @@ const TV = () => {
 
     const getMediaElement = () => video.current;
 
-    const toggleRecording = (epgEvent: EPGEvent, callback?: () => any) => {
+    const toggleRecording = (epgEvent: EPGEvent, callback?: () => unknown) => {
         // add current viewing channel to records
         // get current event
 
@@ -414,14 +414,14 @@ const TV = () => {
 
             {state === State.CHANNEL_LIST && (
                 <ChannelList
-                    toggleRecording={(event: EPGEvent, callback: () => any) => toggleRecording(event, callback)}
+                    toggleRecording={(event: EPGEvent, callback: () => unknown) => toggleRecording(event, callback)}
                     unmount={() => setState(State.CHANNEL_INFO)}
                 />
             )}
 
             {state === State.EPG && (
                 <TVGuide
-                    toggleRecording={(event: EPGEvent, callback: () => any) => toggleRecording(event, callback)}
+                    toggleRecording={(event: EPGEvent, callback: () => unknown) => toggleRecording(event, callback)}
                     unmount={() => setState(State.CHANNEL_INFO)}
                 />
             )}

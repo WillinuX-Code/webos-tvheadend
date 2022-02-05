@@ -125,7 +125,7 @@ export default class TVHSettingsTest {
             .catch((error) => this.toResult(dvrLabel, false, this.getErrorText(error)));
     };
 
-    private toResult(label: string, accessible: boolean, result: string, payload?: any): ResultItem {
+    private toResult(label: string, accessible: boolean, result: string, payload?: unknown): ResultItem {
         return {
             label: label,
             accessible: accessible,
@@ -156,7 +156,7 @@ export default class TVHSettingsTest {
                 'Using Version 4.3 with User Authentication requires activation of "Persistence Token" in the Users Password setttings of TVHeadend';
         }
         if (isForbidden) {
-            errorText = 'User is missing privileges to acces the stream url';
+            errorText = 'User is missing privileges to access the stream url';
         }
         return errorText;
     }

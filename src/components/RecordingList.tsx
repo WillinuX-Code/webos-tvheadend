@@ -47,7 +47,7 @@ const RecordingList = (props: {
     const mChannelLayoutPadding = 7;
     const mChannelLayoutHeight = 90;
     const mChannelLayoutWidth = 900;
-    const mChannelLayoutBackgroundFocus = 'rgba(65,182,230,1)';
+    const mChannelLayoutBackgroundFocus = 'rgba(29,170,226,1)';
 
     const [state, setState] = useState<State>(State.DETAILS);
     const [detailsState, setDetailsState] = useState<DetailsState>();

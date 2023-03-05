@@ -25,7 +25,7 @@ const ChannelInfo = (props: { unmount: () => void }) => {
     const mChannelLayoutPadding = 7;
     const mChannelNextTitleMaxLength = 900;
     //const mChannelLayoutBackground = '#323232';
-    //const mChannelLayoutBackgroundFocus = 'rgba(65,182,230,1)';
+    //const mChannelLayoutBackgroundFocus = 'rgba(29,170,226,1)';
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
         const keyCode = event.keyCode;

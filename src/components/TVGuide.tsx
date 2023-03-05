@@ -53,7 +53,7 @@ const TVGuide = (props: {
 
     const mEventLayoutBackground = '#234054';
     const mEventLayoutBackgroundCurrent = 'rgb(50,85,110)';
-    const mEventLayoutBackgroundFocus = 'rgb(65,182,230)';
+    const mEventLayoutBackgroundFocus = 'rgb(29,170,226)';
     const mEventLayoutTextColor = '#cccccc';
     const mEventLayoutTextSize = 28;
     const mEventLayoutRecordingColor = '#ff0000';
@@ -71,7 +71,7 @@ const TVGuide = (props: {
     const mTimeBarNowTextSize = 22;
     const mTimeBarLineWidth = 3;
     const mTimeBarLineColor = '#c57120';
-    const mTimeBarLinePositionColor = 'rgb(65,182,230)';
+    const mTimeBarLinePositionColor = 'rgb(29,170,226)';
 
     const resetBoundaries = () => {
         millisPerPixel.current = calculateMillisPerPixel();

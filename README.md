@@ -1,11 +1,16 @@
 # webos-tvheadend
 
-## Screenshots
+## Setup
 ![Setup](screenshots/setup_verification.png?raw=true "Setup Verification")
+## Channel list
 ![Channel List](screenshots/channellist.png?raw=true "Channel List")
+## Channel list with details
 ![Channel List Details](screenshots/channellist_details.png?raw=true "Channel List Details")
+## EPG
 ![EPG](screenshots/epg.png?raw=true "EPG")
+## Current Channel info
 ![Infobar](screenshots/infobar.png?raw=true "Infobar")
+## Menu
 ![Menü](screenshots/menu.png?raw=true "Menü")
 
 ## Build

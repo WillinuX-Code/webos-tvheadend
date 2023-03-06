@@ -334,7 +334,7 @@ const TV = () => {
         }
 
         // request focus if none of the other components are active
-        if (state === State.TV) {
+        if (state === State.TV || state === State.CHANNEL_INFO) {
             focus();
         }
     }, [state]);

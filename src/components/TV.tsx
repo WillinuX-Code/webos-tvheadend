@@ -209,9 +209,6 @@ const TV = () => {
             return;
         }
         setCurrentChannelPosition(newChannelPosition);
-
-        // store last used channel
-        StorageHelper.setLastChannelIndex(newChannelPosition);
     };
 
     const handleLoadedMetaData = () => {
@@ -323,6 +320,8 @@ const TV = () => {
             const currentChannel = getCurrentChannel();
             if (currentChannel && currentChannel.getChannelID() !== currentChannelPosition) {
                 updateStreamSource(currentChannel.getStreamUrl());
+                // store last used channel
+                StorageHelper.setLastChannelIndex(currentChannelPosition);
             }
         }
     }, [currentChannelPosition]);

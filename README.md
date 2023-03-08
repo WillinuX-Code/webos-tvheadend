@@ -1,4 +1,7 @@
 # webos-tvheadend
+* This is a WebOS Client for TVHeadend
+* It can currently only be installed using the Developer App
+* The design is similiar to the famous Media Center Kodi
 
 ## Setup
 ![Setup](screenshots/setup_verification.png?raw=true "Setup Verification")

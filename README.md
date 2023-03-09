@@ -2,6 +2,8 @@
 * This is a WebOS Client for TVHeadend
 * It can currently only be installed using the Developer App
 * The design is similiar to the famous Media Center Kodi
+* It is tested on WebOS 3,4 and 5
+* It uses react but most components use the canvas 2d api to improve performance on older TVs
 
 ## Setup
 ![Setup](screenshots/setup_verification.png?raw=true "Setup Verification")

@@ -6,6 +6,7 @@
     "dependencies": {
         "@enact/moonstone": "^3.3.1",
         "@procot/webostv": "^1.2.2",
+        "core-js": "^3.29.1",
         "ilib": "^14.6.2",
         "react": "^16.14.0",
         "react-dom": "^16.14.0"

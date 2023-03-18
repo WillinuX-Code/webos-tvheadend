@@ -7,6 +7,7 @@ import kind from '@enact/core/kind';
 
 interface ButtonProps {
     source: 'confirm' | 'abort';
+    children: React.ReactNode;
 }
 
 const DialogPopup = (props: {

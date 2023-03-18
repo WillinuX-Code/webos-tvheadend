@@ -1,6 +1,6 @@
 {
     "name": "webos-tvheadend",
-    "version": "0.8.1",
+    "version": "0.8.2",
     "private": true,
     "homepage": "./",
     "dependencies": {
@@ -8,7 +8,6 @@
         "@procot/webostv": "^1.2.2",
         "core-js": "^3.29.1",
         "ilib": "^14.6.2",
-        "core-js": "^3.29.1",
         "react": "^16.14.0",
         "react-dom": "^16.14.0",
         "regenerator-runtime": "^0.13.11"

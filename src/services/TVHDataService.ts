@@ -95,7 +95,7 @@ export default class TVHDataService {
     private httpProxyServiceAdapter = Config.httpProxyServiceAdapter;
     private epgCacheService = new EPGCacheService();
     private webosService = new WebOSService();
-    private maxTotalEpgEntries = 20000;
+    private maxTotalEpgEntries = 10000;
     private channels: EPGChannel[] = [];
     private url?: string;
     // private profile: string;

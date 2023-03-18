@@ -279,10 +279,15 @@ const TV = () => {
         videoElement.appendChild(source);
 
         // Auto-play video with some (unused) error handling
-        videoElement
-            .play()
-            .then(() => setIsVideoPlaying(true))
-            .catch((error) => console.log('channel switched before it could be played', error));
+        const playPromise = videoElement.play();
+        // workarund for promise not beeing returned in webos 3.x
+        if (playPromise !== undefined) {
+            playPromise
+                .then(() => setIsVideoPlaying(true))
+                .catch((error) => console.log('channel switched before it could be played', error));
+        } else {
+            setIsVideoPlaying(true);
+        }
     };
 
     const getWidth = () => window.innerWidth;

@@ -1,15 +1,25 @@
 const path = require('path');
+const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-    entry: './src/index.tsx',
+    entry: {
+        polyfills: './src/polyfills.js',
+        index: './src/index.tsx'
+    },
     output: {
-        filename: 'main.js',
+        asyncChunks: true,
+        clean: true,
+        filename: '[name].bundle.js',
         path: path.resolve(__dirname, 'build')
     },
     plugins: [
         new HtmlWebpackPlugin({
             template: path.join(__dirname, 'public', 'index.html')
+        }),
+        new CopyPlugin({
+            // copy appinfo and resources to build folder
+            patterns: ['public/appinfo.json', 'public/splash.png', 'public/largeIcon.png', 'public/icon.png']
         })
     ],
     devServer: {
@@ -21,7 +31,7 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.(js|jsx)$/,
+                test: /\.(m?js|jsx)$/,
                 //exclude: /node_modules/,
                 use: ['babel-loader']
             },
@@ -48,5 +58,10 @@ module.exports = {
     // pass all js files through Babel
     resolve: {
         extensions: ['*', '.js', '.jsx', '.ts', '.tsx']
+    },
+    optimization: {
+        splitChunks: {
+            chunks: 'all'
+        }
     }
 };

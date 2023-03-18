@@ -8,10 +8,9 @@
                     "chrome": "38"
                 },
                 "useBuiltIns": "entry",
-                "corejs": "3.0"
-            },
-           
+                "corejs": "3.29.0"
+            }
         ],
-        [ "@babel/preset-react", {"runtime": "automatic"}]
+        ["@babel/preset-react", { "runtime": "automatic" }]
     ]
 }

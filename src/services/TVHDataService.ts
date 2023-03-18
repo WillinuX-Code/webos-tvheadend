@@ -95,7 +95,7 @@ export default class TVHDataService {
     private httpProxyServiceAdapter = Config.httpProxyServiceAdapter;
     private epgCacheService = new EPGCacheService();
     private webosService = new WebOSService();
-    private maxTotalEpgEntries = 10000;
+    private maxTotalEpgEntries = 20000;
     private channels: EPGChannel[] = [];
     private url?: string;
     // private profile: string;
@@ -119,7 +119,7 @@ export default class TVHDataService {
      */
     async getLocaleInfo() {
         const localeInfo = await this.webosService.getLocaleInfo();
-        // console.log('getLocaleInfo:', localeInfo);
+        console.log('getLocaleInfo:', localeInfo);
         return localeInfo;
     }
 
@@ -429,10 +429,10 @@ export default class TVHDataService {
         });
     }
 
-    retrieveTVHEPG(start: number, callback: EPGCallback) {
+    retrieveTVHEPG(start: number, callback: EPGCallback): void {
         let totalCount = 0;
 
-        return this.httpProxyServiceAdapter
+        this.httpProxyServiceAdapter
             .call<TVHEvents>({
                 url: this.url + TVHDataService.API_EPG + start,
                 user: this.user,

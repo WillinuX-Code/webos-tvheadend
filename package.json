@@ -8,6 +8,7 @@
         "@procot/webostv": "^1.2.2",
         "core-js": "^3.29.1",
         "ilib": "^14.6.2",
+        "core-js": "^3.29.1",
         "react": "^16.14.0",
         "react-dom": "^16.14.0",
         "regenerator-runtime": "^0.13.11"
@@ -46,6 +47,7 @@
         "@typescript-eslint/eslint-plugin": "^4.14.0",
         "@typescript-eslint/parser": "^4.14.0",
         "babel-loader": "^9.1.2",
+        "copy-webpack-plugin": "^11.0.0",
         "css-loader": "^6.7.3",
         "eslint": "^7.18.0",
         "eslint-config-prettier": "^7.2.0",

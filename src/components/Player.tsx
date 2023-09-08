@@ -128,16 +128,12 @@ const Player = () => {
             setCurrentRecordingPosition(-1);
         }
 
-        tvhDataService?.deleteRec(
-            event,
-            (newrecordings) => setRecordings(newrecordings),
-            persistentAuthToken
-        );
+        tvhDataService?.deleteRec(event, (newrecordings) => setRecordings(newrecordings), persistentAuthToken);
     };
 
     const cancelRecording = (event: EPGEvent) => {
         console.log(event);
-        
+
         if (!event) {
             return;
         }
@@ -234,10 +230,11 @@ const Player = () => {
         videoElement.appendChild(source);
 
         // Auto-play video with some (unused) error handling
-        videoElement
-            .play()
-            .then()
-            .catch((error) => console.log('channel switched before it could be played', error));
+        const playPromise = videoElement.play();
+        // workarund for promise not beeing returned in webos 3.x
+        if (playPromise !== undefined) {
+            playPromise.catch((error) => console.log('recording switched before it could be played', error));
+        }
     };
 
     const getWidth = () => window.innerWidth;

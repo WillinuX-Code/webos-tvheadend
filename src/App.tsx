@@ -81,33 +81,28 @@ const App = () => {
 
             // retrieve channel infos etc
             setIsChannelsRetrieved(false);
-            tvhDataService
-                .retrieveM3UChannels()
-                .then((channels) => {
+            tvhDataService.retrieveM3UChannels().then((channels) => {
+                epgData.updateChannels(channels);
+                setIsChannelsRetrieved(true);
+
+                // safe persistent token if available
+                if (channels.length > 0) {
+                    safePersistentAuthToken(channels[0].getStreamUrl());
+                }
+                // preload images
+                preloadImages(channels);
+
+                // retrieve epg and update channels
+                tvhDataService.retrieveTVHEPG(0, (channels) => {
+                    // note: channels are already updated as we are working on references here
                     epgData.updateChannels(channels);
-                    setIsChannelsRetrieved(true);
-
-                    // safe persistent token if available
-                    if (channels.length > 0) {
-                        safePersistentAuthToken(channels[0].getStreamUrl());
-                    }
-                    // preload images
-                    preloadImages(channels);
-
-                    // retrieve epg and update channels
-                    tvhDataService.retrieveTVHEPG(0, (channels) => {
-                        // note: channels are already updated as we are working on references here
-                        epgData.updateChannels(channels);
-                    });
-
-                    // retrieve recordings and update channels
-                    tvhDataService.retrieveUpcomingRecordings((recordings) => {
-                        epgData.updateRecordings(recordings);
-                    });
-                })
-                .catch((error) => {
-                    console.log('Failed to retrieve channels: ', error);
                 });
+
+                // retrieve recordings and update channels
+                tvhDataService.retrieveUpcomingRecordings((recordings) => {
+                    epgData.updateRecordings(recordings);
+                });
+            });
 
             setAppViewState(AppViewState.TV);
         } else {
@@ -119,13 +114,9 @@ const App = () => {
         try {
             // retrieve local info
             const localInfoResult = await tvhDataService.getLocaleInfo();
-            let locale = localInfoResult.settings.localeInfo.locales.UI;
-            console.log('Retrieved locale info:', locale);
-            if (locale === undefined) {
-                locale = 'en-US';
-                console.log('locale fallback to:', locale);
-            }
+            const locale = localInfoResult.settings.localeInfo.locales.UI;
             setLocale(locale);
+            console.log('Retrieved locale info:', locale);
         } catch (error) {
             console.log('Failed to retrieve locale info: ', error);
         }

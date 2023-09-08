@@ -29,7 +29,8 @@ const App = () => {
         setTvhDataService,
         epgData,
         imageCache,
-        setPersistentAuthToken
+        setPersistentAuthToken,
+        setAnimationsEnabled
     } = useContext(AppContext);
 
     const [isChannelsRetrieved, setIsChannelsRetrieved] = useState(false);
@@ -78,7 +79,8 @@ const App = () => {
         if (tvhDataService) {
             // load locale
             loadLocale(tvhDataService);
-
+            // load animations enabled
+            loadAnimationsEnabled(tvhDataService);
             // retrieve channel infos etc
             setIsChannelsRetrieved(false);
             tvhDataService.retrieveM3UChannels().then((channels) => {
@@ -117,6 +119,18 @@ const App = () => {
             const locale = localInfoResult.settings.localeInfo.locales.UI;
             setLocale(locale);
             console.log('Retrieved locale info:', locale);
+        } catch (error) {
+            console.log('Failed to retrieve locale info: ', error);
+        }
+    };
+
+    const loadAnimationsEnabled = async (tvhDataService: TVHDataService) => {
+        try {
+            // retrieve local info
+            const deviceInfoResult = await tvhDataService.getDeviceInfo();
+            const majorVersion = deviceInfoResult.sdkVersion.split('.')[0];
+            setAnimationsEnabled(Number(majorVersion) > 3);
+            console.log('Retrieved Firmware Major Version:', majorVersion);
         } catch (error) {
             console.log('Failed to retrieve locale info: ', error);
         }

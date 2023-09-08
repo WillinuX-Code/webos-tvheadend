@@ -44,9 +44,16 @@ interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
     subscribed: boolean;
 }
 
+interface DeviceInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
+    modelName: string;
+    firmwareVersion: string;
+    sdkVersion: string;
+}
+
 interface LunaServiceInterface {
     toast(message: string): void;
     getLocaleInfo(): Promise<LocaleInfoSuccessResponse>;
+    getDeviceInfo(): Promise<DeviceInfoSuccessResponse>;
 }
 
 interface FileServiceInterface {

@@ -123,6 +123,12 @@ export default class TVHDataService {
         return localeInfo;
     }
 
+    async getDeviceInfo() {
+        const deviceInfo = await this.webosService.getDeviceInfo();
+        console.log('getDeviceInfo:', deviceInfo);
+        return deviceInfo;
+    }
+
     /**
      * retrieve tvh server info
      */

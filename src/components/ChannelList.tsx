@@ -25,7 +25,9 @@ const ChannelList = (props: {
     toggleRecording: (event: EPGEvent, callback: () => unknown) => void;
     unmount: () => void;
 }) => {
-    const { epgData, imageCache, currentChannelPosition, setCurrentChannelPosition } = useContext(AppContext);
+    const { epgData, imageCache, currentChannelPosition, setCurrentChannelPosition, isAnimationsEnabled } = useContext(
+        AppContext
+    );
     const canvas = useRef<HTMLCanvasElement>(null);
     const listWrapper = useRef<HTMLDivElement>(null);
     const scrollAnimationId = useRef(0);
@@ -480,7 +482,7 @@ const ChannelList = (props: {
         if (state === State.DETAILS) {
             setDetailsData();
         }
-        scrollToChannelPosition(channelPos, true);
+        scrollToChannelPosition(channelPos, isAnimationsEnabled);
     };
 
     const setDetailsData = () => {

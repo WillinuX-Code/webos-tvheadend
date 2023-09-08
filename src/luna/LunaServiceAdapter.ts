@@ -38,4 +38,17 @@ export default class LunaServiceAdapter implements LunaServiceInterface {
             });
         });
     }
+
+    getDeviceInfo(): Promise<DeviceInfoSuccessResponse> {
+        return new Promise<DeviceInfoSuccessResponse>(function (resolve, reject) {
+            global.webOS.service.request('luna://com.webos.service.tv.systemproperty', {
+                method: 'getSystemInfo',
+                parameters: {
+                    keys: ['modelName', 'firmwareVersion', 'sdkVersion']
+                },
+                onSuccess: (res: DeviceInfoSuccessResponse) => resolve(res),
+                onFailure: (res) => reject(res)
+            });
+        });
+    }
 }

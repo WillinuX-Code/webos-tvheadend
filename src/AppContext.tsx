@@ -30,6 +30,8 @@ type AppContext = {
     setAppVisibilityState: (value: AppVisibilityState) => void;
     persistentAuthToken?: string; // safe persistent auth token to be used for recording stream url
     setPersistentAuthToken: (value: string) => void;
+    isAnimationsEnabled: boolean;
+    setAnimationsEnabled: (value: boolean) => void;
 };
 
 const AppContext = createContext({} as AppContext);
@@ -45,6 +47,7 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
     const [currentRecordingPosition, setCurrentRecordingPosition] = useState(-1);
     const [appVisibilityState, setAppVisibilityState] = useState(AppVisibilityState.FOCUSED);
     const [persistentAuthToken, setPersistentAuthToken] = useState<string>();
+    const [isAnimationsEnabled, setAnimationsEnabled] = useState<boolean>(true);
 
     const appContext: AppContext = {
         menuState: menuState,
@@ -64,7 +67,9 @@ export const AppContextProvider = ({ children }: { children: JSX.Element }) => {
         appVisibilityState: appVisibilityState,
         setAppVisibilityState: (value: AppVisibilityState) => setAppVisibilityState(value),
         persistentAuthToken: persistentAuthToken,
-        setPersistentAuthToken: (value: string) => setPersistentAuthToken(value)
+        setPersistentAuthToken: (value: string) => setPersistentAuthToken(value),
+        isAnimationsEnabled: isAnimationsEnabled,
+        setAnimationsEnabled: (value: boolean) => setAnimationsEnabled(value)
     };
 
     return <AppContext.Provider value={appContext}>{children}</AppContext.Provider>;

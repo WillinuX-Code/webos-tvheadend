@@ -17,7 +17,11 @@ export default class WebOSService {
      */
     async getLocaleInfo() {
         const localeInfo = await this.lunaServiceAdapter.getLocaleInfo();
-        // console.log('getLocaleInfo:', localeInfo);
         return localeInfo;
+    }
+
+    async getDeviceInfo() {
+        const deviceInfo = await this.lunaServiceAdapter.getDeviceInfo();
+        return deviceInfo;
     }
 }

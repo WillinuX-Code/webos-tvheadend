@@ -21,4 +21,13 @@ export default class MockLunaServiceAdapter implements LunaServiceInterface {
             }
         } as LocaleInfoSuccessResponse;
     }
+
+    async getDeviceInfo() {
+        return {
+            returnValue: true,
+            modelName: 'webOS TV',
+            firmwareVersion: '04.71.25',
+            sdkVersion: '4.4.0'
+        } as DeviceInfoSuccessResponse;
+    }
 }

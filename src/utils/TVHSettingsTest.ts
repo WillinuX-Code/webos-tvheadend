@@ -1,6 +1,8 @@
 import TVHDataService from '../services/TVHDataService';
+import WebOSService from '../services/WebOSService';
 
 export interface TestResults {
+    firmwareInfo: ResultItem;
     serverInfo: ResultItem;
     playlist: ResultItem;
     stream: ResultItem;
@@ -24,6 +26,7 @@ export default class TVHSettingsTest {
 
     /**
      * test
+     * - webos firmware version
      * - server info
      * - playlist
      * - stream
@@ -32,22 +35,37 @@ export default class TVHSettingsTest {
      */
     async testAll(): Promise<TestResults> {
         // test server info
+        const firmwareVersionResult = this.testWebosFirmwareVersion();
         const serverInfoResult = this.testServerInfo();
         const epgResult = this.testEpg();
         const testDvr = this.testDvr();
         const playlistAndChannelStreamResult = this.testPlaylistAndChannelStream();
 
         const testResults: Promise<TestResults> = Promise.all([
+            firmwareVersionResult,
             serverInfoResult,
             playlistAndChannelStreamResult,
             epgResult,
             testDvr
-        ]).then(([serverInfo, { playlist, stream }, epg, dvr]) => {
-            return { serverInfo, playlist, stream, epg, dvr };
+        ]).then(([firmwareInfo, serverInfo, { playlist, stream }, epg, dvr]) => {
+            return { firmwareInfo, serverInfo, playlist, stream, epg, dvr };
         });
 
         return testResults;
     }
+
+    testWebosFirmwareVersion = async () => {
+        return new WebOSService().getDeviceInfo().then((deviceInfo) => {
+            const firmwareVersionLabel = 'Device Info: ';
+            const firmwareVersionResult = this.toResult(
+                firmwareVersionLabel,
+                true,
+                deviceInfo.modelName + ' - ' + deviceInfo.firmwareVersion + ' - ' + deviceInfo.sdkVersion,
+                deviceInfo
+            );
+            return firmwareVersionResult;
+        });
+    };
 
     testPlaylistAndChannelStream = async () => {
         const { playlistResult, streamUrl } = await this.testPlaylist();

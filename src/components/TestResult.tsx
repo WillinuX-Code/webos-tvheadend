@@ -6,6 +6,8 @@ import { TestResults } from '../utils/TVHSettingsTest';
 const TestResult = (results: TestResults) => (
     <>
         <BodyText>
+            {results.firmwareInfo && <TestResultItem {...results.firmwareInfo} />}
+            <br />
             {results.serverInfo && <TestResultItem {...results.serverInfo} />}
             <br />
             {results.playlist && <TestResultItem {...results.playlist} />}

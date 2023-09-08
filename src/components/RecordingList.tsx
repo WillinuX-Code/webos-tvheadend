@@ -30,7 +30,9 @@ const RecordingList = (props: {
     unmount: () => void;
     recordings: EPGChannelRecording[];
 }) => {
-    const { imageCache, currentRecordingPosition, setCurrentRecordingPosition } = useContext(AppContext);
+    const { imageCache, currentRecordingPosition, setCurrentRecordingPosition, isAnimationsEnabled } = useContext(
+        AppContext
+    );
 
     const canvas = useRef<HTMLCanvasElement>(null);
     const listWrapper = useRef<HTMLDivElement>(null);
@@ -499,7 +501,7 @@ const RecordingList = (props: {
         if (state === State.DETAILS) {
             setDetailsData();
         }
-        scrollToChannelPosition(channelPos, true);
+        scrollToChannelPosition(channelPos, isAnimationsEnabled);
     };
 
     useEffect(() => {

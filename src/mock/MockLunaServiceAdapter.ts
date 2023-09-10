@@ -30,4 +30,11 @@ export default class MockLunaServiceAdapter implements LunaServiceInterface {
             sdkVersion: '4.4.0'
         } as DeviceInfoSuccessResponse;
     }
+
+    async getNetworkInfo() {
+        return {
+            returnValue: true,
+            isInternetConnectionAvailable: true
+        } as ConnectionMgrResponse;
+    }
 }

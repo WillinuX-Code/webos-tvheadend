@@ -51,4 +51,14 @@ export default class LunaServiceAdapter implements LunaServiceInterface {
             });
         });
     }
+
+    getNetworkInfo(): Promise<ConnectionMgrResponse> {
+        return new Promise<ConnectionMgrResponse>(function (resolve, reject) {
+            global.webOS.service.request('luna://com.palm.connectionmanager', {
+                method: 'getStatus',
+                onSuccess: (inResponse: ConnectionMgrResponse) => resolve(inResponse),
+                onFailure: (inError) => reject(inError)
+            });
+        });
+    }
 }

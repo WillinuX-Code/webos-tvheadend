@@ -385,7 +385,7 @@ export default class TVHDataService {
     private async _retrieveM3UChannels(withAuth: boolean): Promise<EPGChannel[]> {
         try {
             // after we set the base url we retrieve channels async
-            let playlistPath = null;
+            let playlistPath;
             // persistence token is only available for authentication on >= 4.3
             if (withAuth) {
                 playlistPath = TVHDataService.M3U_PLAYLIST.replace('%s', 'auth/');

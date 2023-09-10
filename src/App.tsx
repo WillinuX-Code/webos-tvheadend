@@ -8,6 +8,7 @@ import AppContext, { AppVisibilityState } from './AppContext';
 import EPGChannel from './models/EPGChannel';
 import StorageHelper from './utils/StorageHelper';
 import Menu, { MenuItem } from './components/Menu';
+import Config from './config/Config';
 
 export enum AppViewState {
     TV,
@@ -184,7 +185,29 @@ const App = () => {
         }
     };
 
+    const waitUntilNetworkAvailable = () => {
+        Config.lunaServiceAdapter.getNetworkInfo().then((networkInfo) => {
+            console.log('networkInfo', networkInfo);
+            if (
+                networkInfo.wired.state === 'connected' ||
+                networkInfo.wifi.state === 'connected' ||
+                networkInfo.wifiDirect.state === 'connected'
+            ) {
+                console.log('network is connected');
+                return;
+            }
+
+            // if no network type is connected we wait 2s and try again
+            setTimeout(() => {
+                waitUntilNetworkAvailable();
+            }, 2000);
+        });
+    };
+
     useEffect(() => {
+        // get network info until it returns true and delaly it by 1s
+        waitUntilNetworkAvailable();
+
         console.log('app component mounted');
         const tvhSettings = StorageHelper.getTvhSettings();
         const service = tvhSettings ? new TVHDataService(tvhSettings) : undefined;

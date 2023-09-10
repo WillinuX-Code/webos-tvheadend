@@ -24,4 +24,9 @@ export default class WebOSService {
         const deviceInfo = await this.lunaServiceAdapter.getDeviceInfo();
         return deviceInfo;
     }
+
+    async getNetworkInfo() {
+        const networkInfo = await this.lunaServiceAdapter.getNetworkInfo();
+        return networkInfo;
+    }
 }

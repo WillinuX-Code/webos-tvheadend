@@ -44,6 +44,17 @@ interface LocaleInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
     subscribed: boolean;
 }
 
+interface ConnectionMgrResponse extends WebOSTV.OnCompleteSuccessResponse {
+    isInternetConnectionAvailable: boolean;
+    wired: NetworkDetails;
+    wifi: NetworkDetails;
+    wifiDirect: NetworkDetails;
+}
+
+interface NetworkDetails {
+    state: string;
+}
+
 interface DeviceInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
     modelName: string;
     firmwareVersion: string;
@@ -54,6 +65,7 @@ interface LunaServiceInterface {
     toast(message: string): void;
     getLocaleInfo(): Promise<LocaleInfoSuccessResponse>;
     getDeviceInfo(): Promise<DeviceInfoSuccessResponse>;
+    getNetworkInfo(): Promise<ConnectionMgrResponse>;
 }
 
 interface FileServiceInterface {

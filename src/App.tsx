@@ -273,7 +273,7 @@ const App = () => {
             {menuState && <Menu items={menu} unmount={() => setAppViewState(AppViewState.TV)} />}
             {appViewState === AppViewState.SETTINGS && <TVHSettings unmount={() => setAppViewState(AppViewState.TV)} />}
             {appViewState === AppViewState.TV && isChannelsRetrieved && <TV />}
-            {appViewState === AppViewState.TV && !isChannelsRetrieved && "Loading..."}
+            {appViewState === AppViewState.TV && !isChannelsRetrieved && "Loading Channels..."}
             {appViewState === AppViewState.RECORDINGS && <Player />}
         </div>
     );

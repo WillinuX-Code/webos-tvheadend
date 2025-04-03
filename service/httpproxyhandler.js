@@ -120,7 +120,7 @@ function request(options, user, password, message) {
             });
         })
         .on('socket', function (socket) {
-            socket.setTimeout(10000);
+            socket.setTimeout(3000);
             socket.on('timeout', function () {
                 req.destroy();
             });

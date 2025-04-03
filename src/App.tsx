@@ -105,6 +105,10 @@ const App = () => {
                 tvhDataService.retrieveUpcomingRecordings((recordings) => {
                     epgData.updateRecordings(recordings);
                 });
+            }).catch(error => {
+                console.log('Failed to retrieve channels:', error);
+                setAppViewState(AppViewState.SETTINGS);
+                return;
             });
 
             setAppViewState(AppViewState.TV);
@@ -185,29 +189,25 @@ const App = () => {
         }
     };
 
-    const waitUntilNetworkAvailable = () => {
-        Config.lunaServiceAdapter.getNetworkInfo().then((networkInfo) => {
-            console.log('networkInfo', networkInfo);
-            if (
-                networkInfo.wired.state === 'connected' ||
-                networkInfo.wifi.state === 'connected' ||
-                networkInfo.wifiDirect.state === 'connected'
-            ) {
-                console.log('network is connected');
-                return;
-            }
+    const waitUntilNetworkAvailable = async () => {
+        const networkInfo = await Config.lunaServiceAdapter.getNetworkInfo();
+        console.log('networkInfo', networkInfo);
+        if (
+            networkInfo.wired.state === 'connected' ||
+            networkInfo.wifi.state === 'connected' ||
+            networkInfo.wifiDirect.state === 'connected'
+        ) {
+            console.log('network is connected');
+            return;
+        }
 
-            // if no network type is connected we wait 2s and try again
-            setTimeout(() => {
-                waitUntilNetworkAvailable();
-            }, 2000);
-        });
+        // if no network type is connected we wait 2s and try again
+        setTimeout(() => {
+            waitUntilNetworkAvailable();
+        }, 2000);
     };
 
     useEffect(() => {
-        // get network info until it returns true and delaly it by 1s
-        waitUntilNetworkAvailable();
-
         console.log('app component mounted');
         const tvhSettings = StorageHelper.getTvhSettings();
         const service = tvhSettings ? new TVHDataService(tvhSettings) : undefined;
@@ -262,6 +262,9 @@ const App = () => {
     };
 
     useEffect(() => {
+         // get network info until it returns true and delaly it by 1s
+        waitUntilNetworkAvailable();
+
         reloadData();
     }, [tvhDataService]);
 
@@ -270,6 +273,7 @@ const App = () => {
             {menuState && <Menu items={menu} unmount={() => setAppViewState(AppViewState.TV)} />}
             {appViewState === AppViewState.SETTINGS && <TVHSettings unmount={() => setAppViewState(AppViewState.TV)} />}
             {appViewState === AppViewState.TV && isChannelsRetrieved && <TV />}
+            {appViewState === AppViewState.TV && !isChannelsRetrieved && "Loading..."}
             {appViewState === AppViewState.RECORDINGS && <Player />}
         </div>
     );

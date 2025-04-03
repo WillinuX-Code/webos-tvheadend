@@ -12,6 +12,10 @@ export default class WebOSService {
         this.lunaServiceAdapter.toast(message);
     }
 
+    async isAvailable() {
+        return this.lunaServiceAdapter.isAvailable();
+    }
+
     /**
      * retrieve local information from tv
      */

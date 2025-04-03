@@ -12,6 +12,16 @@ import channelM3UMock from './channels.m3u.json';
  * - local + webos emulator => luna service bus
  */
 export default class MockHttpProxyServiceAdapter implements HttpProxyInterface {
+    isAvailable(): Promise<boolean> {
+        return new Promise<boolean>((resolve) => {
+            console.log('lsa:%s start');
+            setTimeout(() => {
+                resolve(true);
+                console.log('lsa:%s end');
+            }, 1000); // Simulate async operation
+        });
+    }
+    
     async call<TResult>(params: ProxyRequestParams): Promise<TResult> {
         console.log('lsa:%s start');
         const url = params.url;

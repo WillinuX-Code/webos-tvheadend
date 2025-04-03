@@ -5,6 +5,10 @@
  * - local + webos emulator => luna service bus
  */
 export default class MockLunaServiceAdapter implements LunaServiceInterface {
+    isAvailable() {
+        return true;
+    }
+
     toast(message: string) {
         console.log('lsa:toast start', message);
     }

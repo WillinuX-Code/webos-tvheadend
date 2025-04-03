@@ -8,7 +8,6 @@ import AppContext, { AppVisibilityState } from './AppContext';
 import EPGChannel from './models/EPGChannel';
 import StorageHelper from './utils/StorageHelper';
 import Menu, { MenuItem } from './components/Menu';
-import Config from './config/Config';
 
 export enum AppViewState {
     TV,
@@ -35,7 +34,7 @@ const App = () => {
     } = useContext(AppContext);
 
     const [isChannelsRetrieved, setIsChannelsRetrieved] = useState(false);
-
+    const [debugInfo, setDebugInfo] = useState("");
     const isWebKit = typeof document['hidden'] === 'undefined';
 
     const menu: MenuItem[] = [
@@ -76,45 +75,68 @@ const App = () => {
         setAppViewState(appViewState);
     };
 
-    const reloadData = () => {
-        if (tvhDataService) {
-            // load locale
-            loadLocale(tvhDataService);
-            // load animations enabled
-            loadAnimationsEnabled(tvhDataService);
-            // retrieve channel infos etc
-            setIsChannelsRetrieved(false);
-            tvhDataService.retrieveM3UChannels().then((channels) => {
+    const reloadData = async () => {
+        if (!tvhDataService) {
+            return;
+        }
+        setDebugInfo("Connecting...");
+        // await readyness
+        try {
+            await tvhDataService.awaitReadyness();
+        } catch (error) {
+            setDebugInfo('Failed to connect to TVH: '+ + JSON.stringify(error));
+            setAppViewState(AppViewState.SETTINGS);
+            return;
+        }
+        
+        // load locale
+        setDebugInfo("Loading Locale...");
+        await loadLocale(tvhDataService);
+        
+        // load animations enabled
+        setDebugInfo("Check animations enabled...");
+        await loadAnimationsEnabled(tvhDataService);
+        setDebugInfo("Set retrieved channels to false...");
+        // retrieve channel infos etc
+        setIsChannelsRetrieved(false);
+
+        try {
+            setDebugInfo("Loading channels...");
+            const channels = await tvhDataService.retrieveM3UChannels();
+            setDebugInfo("Updating channels ("+channels.length+")...");
+            epgData.updateChannels(channels);
+            setDebugInfo("Channels retrieved true...");
+            setIsChannelsRetrieved(true);
+
+            // safe persistent token if available
+            if (channels.length > 0) {
+                setDebugInfo("Safe persistent auth token...");
+                safePersistentAuthToken(channels[0].getStreamUrl());
+            }
+            setDebugInfo("Preload images...");
+            // preload images
+            preloadImages(channels);
+
+            setDebugInfo("Retrieve EPG...");
+            // retrieve epg and update channels
+            tvhDataService.retrieveTVHEPG(0, (channels) => {
+                // note: channels are already updated as we are working on references here
                 epgData.updateChannels(channels);
-                setIsChannelsRetrieved(true);
-
-                // safe persistent token if available
-                if (channels.length > 0) {
-                    safePersistentAuthToken(channels[0].getStreamUrl());
-                }
-                // preload images
-                preloadImages(channels);
-
-                // retrieve epg and update channels
-                tvhDataService.retrieveTVHEPG(0, (channels) => {
-                    // note: channels are already updated as we are working on references here
-                    epgData.updateChannels(channels);
-                });
-
-                // retrieve recordings and update channels
-                tvhDataService.retrieveUpcomingRecordings((recordings) => {
-                    epgData.updateRecordings(recordings);
-                });
-            }).catch(error => {
-                console.log('Failed to retrieve channels:', error);
-                setAppViewState(AppViewState.SETTINGS);
-                return;
             });
 
-            setAppViewState(AppViewState.TV);
-        } else {
+            setDebugInfo("Retrieve recordings...");
+            // retrieve recordings and update channels
+            tvhDataService.retrieveUpcomingRecordings((recordings) => {
+                epgData.updateRecordings(recordings);
+            });
+        } catch (error) {
+            setDebugInfo('Failed to retrieve channels: '+ JSON.stringify(error));
             setAppViewState(AppViewState.SETTINGS);
+            return;
         }
+
+        setDebugInfo("");
+        setAppViewState(AppViewState.TV);
     };
 
     const loadLocale = async (tvhDataService: TVHDataService) => {
@@ -189,29 +211,8 @@ const App = () => {
         }
     };
 
-    const waitUntilNetworkAvailable = async () => {
-        const networkInfo = await Config.lunaServiceAdapter.getNetworkInfo();
-        console.log('networkInfo', networkInfo);
-        if (
-            networkInfo.wired.state === 'connected' ||
-            networkInfo.wifi.state === 'connected' ||
-            networkInfo.wifiDirect.state === 'connected'
-        ) {
-            console.log('network is connected');
-            return;
-        }
-
-        // if no network type is connected we wait 2s and try again
-        setTimeout(() => {
-            waitUntilNetworkAvailable();
-        }, 2000);
-    };
-
     useEffect(() => {
         console.log('app component mounted');
-        const tvhSettings = StorageHelper.getTvhSettings();
-        const service = tvhSettings ? new TVHDataService(tvhSettings) : undefined;
-        setTvhDataService(service);
 
         // add global event listeners for blur and focus of the app
         window.addEventListener('blur', handleBlur);
@@ -225,6 +226,14 @@ const App = () => {
 
         // webOSRelaunch event
         document.addEventListener('webOSRelaunch', handleWebOSRelaunch);
+
+        const tvhSettings = StorageHelper.getTvhSettings();
+        if(tvhSettings !== undefined) {
+            setTvhDataService(new TVHDataService(tvhSettings));
+        } else {
+            setAppViewState(AppViewState.SETTINGS);
+        }
+        
     }, []);
 
     const handleBlur = (event: FocusEvent) => {
@@ -262,18 +271,15 @@ const App = () => {
     };
 
     useEffect(() => {
-         // get network info until it returns true and delaly it by 1s
-        waitUntilNetworkAvailable();
-
         reloadData();
     }, [tvhDataService]);
 
     return (
         <div className="app" onKeyDown={handleKeyPress}>
+            {debugInfo && <div className="debug-info">{debugInfo}</div>}
             {menuState && <Menu items={menu} unmount={() => setAppViewState(AppViewState.TV)} />}
             {appViewState === AppViewState.SETTINGS && <TVHSettings unmount={() => setAppViewState(AppViewState.TV)} />}
             {appViewState === AppViewState.TV && isChannelsRetrieved && <TV />}
-            {appViewState === AppViewState.TV && !isChannelsRetrieved && "Loading Channels..."}
             {appViewState === AppViewState.RECORDINGS && <Player />}
         </div>
     );

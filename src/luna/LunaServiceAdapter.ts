@@ -7,6 +7,11 @@ import '@procot/webostv/webOSTV';
  * - local + webos emulator => luna service bus
  */
 export default class LunaServiceAdapter implements LunaServiceInterface {
+    isAvailable(): boolean {
+        const isAvailable = (global.webOS && global.webOS.service) ? true : false;
+        return isAvailable;
+    }
+
     toast(message: string): void {
         console.log('lsa:toast start');
         global.webOS.service.request('luna://com.webos.notification', {

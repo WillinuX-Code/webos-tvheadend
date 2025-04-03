@@ -62,6 +62,7 @@ interface DeviceInfoSuccessResponse extends WebOSTV.OnCompleteSuccessResponse {
 }
 
 interface LunaServiceInterface {
+    isAvailable(): boolean;
     toast(message: string): void;
     getLocaleInfo(): Promise<LocaleInfoSuccessResponse>;
     getDeviceInfo(): Promise<DeviceInfoSuccessResponse>;
@@ -75,4 +76,5 @@ interface FileServiceInterface {
 
 interface HttpProxyInterface {
     call<T>(params: ProxyRequestParams): Promise<T>;
+    isAvailable(): Promise<boolean>;
 }

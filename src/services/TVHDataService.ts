@@ -144,7 +144,7 @@ export default class TVHDataService {
     }
 
     async waitUntilLunaServiceAvailable(count: number) {
-        if (count > 10) {
+        if (count > 5) {
             return Promise.reject('LunaService not available');
         }
         try {
@@ -164,7 +164,7 @@ export default class TVHDataService {
     }
 
     async waitUntilNetworkAvailable(count: number) {
-        if (count > 10) {
+        if (count > 5) {
             return Promise.reject('Network not available');
         }
         try {

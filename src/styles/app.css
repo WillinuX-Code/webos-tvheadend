@@ -228,3 +228,13 @@ body {
 .tvhSettings .password {
     width: 30%;
 }
+
+.debug-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+}

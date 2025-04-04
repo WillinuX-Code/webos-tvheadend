@@ -493,7 +493,7 @@ const ChannelList = (props: {
         }
         // get current event
         const currentEvent = epgData.getEventAtTimestamp(channelPosition.current, EPGUtils.getNow()) || undefined;
-        let newFocusedEvent = null;
+        let newFocusedEvent;
         if (currentEvent) {
             // get next event position with offset
             const eventPos =

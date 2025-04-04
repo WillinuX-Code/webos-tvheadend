@@ -114,6 +114,79 @@ export default class TVHDataService {
         this.password = settings.password;
     }
 
+    async awaitReadyness() {
+        try {
+            await this.waitUntilLunaServiceAvailable(1);
+        }
+        catch (error) {
+            console.log('LunaService not available: ', error);
+            return Promise.reject('LunaService not available');
+        }
+
+        // wait until service is avaialble
+        try {
+            await this.httpProxyServiceAdapter.isAvailable();
+        } catch (error) {
+            console.log('HttpProxyService not available: ', error);
+            return Promise.reject('HttpProxyService not available');
+        }
+
+        // wait until network is available
+        try {
+            await this.waitUntilNetworkAvailable(1);
+        }
+        catch (error) {
+            console.log('Network not available: ', error);
+            return Promise.reject('Network not available');
+        }
+
+        return Promise.resolve();
+    }
+
+    async waitUntilLunaServiceAvailable(count: number) {
+        if (count > 5) {
+            return Promise.reject('LunaService not available');
+        }
+        try {
+            const isAvailable = await this.webosService.isAvailable();
+            if (isAvailable) {
+                return Promise.resolve();
+            }
+        } catch (error) {
+            console.log('LunaService not available: retry '+count, error);
+        }
+
+         // if no network type is connected we wait 2s and try again
+        setTimeout(() => {
+            this.waitUntilLunaServiceAvailable(count + 1);
+        }, 2000);
+
+    }
+
+    async waitUntilNetworkAvailable(count: number) {
+        if (count > 5) {
+            return Promise.reject('Network not available');
+        }
+        try {
+            const networkInfo = await Config.lunaServiceAdapter.getNetworkInfo();
+            console.log('networkInfo', networkInfo);
+            if (
+                networkInfo.wired.state === 'connected' ||
+                networkInfo.wifi.state === 'connected' ||
+                networkInfo.wifiDirect.state === 'connected'
+            ) {
+                return Promise.resolve();
+            }
+        } catch (error) {
+            console.log('Network not available: retry '+count, error);
+        }
+
+        // if no network type is connected we wait 2s and try again
+        setTimeout(() => {
+            this.waitUntilNetworkAvailable(count + 1);
+        }, 2000);
+    }
+
     /**
      * retrieve local information from tv
      */
@@ -385,7 +458,7 @@ export default class TVHDataService {
     private async _retrieveM3UChannels(withAuth: boolean): Promise<EPGChannel[]> {
         try {
             // after we set the base url we retrieve channels async
-            let playlistPath = null;
+            let playlistPath;
             // persistence token is only available for authentication on >= 4.3
             if (withAuth) {
                 playlistPath = TVHDataService.M3U_PLAYLIST.replace('%s', 'auth/');

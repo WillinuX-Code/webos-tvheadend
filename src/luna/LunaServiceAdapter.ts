@@ -7,6 +7,11 @@ import '@procot/webostv/webOSTV';
  * - local + webos emulator => luna service bus
  */
 export default class LunaServiceAdapter implements LunaServiceInterface {
+    isAvailable(): boolean {
+        const isAvailable = (global.webOS && global.webOS.service) ? true : false;
+        return isAvailable;
+    }
+
     toast(message: string): void {
         console.log('lsa:toast start');
         global.webOS.service.request('luna://com.webos.notification', {
@@ -48,6 +53,16 @@ export default class LunaServiceAdapter implements LunaServiceInterface {
                 },
                 onSuccess: (res: DeviceInfoSuccessResponse) => resolve(res),
                 onFailure: (res) => reject(res)
+            });
+        });
+    }
+
+    getNetworkInfo(): Promise<ConnectionMgrResponse> {
+        return new Promise<ConnectionMgrResponse>(function (resolve, reject) {
+            global.webOS.service.request('luna://com.palm.connectionmanager', {
+                method: 'getStatus',
+                onSuccess: (inResponse: ConnectionMgrResponse) => resolve(inResponse),
+                onFailure: (inError) => reject(inError)
             });
         });
     }

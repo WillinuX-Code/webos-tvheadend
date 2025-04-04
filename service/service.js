@@ -26,3 +26,10 @@ service.register('fileIO', fileHandler.handleFileIO);
  * not possible from browser due to cors restrictions
  */
 service.register('proxy', httpProxyHandler.proxy);
+
+service.register('ping', function ping(message) {
+    message.respond({
+        returnValue: true,
+        result: 'pong'
+    });
+})

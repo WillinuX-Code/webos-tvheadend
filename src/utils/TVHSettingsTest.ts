@@ -1,5 +1,5 @@
+import Config from '../config/Config';
 import TVHDataService from '../services/TVHDataService';
-import WebOSService from '../services/WebOSService';
 
 export interface TestResults {
     firmwareInfo: ResultItem;
@@ -55,7 +55,7 @@ export default class TVHSettingsTest {
     }
 
     testWebosFirmwareVersion = async () => {
-        return new WebOSService().getDeviceInfo().then((deviceInfo) => {
+        return Config.lunaServiceAdapter.getDeviceInfo().then((deviceInfo) => {
             const firmwareVersionLabel = 'Device Info: ';
             const firmwareVersionResult = this.toResult(
                 firmwareVersionLabel,

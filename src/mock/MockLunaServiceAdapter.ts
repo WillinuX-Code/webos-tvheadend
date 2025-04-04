@@ -5,6 +5,10 @@
  * - local + webos emulator => luna service bus
  */
 export default class MockLunaServiceAdapter implements LunaServiceInterface {
+    isAvailable() {
+        return true;
+    }
+
     toast(message: string) {
         console.log('lsa:toast start', message);
     }
@@ -29,5 +33,12 @@ export default class MockLunaServiceAdapter implements LunaServiceInterface {
             firmwareVersion: '04.71.25',
             sdkVersion: '4.4.0'
         } as DeviceInfoSuccessResponse;
+    }
+
+    async getNetworkInfo() {
+        return {
+            returnValue: true,
+            isInternetConnectionAvailable: true
+        } as ConnectionMgrResponse;
     }
 }

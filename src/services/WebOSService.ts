@@ -12,6 +12,10 @@ export default class WebOSService {
         this.lunaServiceAdapter.toast(message);
     }
 
+    async isAvailable() {
+        return this.lunaServiceAdapter.isAvailable();
+    }
+
     /**
      * retrieve local information from tv
      */
@@ -23,5 +27,10 @@ export default class WebOSService {
     async getDeviceInfo() {
         const deviceInfo = await this.lunaServiceAdapter.getDeviceInfo();
         return deviceInfo;
+    }
+
+    async getNetworkInfo() {
+        const networkInfo = await this.lunaServiceAdapter.getNetworkInfo();
+        return networkInfo;
     }
 }

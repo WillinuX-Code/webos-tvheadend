@@ -1,6 +1,6 @@
 {
     "id": "com.willinux.tvh.app",
-    "version": "0.8.3",
+    "version": "0.8.4",
     "vendor": "WillinuX-Code",
     "type": "web",
     "main": "index.html",
